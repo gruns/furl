@@ -8,6 +8,7 @@ manipulations proves tedious. Furl makes manipulating URLs simple.
 
 Query arguments are easy. Really easy.
 
+    ```python
     >>> furl('http://www.google.com/?one=1').add(args={'two':'2'}).url
     'http://www.google.com/?two=2&one=1'
 
@@ -16,29 +17,28 @@ Query arguments are easy. Really easy.
 
     >>> furl('http://www.google.com/?one=1&two=2').remove(args=['one']).url
     'http://www.google.com/?two=2'
+    ```
 
 Encoding is handled for you.
 
+    ```python
     >>> f = furl('http://www.google.com/')
     >>> f.path = 'some encoding here'
     >>> f.args['and some encoding'] = 'here, too'
     >>> f.url
     'http://www.google.com/some%20encoding%20here?and+some+encoding=here%2C+too'
+    ```
 
 Fragments have a path and a query, too.
 
+    ```python
     >>> f = furl('http://www.google.com/')
     >>> f.fragment.path.segments = ['two', 'directories']
     >>> f.fragment.args = {'one':'argument'}
     >>> str(f)
     'http://www.google.com/#two/directories?one=argument'
-
-Or in one line
-
-    >>> furl('http://www.google.com/').set(fragment_path=['some', 'directories'],
-                                           fragment_args={'some':'parameters'}).url
-    'http://www.google.com/#some/directories?some=parameters'
+    ```
 
 ### API
 
-See more examples and details of furl's API in the API.md document.
+See more furl magic and examples in furl's API document, gruns/furl/API.md.
