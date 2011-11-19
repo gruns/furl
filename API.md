@@ -127,7 +127,7 @@ True
 ### Query
 
 URL queries are Query objects in furl, and are composed of a dictionary of query
-keys and values, __params___. Query keys and values in __params__ are maintained
+keys and values, __params__. Query keys and values in __params__ are maintained
 unquoted.
 
 ```python
@@ -197,10 +197,9 @@ instances.
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
 >>> str(f.fragment)
 '/fragment/path?with=params'
->>> str(f.fragment)
-'/fragment/path?with=params'
 >>> f.fragment.args['new'] = 'yep'
-'/fragment/path/file.ext?new=yep&with=params'
+>>> str(f.fragment)
+'/fragment/path?new=yep&with=params'
 ```
 
 Creating hash-bang fragments with furl illustrates the use of Fragment's

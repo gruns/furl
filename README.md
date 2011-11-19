@@ -16,7 +16,7 @@ Query arguments are easy. Really easy.
 'http://www.google.com/?three=3&two=2'
 ```
 
-Or with furl's inline modification methods.
+Or use furl's inline modification methods.
 
 ```python
 >>> furl('http://www.google.com/?one=1').add(args={'two':'2'}).url
