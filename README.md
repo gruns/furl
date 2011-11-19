@@ -1,4 +1,4 @@
-## furl
+# furl
 
 ### furl is a small Python library that makes manipulating URLs simple.
 
@@ -39,6 +39,6 @@ Or in one line
                                            fragment_args={'some':'parameters'}).url
     'http://www.google.com/#some/directories?some=parameters'
 
-#### API
+### API
 
 See more examples and details of furl's API in the API.md document.

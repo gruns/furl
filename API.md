@@ -1,6 +1,6 @@
-## furl API
+# furl API
 
-#### Basics
+### Basics
 
 furl objects let you access and modify the six major components of a URL
 
@@ -15,7 +15,7 @@ furl objects let you access and modify the six major components of a URL
  * __query__ is a Query object comprised of query arguments.
  * __fragment__ is a Fragment object comprised of a Path and Query object.
 
-#### Scheme, Host, Port, and Network Location
+### Scheme, Host, Port, and Network Location
 
 __scheme__ and __host__ are strings and __port__ is an integer or None.
 
@@ -43,7 +43,7 @@ __port__ if it is None or the default port for the provided __scheme__.
     'www.google.com:99'
 
 
-#### Path
+### Path
 
 URL paths are Path objects in furl, and are composed of zero or more path
 __segments__ that can be manipulated directly. Path segments in __segments__ are
@@ -104,7 +104,7 @@ is a file, False otherwise.
     True
 
 
-#### Query
+### Query
 
 URL queries are Query objects in furl, and are composed of a dictionary of query
 keys and values, __params___. Query keys and values in __params__ are maintained
@@ -139,7 +139,7 @@ and an __args__ attribute is provided as a shortcut to access __query.params__.
     True
 
 
-#### Fragment
+### Fragment
 
 URL fragments are Fragment objects in furl, and are composed of a __path__ and
 __query__, separated by an optional '?', __separator__.
@@ -191,11 +191,11 @@ __path__ from its __query__ isn't included.
     'http://www.google.com/#!a=dic&of=args'
 
 
-#### Inline modification
+### Inline modification
 
 For quick, single-line URL editing, the __add()__, __set()__, and __remove()__
 methods of furl objects let you manipulate various components of the url and
-then return the furl object iself.
+then return the furl object itself for further use.
 
     >>> url = 'http://www.google.com/#fragment' 
     >>> furl(url).add(args={'example':'arg'}).set(port=99).remove(fragment=True).url
@@ -212,10 +212,12 @@ __add()__ adds to attributes of a furl object with the optional arguments
    fragment's query.
  * __query_params__: A dictionary of query keys and values to add to the query.
 
-    >>> url = 'http://www.google.com/' 
-    >>> furl(url).add(path='/index.html', fragment_path='frag/path',
-                      fragment_args={'frag':'args'}).url
-    'http://www.google.com/index.html#fragment/frag/path?frag=args'
+```python
+>>> url = 'http://www.google.com/' 
+>>> furl(url).add(path='/index.html', fragment_path='frag/path',
+                  fragment_args={'frag':'args'}).url
+'http://www.google.com/index.html#fragment/frag/path?frag=args'
+```
 
 __set()__ sets attributes of a furl object with the optional arguments
 
@@ -235,9 +237,11 @@ __set()__ sets attributes of a furl object with the optional arguments
  * __query__: Query string to adopt.
  * __query_params__: A dictionary of query keys and values to adopt.
 
+    ```python
     >>> furl().set(scheme='https', host='secure.google.com', port=99,
                    path='index.html', args={'some':'args'}, fragment='great job').url
     'https://secure.google.com:99/index.html?some=args#great job'
+    ```
 
 __set()__ removes attributes of a furl object with the optional arguments
 
