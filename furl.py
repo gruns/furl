@@ -194,7 +194,8 @@ class Query(object):
     return self
 
   def __str__(self):
-    return urllib.urlencode(self.params)
+    params = {str(key):str(val) for key, val in self.params.iteritems()}
+    return urllib.urlencode(params)
 
   def __repr__(self):
     return "%s('%s')" % (self.__class__.__name__, str(self))
@@ -227,7 +228,7 @@ class QueryCompositionInterface(object):
     """
     Returns: True if this attribute is handled and set here, False otherwise.
     """
-    if attr == 'query':
+    if attr == 'args' or attr == 'query':
       self._query.parse(value)
       return True
     return False
@@ -559,7 +560,7 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
       path: A list of path segments or a path string to adopt.
       fragment: Fragment string to adopt.
       scheme: Scheme string to adopt.
-      netloc: Network location string to adopt
+      netloc: Network location string to adopt.
       fragment_path: A list of path segments to adopt for the fragment's path or
         a path string to adopt as the fragment's path.
       fragment_args: A dictionary of query keys and values for the fragment's
@@ -631,8 +632,8 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     Parameters:
       args: Shortcut for query_params. See <query_params> below.
       path: A list of path segments to remove from the end of the existing path
-        segments or a path string to remove from the end of the existing path
-        string.
+        segments list or a path string to remove from the end of the existing
+        path string.
       fragment: If True, remove the fragment portion of the URL entirely.
       query: If True, remove the query portion of the URL entirely.
       query_params: A dictionary of query keys and values to remove from the

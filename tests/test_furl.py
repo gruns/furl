@@ -14,7 +14,7 @@ import unittest
 import urlparse
 import warnings
 
-import util.url as furl
+import furl
 
 class TestPath(unittest.TestCase):
   def test_isdir_isfile(self):
@@ -176,6 +176,13 @@ class TestQuery(unittest.TestCase):
     assert q.params == {'b':'b', 'sup':'sup'}
     q.params['b'] = 'BLROP'
     assert q.params == {'b':'BLROP', 'sup':'sup'}
+
+    # Non-string parameters are stringified
+    q.params.clear()
+    q.params[99] = 99
+    q.params['int'] = 1
+    q.params['float'] = 0.39393
+    assert furl.parse_qs(str(q)) == {'int':'1', 'float':'0.39393', '99':'99'}
 
   def test_add(self):
     q = furl.Query('a=a')
