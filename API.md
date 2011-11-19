@@ -151,8 +151,8 @@ Manipulation
 {'four': '4', 'five': '5'}
 ```
 
-Both __furl__ and __fragment__ (covered below) objects contain a Query instance
-and an __args__ attribute is provided as a shortcut to access __query.params__.
+Both furl and Fragment (covered below) objects contain a Query instance and an
+__args__ attribute is provided as a shortcut to access __query.params__.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
@@ -205,22 +205,22 @@ instances.
 
 Creating hash-bang fragments with furl illustrates the use of Fragment's
 __separator__. When __separator__ is False, the '?' separating the Fragment's
-__path__ from its __query__ isn't included.
+Path from its Query isn't included.
 
 ```python
 >>> f = furl('http://www.google.com/')
 >>> f.fragment.path = '!'
->>> f.fragment.args = {'a':'dic', 'of':'args'}
+>>> f.fragment.args = {'a':'dict', 'of':'args'}
 >>> f.fragment.separator
 True
 >>> str(f.fragment)
-'!?a=dic&of=args'
+'!?a=dict&of=args'
 
 >>> f.fragment.separator = False
 >>> str(f.fragment)
-'!a=dic&of=args'
+'!a=dict&of=args'
 >>> f.url
-'http://www.google.com/#!a=dic&of=args'
+'http://www.google.com/#!a=dict&of=args'
 ```
 
 
