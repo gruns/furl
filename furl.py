@@ -16,20 +16,20 @@ import warnings
 
 class Path(object):
   """
-  Represents a URL path composed of zero or more path segments.
+  Represents a URL path comprised of zero or more path segments.
 
     http://tools.ietf.org/html/rfc3986#section-3.3
 
-  Path parameters are currently not supported (they are quite rare in web URLs).
+  Path parameters are currently not supported.
 
   Attributes:
     segments: List of zero or more path segments comprising this path. If the
       path string has a trailing '/', the last segment will be '' and self.isdir
-      will be True, and self.isfile will be False. An empty segment list
+      will be True and self.isfile will be False. An empty segment list
       represents an empty path, not '/' (though they have the same meaning).
-    isabsolute: Boolean flag whether or not this is an absolute path or not. An
-      absolute path starts with a '/'. self.isabsolute is False if the path
-      is empty (self.segments == [] and str(path) == '').
+    isabsolute: Boolean whether or not this is an absolute path or not. An
+      absolute path starts with a '/'. self.isabsolute is False if the path is
+      empty (self.segments == [] and str(path) == '').
   """
   def __init__(self, path=''):
     self.segments = []
@@ -124,7 +124,7 @@ class PathCompositionInterface(object):
 
   def __setattr__(self, attr, value):
     """
-    Returns True if this attribute is handled and set here, False otherwise.
+    Returns: True if this attribute is handled and set here, False otherwise.
     """
     if attr == 'path':
       self._path.parse(value)
@@ -134,16 +134,15 @@ class PathCompositionInterface(object):
 
 class Query(object):
   """
-  Represents a URL query composed of zero or more unique parameters and their
+  Represents a URL query comprised of zero or more unique parameters and their
   respective values.
 
     http://tools.ietf.org/html/rfc3986#section-3.4
 
   Repeated URL parameters, like 'a=1&a=2', are deprecated to their first value,
-  'a=1'. This is a tradeoff of ease of use over rarely needed flexibility so
-  that interacting with query parameters can be done more easily with strings
-  instead of lists of strings. For example, one can check the value of a query
-  parameter with
+  'a=1'. This is a tradeoff in favor of ease of use over the rarely needed
+  flexibility of repeated query parameters. As a result, interacting with query
+  parameters can be performed with strings instead of lists of strings.
 
     if furl('...').args['meat'] == 'pumps':
       ...
@@ -154,9 +153,8 @@ class Query(object):
     if len(val) == 1 and val[0] == 'pumps':
       ...
 
-  In the future, perhaps repeated URL parameters could be supported with an
-  __init__() flag, like repeated_params=True, though the interface to this class
-  would have to change accordingly.
+  In the future, support fro repeated URL parameters could be added, possibly
+  with a a constructor argument like repeated_params=True.
 
   Attributes:
     params: Dictionary of query parameter key:value pairs. Parameters in
@@ -185,12 +183,11 @@ class Query(object):
     return self
 
   def remove(self, query=None):
-    if query:
-      if query == True:
-        self.parse('')
-      elif isinstance(query, list):
-        for key in query:
-          self.params.pop(key, None)
+    if query == True:
+      self.parse('')
+    elif isinstance(query, list):
+      for key in query:
+        self.params.pop(key, None)
     return self
 
   def __str__(self):
@@ -236,7 +233,7 @@ class QueryCompositionInterface(object):
 
 class Fragment(PathCompositionInterface, QueryCompositionInterface):
   """
-  Represents a URL fragment, composed internally of a Path and Query optionally
+  Represents a URL fragment, comprised internally of a Path and Query optionally
   separated by a '?' character.
 
     http://tools.ietf.org/html/rfc3986#section-3.5
@@ -290,9 +287,8 @@ class Fragment(PathCompositionInterface, QueryCompositionInterface):
     return self
 
   def remove(self, fragment=None, path=None, args=None):
-    if fragment:
-      if fragment == True:
-        self.parse('')
+    if fragment == True:
+      self.parse('')
     self.path.remove(path)
     self.query.remove(args)
     return self
@@ -341,25 +337,16 @@ class FragmentCompositionInterface(object):
 class furl(PathCompositionInterface, QueryCompositionInterface,
            FragmentCompositionInterface):
   """
-  furl: URL manipulation made simple.
-
-  Easily modify six of the common components of web URLs
+  Represents a URL comprised of six components
 
     scheme://host:port/path?query#fragment
-
-  The URL fragment is itself comprised of a path and query, so that more complex
-  fragments like
-
-    #!a/fragment/directory?fragment=arguments
-
-  can be easily modified, too.
 
   Attributes:
     DEFAULT_PORTS: Map of various URL schemes to their default ports. Scheme
       strings are lowercase.
-    scheme: URL scheme ('http', 'https', etc). Always lowercase.
+    scheme: URL scheme ('http', 'https', etc). All lowercase.
     host: URL host (domain, IPv4 address, or IPv6 address), not including
-      port. Always lowercase.
+      port. All lowercase.
     port: Port. Valid port values are 1-65535, or None meaning no port
       specified.
     netloc: Network location. Combined host and port string.
@@ -505,15 +492,15 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     values conflict, <query_params> takes precedence over <args>.
 
     Parameters:
-      args: Shortcut for <query_params>. See <query_params> below.
+      args: Shortcut for <query_params>.
       path: A list of path segments to add to the existing path segments, or a
-        path string to join with existing path string.
+        path string to join with the existing path string.
+      query_params: A dictionary of query keys and values to add to the query.
       fragment_path: A list of path segments to add to the existing fragment
-        path segments, or a path string to join with existing fragment path
+        path segments, or a path string to join with the existing fragment path
         string.
       fragment_args: A dictionary of query keys and values to add to the
         fragment's query.
-      query_params: A dictionary of query keys and values to add to the query.
     Returns: <self>.
     """
     if args and query_params:
@@ -556,11 +543,13 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
       'http://yahoo.com:99/
 
     Parameters:
-      args: Shortcut for query_params. See <query_params> below.
+      args: Shortcut for query_params.
       path: A list of path segments or a path string to adopt.
       fragment: Fragment string to adopt.
       scheme: Scheme string to adopt.
       netloc: Network location string to adopt.
+      query: Query string to adopt.
+      query_params: A dictionary of query keys and values to adopt.
       fragment_path: A list of path segments to adopt for the fragment's path or
         a path string to adopt as the fragment's path.
       fragment_args: A dictionary of query keys and values for the fragment's
@@ -569,8 +558,6 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
         between the fragment path and fragment query.
       host: Host string to adopt.
       port: Port number to adopt.
-      query: Query string to adopt.
-      query_params: A dictionary of query keys and values to adopt.
     Raises:
       ValueError on invalid port.
       UserWarning if <netloc> and (<host> and/or <port>) are provided.
@@ -630,21 +617,21 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     Remove components of url and return this furl instance, <self>.
 
     Parameters:
-      args: Shortcut for query_params. See <query_params> below.
+      args: Shortcut for query_params.
       path: A list of path segments to remove from the end of the existing path
         segments list or a path string to remove from the end of the existing
         path string.
-      fragment: If True, remove the fragment portion of the URL entirely.
       query: If True, remove the query portion of the URL entirely.
-      query_params: A dictionary of query keys and values to remove from the
-        query, if they exist.
+      query_params: A list of query keys to remove from the query, if they
+        exist.
       port: If True, remove the port from the network location string, if it
         exists.
+      fragment: If True, remove the fragment portion of the URL entirely.
       fragment_path: A list of path segments to remove from the end of the
         fragment's path segments or a path string to remove from the end of the
         fragment's path string.
-      fragment_args: A dictionary of query keys and values to remove from the
-        fragment's query.
+      fragment_args: A list of query keys to remove from the fragment's query,
+        if they exist.
     Returns: <self>.
     """
     if port:
