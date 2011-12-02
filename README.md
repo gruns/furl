@@ -52,4 +52,4 @@ Fragments have a path and a query, too.
 ### API
 
 See more furl magic and examples in furl's API document, <a
-href="https://github.com/gruns/furl/blob/master/API.md" API.md>.
+href="https://github.com/gruns/furl/blob/master/API.md"> API.md</a>.
