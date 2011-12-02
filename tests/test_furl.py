@@ -85,12 +85,10 @@ class TestPath(unittest.TestCase):
     unencoded = ['a+a', '/~haypepps/']
 
     for path in encoded:
-      p = furl.Path(path)
-      assert str(p) == urllib.unquote(path)
+      assert str(furl.Path(path)) == urllib.unquote(path)
 
     for path in unencoded:
-      p = furl.Path(path)
-      assert str(p) == path
+      assert str(furl.Path(path)) == path
 
   def test_add(self):
     p = furl.Path('a/b/c/')
