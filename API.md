@@ -16,7 +16,8 @@ scheme://host[:port]/path?query#fragment
   the default port for the given __scheme__ should be inferred, if possible.
  * __path__ is a Path object comprised of path segments.
  * __query__ is a Query object comprised of query arguments.
- * __fragment__ is a Fragment object comprised of a Path and Query object.
+ * __fragment__ is a Fragment object comprised of a Path and Query object
+   separated by an optional '?' separator.
 
 
 ***
@@ -30,7 +31,7 @@ __scheme__ and __host__ are strings and __port__ is an integer or None.
 ('http', 'www.google.com', 99)
 ```
 
-furl infers the default port for common schemes, if possible
+furl infers the default port for common schemes
 
 ```python
 >>> f = furl('https://secure.google.com/')
@@ -57,8 +58,8 @@ __port__ if it is None or the default port for the provided __scheme__.
 ### Path
 
 URL paths are Path objects in furl, and are composed of zero or more path
-__segments__ that can be manipulated directly. Path segments in __segments__ are
-maintaned URL decoded.
+__segments__ that can be manipulated directly. __segments__ are maintaned URL
+decoded.
 
 ```python
 >>> f = furl('http://www.google.com/a/larg%20ish/path')
@@ -87,10 +88,9 @@ Manipulation
 'http://www.google.com/o/hi/there/with%20some%20encoding/'
 ```
 
-A Path can be absolute or not, as specified by the boolean flag
-__isabsolute__. While URL paths are always absolute if they aren't empty, the
-__isabsolute__ boolean flag comes in handy for fragment paths, which can be
-optionally absolute.
+A Path can be absolute or not, as specified by the boolean __isabsolute__. While
+URL paths are always absolute if they aren't empty, __isabsolute__ is useful for
+fragment paths.
 
 ```python
 >>> f = furl('http://www.google.com/a/directory/#/absolute/fragment/path/')
@@ -103,8 +103,8 @@ True
 'http://www.google.com/a/directory/#absolute/fragment/path/'
 ```
 
-A path that ends with a '/' is considered a directory, and otherwise considered
-a file. The Path attribute __isdir__ returns True if the path is a directory,
+A path that ends with '/' is considered a directory, and otherwise considered a
+file. The Path attribute __isdir__ returns True if the path is a directory,
 False otherwise. Conversely, the attribute __isfile__ returns True if the path
 is a file, False otherwise.
 
@@ -151,8 +151,9 @@ Manipulation
 {'four': '4', 'five': '5'}
 ```
 
-Both furl and Fragment (covered below) objects contain a Query instance and an
-__args__ attribute is provided as a shortcut to access __query.params__.
+Both furl objects and Fragment objects (covered below) contain a Query instance,
+and __args__ is provided as a shortcut on these objects to access
+__query.params__.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
@@ -169,7 +170,7 @@ True
 ### Fragment
 
 URL fragments are Fragment objects in furl, and are composed of a __path__ and
-__query__, separated by an optional '?', __separator__.
+__query__ separated by an optional '?' __separator__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -204,7 +205,7 @@ instances.
 
 Creating hash-bang fragments with furl illustrates the use of Fragment's
 __separator__. When __separator__ is False, the '?' separating the Fragment's
-Path from its Query isn't included.
+Path and Query isn't included.
 
 ```python
 >>> f = furl('http://www.google.com/')
@@ -228,7 +229,7 @@ True
 
 For quick, single-line URL editing, the __add()__, __set()__, and __remove()__
 methods of furl objects let you manipulate various components of the url and
-then return the furl object itself for further use.
+return the furl object itself for further use.
 
 ```python
 >>> url = 'http://www.google.com/#fragment' 
@@ -236,16 +237,17 @@ then return the furl object itself for further use.
 'http://www.google.com:99/?example=arg'
 ```
 
-__add()__ adds to attributes of a furl object with the optional arguments
+__add()__ adds items to a furl object with the optional arguments
 
- * __args__: Shortcut for __query_params__. See __query_params__ below.
+ * __args__: Shortcut for __query_params__.
  * __path__: A list of path segments to add to the existing path segments, or a
-   path string to join with existing path string.
+   path string to join with the existing path string.
+ * __query_params__: A dictionary of query keys and values to add to the query.
  * __fragment_path__: A list of path segments to add to the existing fragment
-   path segments, or a path string to join with existing fragment path string.
+   path segments, or a path string to join with the existing fragment path
+   string.
  * __fragment_args__: A dictionary of query keys and values to add to the
    fragment's query.
- * __query_params__: A dictionary of query keys and values to add to the query.
 
 ```python
 >>> url = 'http://www.google.com/' 
@@ -254,23 +256,23 @@ __add()__ adds to attributes of a furl object with the optional arguments
 'http://www.google.com/index.html#fragment/frag/path?frag=args'
 ```
 
-__set()__ sets attributes of a furl object with the optional arguments
+__set()__ sets items of a furl object with the optional arguments
 
- * __args__: Shortcut for __query_params__. See __query_params__ below.
+ * __args__: Shortcut for __query_params__.
  * __path__: List of path segments or a path string to adopt.
- * __fragment__: Fragment string to adopt.
  * __scheme__: Scheme string to adopt.
  * __netloc__: Network location string to adopt.
+ * __query__: Query string to adopt.
+ * __query_params__: A dictionary of query keys and values to adopt.
+ * __fragment__: Fragment string to adopt.
  * __fragment_path__: A list of path segments to adopt for the fragment's path
    or a path string to adopt as the fragment's path.
  * __fragment_args__: A dictionary of query keys and values for the fragment's
    query to adopt.
  * __fragment_separator__: Boolean whether or not there should be a '?'
-   separator between the fragment path and fragment query.
+   separator between the fragment path and the fragment query.
  * __host__: Host string to adopt.
  * __port__: Port number to adopt.
- * __query__: Query string to adopt.
- * __query_params__: A dictionary of query keys and values to adopt.
 
 ```python
 >>> furl().set(scheme='https', host='secure.google.com', port=99,
@@ -278,23 +280,23 @@ __set()__ sets attributes of a furl object with the optional arguments
 'https://secure.google.com:99/index.html?some=args#great job'
 ```
 
-__set()__ removes attributes of a furl object with the optional arguments
+__remove()__ removes items from a furl object with the optional arguments
 
- * __args__: Shortcut for __query_params__. See __query_params__ below.
+ * __args__: Shortcut for __query_params__.
  * __path__: A list of path segments to remove from the end of the existing path
    segments list or a path string to remove from the end of the existing path
    string.
  * __fragment__: If True, remove the fragment portion of the URL entirely.
  * __query__: If True, remove the query portion of the URL entirely.
- * __query_params__: A dictionary of query keys and values to remove from the
-   query, if they exist.
+ * __query_params__: A list of query keys to remove from the query, if they
+        exist.
  * __port__: If True, remove the port from the network location string, if it
    exists.
  * __fragment_path__: A list of path segments to remove from the end of the
    fragment's path segments or a path string to remove from the end of the
    fragment's path string.
- * __fragment_args__: A dictionary of query keys and values to remove from the
-   fragment's query.
+ * __fragment_args__: A list of query keys to remove from the fragment's query,
+   if they exist.
 
 ```python
 >>> url = 'https://secure.google.com:99/a/path/?some=args#great job'
