@@ -284,8 +284,8 @@ __remove()__ removes items from a furl object with the optional arguments
 
  * __args__: Shortcut for __query_params__.
  * __path__: A list of path segments to remove from the end of the existing path
-   segments list or a path string to remove from the end of the existing path
-   string.
+        segments list, or a path string to remove from the end of the existing
+        path string, or True to remove the path entirely.
  * __fragment__: If True, remove the fragment portion of the URL entirely.
  * __query__: If True, remove the query portion of the URL entirely.
  * __query_params__: A list of query keys to remove from the query, if they
