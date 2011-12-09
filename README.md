@@ -9,6 +9,7 @@ manipulations proves tedious. Furl makes manipulating URLs simple.
 Query arguments are easy. Really easy.
 
 ```python
+>>> from furl import furl
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f.args['three'] = '3'
 >>> del f.args['one']
