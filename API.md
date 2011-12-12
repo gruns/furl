@@ -253,7 +253,7 @@ __add()__ adds items to a furl object with the optional arguments
 >>> url = 'http://www.google.com/' 
 >>> furl(url).add(path='/index.html', fragment_path='frag/path',
                   fragment_args={'frag':'args'}).url
-'http://www.google.com/index.html#fragment/frag/path?frag=args'
+'http://www.google.com/index.html#frag/path?frag=args'
 ```
 
 __set()__ sets items of a furl object with the optional arguments
