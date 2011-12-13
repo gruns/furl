@@ -17,6 +17,17 @@ Query arguments are easy. Really easy.
 'http://www.google.com/?three=3&two=2'
 ```
 
+Joining paths is easy.
+```python
+>>> url = furl("http://www.google.com")
+
+>>> url/"path"/"another_path"/"one_more_path"
+furl('http://www.google.com/path/another_path/one_more_path')
+
+>>> print url
+http://www.google.com/path/another_path/one_more_path
+```
+
 Or use furl's inline modification methods.
 
 ```python
