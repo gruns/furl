@@ -18,6 +18,7 @@ Query arguments are easy. Really easy.
 ```
 
 Joining paths is easy.
+
 ```python
 >>> url = furl("http://www.google.com")
 
