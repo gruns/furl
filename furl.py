@@ -153,7 +153,7 @@ class Query(object):
     if len(val) == 1 and val[0] == 'pumps':
       ...
 
-  In the future, support fro repeated URL parameters could be added, possibly
+  In the future, support for repeated URL parameters could be added, possibly
   with a a constructor argument like repeated_params=True.
 
   Attributes:
