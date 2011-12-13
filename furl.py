@@ -167,7 +167,8 @@ class Query(object):
 
   def parse(self, query):
     if isinstance(query, dict):
-      self.params = {k:urllib.unquote_plus(v) for k, v in query.iteritems()}
+      for k, v in query.iteritems():
+        self.params[k]=urllib.unquote_plus(v)
     else:
       self.params = parse_qs(query)
 
@@ -191,7 +192,9 @@ class Query(object):
     return self
 
   def __str__(self):
-    params = {str(key):str(val) for key, val in self.params.iteritems()}
+    params = {}
+    for key, val in self.params.iteritems():
+      params[str(key)] = str(val)
     return urllib.urlencode(params)
 
   def __repr__(self):
@@ -665,7 +668,10 @@ def parse_qs(query):
   Parse a query string to a dictionary of parameter key:value pairs, removing
   any duplicate url parameters. I.e. 'a=1&a=2' would become {'a':'1'}.
   """
-  return {key:val[0] for key, val in urlparse.parse_qs(query).iteritems()}
+  rval = {}
+  for key, val in urlparse.parse_qs(query).iteritems():
+    rval[key] = val[0]
+  return rval
 
 def urlsplit(url):
   """
