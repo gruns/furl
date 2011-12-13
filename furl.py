@@ -105,6 +105,13 @@ class Path(object):
   def __repr__(self):
     return "%s('%s')" % (self.__class__.__name__, str(self))
 
+  def __div__(self, another_path):
+    if isinstance(another_path, Path):
+      self.segments.extend(another_path.segments)
+    elif isinstance(another_path, basestring):
+      self.segments.append(another_path)
+    return self
+
 
 class PathCompositionInterface(object):
   """
@@ -658,6 +665,10 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
 
   def __repr__(self):
     return "%s('%s')" % (self.__class__.__name__, str(self))
+  
+  def __div__(self, another_path):
+    self.path/another_path
+    return self
 
 
 def parse_qs(query):
