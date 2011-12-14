@@ -52,12 +52,13 @@ Fragments have a path and a query, too.
 'http://www.google.com/#two/directories?one=argument'
 ```
 
+***
 ### API
 
 See more furl magic and examples in furl's API document, <a
 href="https://github.com/gruns/furl/blob/master/API.md"> API.md</a>.
 
-
+***
 ### Installation
 
 Installing furl with pip is easy.
