@@ -60,7 +60,7 @@ href="https://github.com/gruns/furl/blob/master/API.md"> API.md</a>.
 
 ### Installation
 
-Installing furl with pip is easy
+Installing furl with pip is easy.
 
 ```
 $ pip install furl
