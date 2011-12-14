@@ -7,7 +7,7 @@
 #
 # Copyright: LOLOLOL
 #
-# License: Build Amazing Things
+# License: Build Amazing Things (Unlicense)
 
 import urllib
 import unittest
