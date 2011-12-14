@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='furl',
-      version='0.1.30',
+      version='0.2',
       packages=find_packages(),
       author='Arthur Grunseid',
       author_email='grunseid@gmail.com',
