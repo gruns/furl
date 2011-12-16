@@ -5,9 +5,7 @@
 
 furl objects let you access and modify the components of a URL
 
-```
-scheme://username:password@host:port/path?query#fragment
-```
+> __scheme__://__username__:__password__@__host__:__port__/__path__?__query__#__fragment__
 
  * __scheme__ is the scheme string, all lowercase.
  * __username__ is the username string for authentication.
