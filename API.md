@@ -3,13 +3,15 @@
 ***
 ### Basics
 
-furl objects let you access and modify the six major components of a URL
+furl objects let you access and modify the components of a URL
 
 ```
-scheme://host[:port]/path?query#fragment
+scheme://username:password@host:port/path?query#fragment
 ```
 
  * __scheme__ is the scheme string, all lowercase.
+ * __username__ is the username string for authentication.
+ * __password__ is the password string for authentication with __username__.
  * __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names
   are all lowercase.
  * __port__ is an integer or None. A value of None means no port specified and
@@ -21,14 +23,15 @@ scheme://host[:port]/path?query#fragment
 
 
 ***
-### Scheme, Host, Port, and Network Location
+### Scheme, Username, Password, Host, Port, and Network Location
 
-__scheme__ and __host__ are strings and __port__ is an integer or None.
+__scheme__, __username__, __password__, and __host__ are strings. __port__ is an
+integer or None.
 
 ```python
->>> f = furl('http://www.google.com:99/')
->>> f.scheme, f.host, f.port
-('http', 'www.google.com', 99)
+>>> f = furl('http://user:pass@www.google.com:99/')
+>>> f.scheme, f.username, f.password, f.host, f.port
+('http', 'user', 'pass', 'www.google.com', 99)
 ```
 
 furl infers the default port for common schemes
@@ -43,8 +46,9 @@ furl infers the default port for common schemes
 None
 ```
 
-__netloc__ is the string combination of __host__ and __port__, not including
-__port__ if it is None or the default port for the provided __scheme__.
+__netloc__ is the string combination of __username__, __password__, __host__,
+and __port__, not including __port__ if it is None or the default port for the
+provided __scheme__.
 
 ```python
 >>> furl('http://www.google.com/').netloc
@@ -52,6 +56,9 @@ __port__ if it is None or the default port for the provided __scheme__.
 
 >>> furl('http://www.google.com:99/').netloc
 'www.google.com:99'
+
+>>> furl('http://user:pass@www.google.com:99/').netloc
+'user:pass@www.google.com:99'
 ```
 
 ***
@@ -273,6 +280,9 @@ __set()__ sets items of a furl object with the optional arguments
    separator between the fragment path and the fragment query.
  * __host__: Host string to adopt.
  * __port__: Port number to adopt.
+ * __username__: Username string to adopt.
+ * __password__: password string to adopt.
+
 
 ```python
 >>> furl().set(scheme='https', host='secure.google.com', port=99,
@@ -297,6 +307,9 @@ __remove()__ removes items from a furl object with the optional arguments
    fragment's path string.
  * __fragment_args__: A list of query keys to remove from the fragment's query,
    if they exist.
+ * __username__: If True, remove the username, if it exists.
+ * __password__: If True, remove the password, if it exists.
+
 
 ```python
 >>> url = 'https://secure.google.com:99/a/path/?some=args#great job'

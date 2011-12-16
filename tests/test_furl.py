@@ -310,104 +310,193 @@ class TestFurl(unittest.TestCase):
     params = urlparse.parse_qs(urlparse.urlsplit(url).query)
     return key in params and params[key][0] == val
 
+  def test_username_and_password(self):
+    # Empty usernames and passwords.
+    for url in ['', 'http://www.pumps.com/']:
+      f = furl.furl(url)
+      assert not f.username and not f.password
+
+    usernames = ['user', 'a-user_NAME$%^&09']
+    passwords = ['pass', 'a-PASS_word$%^&09']
+    baseurl = 'http://www.google.com/'
+    
+    # Username only.
+    userurl = 'http://%s@www.google.com/'
+    for username in usernames:
+      f = furl.furl(userurl % username)
+      assert f.username == username and not f.password
+
+      f = furl.furl(baseurl)
+      f.username = username
+      assert f.username == username and not f.password
+      assert f.url == userurl % username
+
+      f = furl.furl(baseurl)
+      f.set(username=username)
+      assert f.username == username and not f.password
+      assert f.url == userurl % username
+
+      f.remove(username=True)
+      assert not f.username and not f.password
+      assert f.url == baseurl
+
+    # Password only.
+    passurl = 'http://:%s@www.google.com/'
+    for password in passwords:
+      f = furl.furl(passurl % password)
+      assert f.password == password and f.username == ''
+
+      f = furl.furl(baseurl)
+      f.password = password
+      assert f.password == password and f.username == ''
+      assert f.url == passurl % password
+
+      f = furl.furl(baseurl)
+      f.set(password=password)
+      assert f.password == password and f.username == ''
+      assert f.url == passurl % password
+
+      f.remove(password=True)
+      assert not f.username and not f.password
+      assert f.url == baseurl
+
+    # Username and password.
+    userpassurl = 'http://%s:%s@www.google.com/'
+    for username in usernames:
+      for password in passwords:
+        f = furl.furl(userpassurl % (username, password))
+        assert f.username == username and f.password == password
+
+        f = furl.furl(baseurl)
+        f.username = username
+        f.password = password
+        assert f.username == username and f.password == password
+        assert f.url == userpassurl % (username, password)
+
+        f = furl.furl(baseurl)
+        f.set(username=username, password=password)
+        assert f.username == username and f.password == password
+        assert f.url == userpassurl % (username, password)
+
+        f = furl.furl(baseurl)
+        f.remove(username=True, password=True)
+        assert not f.username and not f.password
+        assert f.url == baseurl
+
+    # Through network location.
+    f = furl.furl()
+    f.netloc = 'user@domain.com'
+    assert f.username == 'user' and not f.password
+    assert f.netloc == 'user@domain.com'
+
+    f = furl.furl()
+    f.netloc = ':pass@domain.com'
+    assert not f.username and f.password == 'pass'
+    assert f.netloc == ':pass@domain.com'
+
+    f = furl.furl()
+    f.netloc = 'user:pass@domain.com'
+    assert f.username == 'user' and f.password == 'pass'
+    assert f.netloc == 'user:pass@domain.com'
+
   def test_basics(self):
     url = 'hTtP://www.pumps.com/'
-    fu = furl.furl(url)
-    assert fu.scheme == 'http'
-    assert fu.netloc == 'www.pumps.com'
-    assert fu.host == 'www.pumps.com'
-    assert fu.port == 80
-    assert str(fu.path) == fu.pathstr == '/'
-    assert str(fu.query) == fu.querystr  == ''
-    assert fu.args == fu.query.params == {}
-    assert str(fu.fragment) == fu.fragmentstr == ''
-    assert fu.url == str(fu) == url.lower()
+    f = furl.furl(url)
+    assert f.scheme == 'http'
+    assert f.netloc == 'www.pumps.com'
+    assert f.host == 'www.pumps.com'
+    assert f.port == 80
+    assert str(f.path) == f.pathstr == '/'
+    assert str(f.query) == f.querystr  == ''
+    assert f.args == f.query.params == {}
+    assert str(f.fragment) == f.fragmentstr == ''
+    assert f.url == str(f) == url.lower()
 
     url = 'HTTPS://wWw.YAHOO.cO.UK/one/two/three?a=a&b=b&m=m%26m#fragment'
-    fu = furl.furl(url)
-    assert fu.scheme == 'https'
-    assert fu.netloc == 'www.yahoo.co.uk'
-    assert fu.host == 'www.yahoo.co.uk'
-    assert fu.port == 443
-    assert fu.pathstr == str(fu.path) == '/one/two/three'
-    assert fu.querystr == str(fu.query) == 'a=a&b=b&m=m%26m'
-    assert fu.args == fu.query.params == {'a':'a', 'b':'b', 'm':'m&m'}
-    assert str(fu.fragment) == fu.fragmentstr == 'fragment'
-    assert fu.url == str(fu) == url.lower()
+    f = furl.furl(url)
+    assert f.scheme == 'https'
+    assert f.netloc == 'www.yahoo.co.uk'
+    assert f.host == 'www.yahoo.co.uk'
+    assert f.port == 443
+    assert f.pathstr == str(f.path) == '/one/two/three'
+    assert f.querystr == str(f.query) == 'a=a&b=b&m=m%26m'
+    assert f.args == f.query.params == {'a':'a', 'b':'b', 'm':'m&m'}
+    assert str(f.fragment) == f.fragmentstr == 'fragment'
+    assert f.url == str(f) == url.lower()
 
     url = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl%20string#frag'
-    fu = furl.furl(url)
-    assert fu.scheme == 'sup'
-    assert fu.netloc == '192.168.1.102:8080'
-    assert fu.host == '192.168.1.102'
-    assert fu.port == 8080
-    assert fu.pathstr == str(fu.path) == '///one//a b////'
-    assert fu.querystr == str(fu.query) == 's=kwl+string'
-    assert fu.args == fu.query.params == {'s':'kwl string'}
-    assert str(fu.fragment) == fu.fragmentstr == 'frag'
+    f = furl.furl(url)
+    assert f.scheme == 'sup'
+    assert f.netloc == '192.168.1.102:8080'
+    assert f.host == '192.168.1.102'
+    assert f.port == 8080
+    assert f.pathstr == str(f.path) == '///one//a b////'
+    assert f.querystr == str(f.query) == 's=kwl+string'
+    assert f.args == f.query.params == {'s':'kwl string'}
+    assert str(f.fragment) == f.fragmentstr == 'frag'
     query_quoted = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl+string#frag'
-    assert fu.url == str(fu) == query_quoted
+    assert f.url == str(f) == query_quoted
 
   def test_basic_manipulation(self):
-    fu = furl.furl('http://www.pumps.com/')
+    f = furl.furl('http://www.pumps.com/')
 
-    fu.args.setdefault('foo', 'blah')
-    assert str(fu) == 'http://www.pumps.com/?foo=blah'
-    fu.query.params['foo'] = 'eep'
-    assert str(fu) == 'http://www.pumps.com/?foo=eep'
+    f.args.setdefault('foo', 'blah')
+    assert str(f) == 'http://www.pumps.com/?foo=blah'
+    f.query.params['foo'] = 'eep'
+    assert str(f) == 'http://www.pumps.com/?foo=eep'
 
-    fu.port = 99
-    assert str(fu) == 'http://www.pumps.com:99/?foo=eep'
+    f.port = 99
+    assert str(f) == 'http://www.pumps.com:99/?foo=eep'
 
-    fu.netloc = 'www.yahoo.com:220'
-    assert str(fu) == 'http://www.yahoo.com:220/?foo=eep'
+    f.netloc = 'www.yahoo.com:220'
+    assert str(f) == 'http://www.yahoo.com:220/?foo=eep'
 
-    fu.netloc = 'www.yahoo.com'
-    assert fu.port == 80
-    assert str(fu) == 'http://www.yahoo.com/?foo=eep'
+    f.netloc = 'www.yahoo.com'
+    assert f.port == 80
+    assert str(f) == 'http://www.yahoo.com/?foo=eep'
 
-    fu.scheme = 'sup'
-    assert str(fu) == 'sup://www.yahoo.com:80/?foo=eep'
+    f.scheme = 'sup'
+    assert str(f) == 'sup://www.yahoo.com:80/?foo=eep'
 
-    fu.port = None
-    assert str(fu) == 'sup://www.yahoo.com/?foo=eep'
+    f.port = None
+    assert str(f) == 'sup://www.yahoo.com/?foo=eep'
 
-    fu.fragment = 'sup'
-    assert str(fu) == 'sup://www.yahoo.com/?foo=eep#sup'
+    f.fragment = 'sup'
+    assert str(f) == 'sup://www.yahoo.com/?foo=eep#sup'
 
-    fu.path = 'hay supppp'
-    assert str(fu) == 'sup://www.yahoo.com/hay%20supppp?foo=eep#sup'
+    f.path = 'hay supppp'
+    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?foo=eep#sup'
 
-    fu.args['space'] = '1 2'
-    assert str(fu) == 'sup://www.yahoo.com/hay%20supppp?foo=eep&space=1+2#sup'
+    f.args['space'] = '1 2'
+    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?foo=eep&space=1+2#sup'
 
-    del fu.args['foo']
-    assert str(fu) == 'sup://www.yahoo.com/hay%20supppp?space=1+2#sup'
+    del f.args['foo']
+    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?space=1+2#sup'
 
-    fu.query = 'a=a&s=s*s'
-    assert str(fu) == 'sup://www.yahoo.com/hay%20supppp?a=a&s=s%2As#sup'
+    f.query = 'a=a&s=s*s'
+    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?a=a&s=s%2As#sup'
 
-    fu.query = 'a=a&c=c%5Ec'
-    assert str(fu) == 'sup://www.yahoo.com/hay%20supppp?a=a&c=c%5Ec#sup'
+    f.query = 'a=a&c=c%5Ec'
+    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?a=a&c=c%5Ec#sup'
 
-    fu.query = {'pue':'pue', 'a':'a&a'}
-    assert str(fu) == 'sup://www.yahoo.com/hay%20supppp?a=a%26a&pue=pue#sup'
+    f.query = {'pue':'pue', 'a':'a&a'}
+    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?a=a%26a&pue=pue#sup'
 
-    fu.host = 'ohay.com'
-    assert str(fu) == 'sup://ohay.com/hay%20supppp?a=a%26a&pue=pue#sup'
+    f.host = 'ohay.com'
+    assert str(f) == 'sup://ohay.com/hay%20supppp?a=a%26a&pue=pue#sup'
     
   def test_odd_urls(self):
     # Empty.
-    fu = furl.furl('')
-    assert fu.scheme == ''
-    assert fu.host == ''
-    assert fu.port == None
-    assert fu.netloc == ''
-    assert fu.pathstr == str(fu.path) == ''
-    assert fu.querystr == str(fu.query) == ''
-    assert fu.args == fu.query.params == {}
-    assert str(fu.fragment) == fu.fragmentstr == ''
-    assert fu.url == ''
+    f = furl.furl('')
+    assert f.scheme == ''
+    assert f.host == ''
+    assert f.port == None
+    assert f.netloc == ''
+    assert f.pathstr == str(f.path) == ''
+    assert f.querystr == str(f.query) == ''
+    assert f.args == f.query.params == {}
+    assert str(f.fragment) == f.fragmentstr == ''
+    assert f.url == ''
 
     # TODO(grun): Test more odd urls.
 
@@ -417,12 +506,12 @@ class TestFurl(unittest.TestCase):
     assert furl.furl(url).url == url
 
     # Valid IPv4 and IPv6 addresses.
-    fu = furl.furl('http://192.168.1.101')
-    fu = furl.furl('http://[2001:db8:85a3:8d3:1319:8a2e:370:7348]/')
+    f = furl.furl('http://192.168.1.101')
+    f = furl.furl('http://[2001:db8:85a3:8d3:1319:8a2e:370:7348]/')
 
     # Invalid IPv4 shouldn't raise an exception because urlparse.urlsplit()
     # doesn't raise an exception on invalid IPv4 addresses.
-    fu = furl.furl('http://1.2.3.4.5.6/')
+    f = furl.furl('http://1.2.3.4.5.6/')
 
     # Invalid IPv6 shouldn't raise an exception because urlparse.urlsplit()
     # doesn't raise an exception on invalid IPv6 addresses.
@@ -436,35 +525,35 @@ class TestFurl(unittest.TestCase):
       furl.furl('http://0:0:0:0:0:0:0:1]/')
 
   def test_netlocs(self):
-    fu = furl.furl('http://pumps.com/')
+    f = furl.furl('http://pumps.com/')
     netloc = '1.2.3.4.5.6:999'
-    fu.netloc = netloc
-    assert fu.netloc == netloc
-    assert fu.host == '1.2.3.4.5.6'
-    assert fu.port == 999
+    f.netloc = netloc
+    assert f.netloc == netloc
+    assert f.host == '1.2.3.4.5.6'
+    assert f.port == 999
 
     netloc = '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]:888'
-    fu.netloc = netloc
-    assert fu.netloc == netloc
-    assert fu.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
-    assert fu.port == 888
+    f.netloc = netloc
+    assert f.netloc == netloc
+    assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
+    assert f.port == 888
 
     # Malformed IPv6 should raise an exception because urlparse.urlsplit()
     # raises an exception.
     with self.assertRaises(ValueError):
-      fu.netloc = '[0:0:0:0:0:0:0:1'
+      f.netloc = '[0:0:0:0:0:0:0:1'
     with self.assertRaises(ValueError):
-      fu.netloc = '0:0:0:0:0:0:0:1]'
+      f.netloc = '0:0:0:0:0:0:0:1]'
 
     # Invalid ports.
     with self.assertRaises(ValueError):
-      fu.netloc = '[0:0:0:0:0:0:0:1]:alksdflasdfasdf'
+      f.netloc = '[0:0:0:0:0:0:0:1]:alksdflasdfasdf'
     with self.assertRaises(ValueError):
-      fu.netloc = 'pump2pump.org:777777777777'
+      f.netloc = 'pump2pump.org:777777777777'
 
     # No side effects.
-    assert fu.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
-    assert fu.port == 888
+    assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
+    assert f.port == 888
 
   def test_ports(self):
     # Default port values.
@@ -478,181 +567,181 @@ class TestFurl(unittest.TestCase):
     assert furl.furl('undefined://www.pumps.com:9000/').port == 9000
 
     # Reset the port.
-    fu = furl.furl('http://www.pumps.com:9000/')
-    fu.port = None
-    assert fu.url == 'http://www.pumps.com/'
-    assert fu.port == 80
+    f = furl.furl('http://www.pumps.com:9000/')
+    f.port = None
+    assert f.url == 'http://www.pumps.com/'
+    assert f.port == 80
 
-    fu = furl.furl('undefined://www.pumps.com:9000/')
-    fu.port = None
-    assert fu.url == 'undefined://www.pumps.com/'
-    assert fu.port == None
+    f = furl.furl('undefined://www.pumps.com:9000/')
+    f.port = None
+    assert f.url == 'undefined://www.pumps.com/'
+    assert f.port == None
     
     # Invalid port raises ValueError with no side effects.
     with self.assertRaises(ValueError):
       furl.furl('http://www.pumps.com:invalid/')
 
     url = 'http://www.pumps.com:400/'
-    fu = furl.furl(url)
-    assert fu.port == 400
+    f = furl.furl(url)
+    assert f.port == 400
     with self.assertRaises(ValueError):
-      fu.port = 'asdf'
-    assert fu.url == url
-    fu.port = 9999
+      f.port = 'asdf'
+    assert f.url == url
+    f.port = 9999
     with self.assertRaises(ValueError):
-      fu.port = []
+      f.port = []
     with self.assertRaises(ValueError):
-      fu.port = -1
+      f.port = -1
     with self.assertRaises(ValueError):
-      fu.port = 77777777777
-    assert fu.port == 9999
-    assert fu.url == 'http://www.pumps.com:9999/'
+      f.port = 77777777777
+    assert f.port == 9999
+    assert f.url == 'http://www.pumps.com:9999/'
 
-    self.assertRaises(fu.set, port='asdf')
+    self.assertRaises(f.set, port='asdf')
 
   def test_add(self):
-    fu = furl.furl('http://pumps.com/')
+    f = furl.furl('http://pumps.com/')
 
-    assert fu == fu.add(args={'a':'a', 'm':'m&m'}, path='/kwl jump',
+    assert f == f.add(args={'a':'a', 'm':'m&m'}, path='/kwl jump',
                         fragment_path='1', fragment_args={'f':'frp'})
-    assert self._param(fu.url, 'a', 'a')
-    assert self._param(fu.url, 'm', 'm&m')
-    assert str(fu.fragment) == fu.fragmentstr == '1?f=frp'
-    assert urlparse.urlsplit(fu.url).path == '/kwl%20jump'
+    assert self._param(f.url, 'a', 'a')
+    assert self._param(f.url, 'm', 'm&m')
+    assert str(f.fragment) == f.fragmentstr == '1?f=frp'
+    assert urlparse.urlsplit(f.url).path == '/kwl%20jump'
 
-    assert fu == fu.add(path='dir', fragment_path='23', args={'b':'b'},
+    assert f == f.add(path='dir', fragment_path='23', args={'b':'b'},
                         fragment_args={'b':'bewp'})
-    assert self._param(fu.url, 'a', 'a')
-    assert self._param(fu.url, 'm', 'm&m')
-    assert self._param(fu.url, 'b', 'b')
-    assert fu.pathstr == str(fu.path) == '/kwl jump/dir'
-    assert str(fu.fragment) == fu.fragmentstr == '1/23?b=bewp&f=frp'
+    assert self._param(f.url, 'a', 'a')
+    assert self._param(f.url, 'm', 'm&m')
+    assert self._param(f.url, 'b', 'b')
+    assert f.pathstr == str(f.path) == '/kwl jump/dir'
+    assert str(f.fragment) == f.fragmentstr == '1/23?b=bewp&f=frp'
 
     # Test warnings for potentially overlapping parameters.
     with warnings.catch_warnings(True) as w1:
-      fu.add(args={'a':'1'}, query_params={'a':'2'})
+      f.add(args={'a':'1'}, query_params={'a':'2'})
       assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
-      assert self._param(fu.url, 'a', '2') # <query_params> takes precedence.
+      assert self._param(f.url, 'a', '2') # <query_params> takes precedence.
 
   def test_set(self):
-    fu = furl.furl('http://pumps.com/kwl%20jump/dir')
-    assert fu == fu.set(args={'no':'nope'}, fragment='sup')
-    assert 'a' not in fu.args
-    assert 'b' not in fu.args
-    assert fu.url == 'http://pumps.com/kwl%20jump/dir?no=nope#sup'
+    f = furl.furl('http://pumps.com/kwl%20jump/dir')
+    assert f == f.set(args={'no':'nope'}, fragment='sup')
+    assert 'a' not in f.args
+    assert 'b' not in f.args
+    assert f.url == 'http://pumps.com/kwl%20jump/dir?no=nope#sup'
 
     # No conflict warnings between <host>/<port> and <netloc>, or <query> and
     # <params>.
-    assert fu == fu.set(args={'a':'a a'}, path='path path/dir', port='999',
+    assert f == f.set(args={'a':'a a'}, path='path path/dir', port='999',
                         fragment='moresup', scheme='sup', host='host')
-    assert fu.url == 'sup://host:999/path%20path/dir?a=a+a#moresup'
+    assert f.url == 'sup://host:999/path%20path/dir?a=a+a#moresup'
 
     # Path as a list of paths to join.
-    assert fu == fu.set(path=['d1', 'd2'])
-    assert fu.url == 'sup://host:999/d1/d2?a=a+a#moresup'
-    assert fu == fu.add(path=['/d3/', '/d4/'])
-    assert fu.url == 'sup://host:999/d1/d2//d3///d4/?a=a+a#moresup'
+    assert f == f.set(path=['d1', 'd2'])
+    assert f.url == 'sup://host:999/d1/d2?a=a+a#moresup'
+    assert f == f.add(path=['/d3/', '/d4/'])
+    assert f.url == 'sup://host:999/d1/d2//d3///d4/?a=a+a#moresup'
 
     # Set a lot of stuff (but avoid conflicts, which are tested below).
-    fu.set(query_params={'k':'k'}, fragment_path='no scrubs', scheme='morp',
+    f.set(query_params={'k':'k'}, fragment_path='no scrubs', scheme='morp',
            host='myhouse', port=69, path='j$j*m#n', fragment_args={'f':'f'})
-    assert fu.url == 'morp://myhouse:69/j%24j%2Am%23n?k=k#no scrubs?f=f'
+    assert f.url == 'morp://myhouse:69/j%24j%2Am%23n?k=k#no scrubs?f=f'
 
     # No side effects.
-    oldurl = fu.url
-    self.assertRaises(ValueError, fu.set, args={'a':'a a'},
+    oldurl = f.url
+    self.assertRaises(ValueError, f.set, args={'a':'a a'},
                       path='path path/dir', port='INVALID_PORT',
                       fragment='moresup', scheme='sup', host='host')
-    assert fu.url == oldurl
+    assert f.url == oldurl
     with warnings.catch_warnings(True) as w1:
-      self.assertRaises(ValueError, fu.set, netloc='nope.com:99', port='NOPE')
+      self.assertRaises(ValueError, f.set, netloc='nope.com:99', port='NOPE')
       assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
-    assert fu.url == oldurl
+    assert f.url == oldurl
 
     # Test warnings for potentially overlapping parameters.
-    fu = furl.furl('http://pumps.com')
+    f = furl.furl('http://pumps.com')
     warnings.simplefilter("always")
 
     # Host, port, and netloc overlap - host and port take precedence.
     with warnings.catch_warnings(True) as w1:
-      fu.set(netloc='dumps.com:99', host='ohay.com')
+      f.set(netloc='dumps.com:99', host='ohay.com')
       assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
-      fu.host == 'ohay.com'
-      fu.port == 99
+      f.host == 'ohay.com'
+      f.port == 99
     with warnings.catch_warnings(True) as w2:
-      fu.set(netloc='dumps.com:99', port=88)
+      f.set(netloc='dumps.com:99', port=88)
       assert len(w2) == 1 and issubclass(w2[0].category, UserWarning)
-      fu.port == 88
+      f.port == 88
     with warnings.catch_warnings(True) as w3:
-      fu.set(netloc='dumps.com:99', host='ohay.com', port=88)
+      f.set(netloc='dumps.com:99', host='ohay.com', port=88)
       assert len(w3) == 1 and issubclass(w3[0].category, UserWarning)
 
     # Query, args, and query_params overlap - args and query_params take
     # precedence.
     with warnings.catch_warnings(True) as w4:
-      fu.set(query='yosup', args={'a':'a', 'b':'b'})
+      f.set(query='yosup', args={'a':'a', 'b':'b'})
       assert len(w4) == 1 and issubclass(w4[0].category, UserWarning)
-      assert self._param(fu.url, 'a', 'a')
-      assert self._param(fu.url, 'b', 'b')
+      assert self._param(f.url, 'a', 'a')
+      assert self._param(f.url, 'b', 'b')
     with warnings.catch_warnings(True) as w5:
-      fu.set(query='yosup', query_params={'a':'a', 'b':'b'})
+      f.set(query='yosup', query_params={'a':'a', 'b':'b'})
       assert len(w5) == 1 and issubclass(w5[0].category, UserWarning)
-      assert self._param(fu.url, 'a', 'a')
-      assert self._param(fu.url, 'b', 'b')
+      assert self._param(f.url, 'a', 'a')
+      assert self._param(f.url, 'b', 'b')
     with warnings.catch_warnings(True) as w6:
-      fu.set(args={'a':'a', 'b':'b'}, query_params={'c':'c', 'd':'d'})
+      f.set(args={'a':'a', 'b':'b'}, query_params={'c':'c', 'd':'d'})
       assert len(w6) == 1 and issubclass(w6[0].category, UserWarning)
-      assert self._param(fu.url, 'c', 'c')
-      assert self._param(fu.url, 'd', 'd')
+      assert self._param(f.url, 'c', 'c')
+      assert self._param(f.url, 'd', 'd')
 
     # Fragment, fragment_path, fragment_args, and fragment_separator overlap -
     # fragment_separator, fragment_path, and fragment_args take precedence.
     with warnings.catch_warnings(True) as w7:
-      fu.set(fragment='hi', fragment_path='!', fragment_args={'a':'a'},
+      f.set(fragment='hi', fragment_path='!', fragment_args={'a':'a'},
              fragment_separator=False)
       assert len(w7) == 1 and issubclass(w7[0].category, UserWarning)
-      assert str(fu.fragment) == '!a=a'
+      assert str(f.fragment) == '!a=a'
     with warnings.catch_warnings(True) as w8:
-      fu.set(fragment='hi', fragment_path='bye')
+      f.set(fragment='hi', fragment_path='bye')
       assert len(w8) == 1 and issubclass(w8[0].category, UserWarning)
-      assert str(fu.fragment) == 'bye'
+      assert str(f.fragment) == 'bye'
     with warnings.catch_warnings(True) as w9:
-      fu.set(fragment='hi', fragment_args={'a':'a'})
+      f.set(fragment='hi', fragment_args={'a':'a'})
       assert len(w9) == 1 and issubclass(w9[0].category, UserWarning)
-      print fu.fragmentstr
-      assert str(fu.fragment) == 'hi?a=a'
+      print f.fragmentstr
+      assert str(f.fragment) == 'hi?a=a'
     with warnings.catch_warnings(True) as w10:
-      fu.set(fragment='!?a=a', fragment_separator=False)
+      f.set(fragment='!?a=a', fragment_separator=False)
       assert len(w10) == 1 and issubclass(w10[0].category, UserWarning)
-      assert str(fu.fragment) == '!a=a'
+      assert str(f.fragment) == '!a=a'
 
   def test_remove(self):
     url = 'http://host:69/a/big/path/?a=a&b=b&s=s+s#a frag?with=args&a=a'
     
-    fu = furl.furl(url)
-    assert fu == fu.remove(fragment=True, args=['a', 'b'], path='path',
+    f = furl.furl(url)
+    assert f == f.remove(fragment=True, args=['a', 'b'], path='path',
                            port=True)
-    assert fu.url == 'http://host/a/big/?s=s+s'
+    assert f.url == 'http://host/a/big/?s=s+s'
 
     # No errors are thrown when removing url components that don't exist.
-    fu = furl.furl(url)
-    assert fu == fu.remove(fragment_path=['asdf'], fragment_args=['asdf'],
+    f = furl.furl(url)
+    assert f == f.remove(fragment_path=['asdf'], fragment_args=['asdf'],
                            args=['asdf'], path=['ppp', 'ump'])
-    assert self._param(fu.url, 'a', 'a')
-    assert self._param(fu.url, 'b', 'b')
-    assert self._param(fu.url, 's', 's s')
-    assert fu.pathstr == '/a/big/path/'
-    assert fu.fragment.pathstr == 'a frag'
-    assert fu.fragment.args == {'a':'a', 'with':'args'}
+    assert self._param(f.url, 'a', 'a')
+    assert self._param(f.url, 'b', 'b')
+    assert self._param(f.url, 's', 's s')
+    assert f.pathstr == '/a/big/path/'
+    assert f.fragment.pathstr == 'a frag'
+    assert f.fragment.args == {'a':'a', 'with':'args'}
 
     # Path as a list of paths to join before removing.
-    assert fu == fu.remove(fragment_path='a frag', fragment_args=['a'],
+    assert f == f.remove(fragment_path='a frag', fragment_args=['a'],
                            query_params=['a','b'], path=['big', 'path'],
                            port=True)
-    assert fu.url == 'http://host/a/?s=s+s#with=args'
+    assert f.url == 'http://host/a/?s=s+s#with=args'
 
-    assert fu == fu.remove(path=True, query=True, fragment=True)
-    assert fu.url == 'http://host'
+    assert f == f.remove(path=True, query=True, fragment=True)
+    assert f.url == 'http://host'
 
   def test_parse_qs(self):
     assert furl.parse_qs('a=a&b=b') == {'a':'a', 'b':'b'}

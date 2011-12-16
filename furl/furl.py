@@ -347,6 +347,8 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
   Attributes:
     DEFAULT_PORTS: Map of various URL schemes to their default ports. Scheme
       strings are lowercase.
+    username: Username string for authentication.
+    password: Password string for authentication with <username>.
     scheme: URL scheme ('http', 'https', etc). All lowercase.
     host: URL host (domain, IPv4 address, or IPv6 address), not including
       port. All lowercase.
@@ -358,6 +360,8 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     fragment: Fragment object from FragmentCompositionInterface.
   """
   DEFAULT_PORTS = {
+    'ftp'   : 21,
+    'ssh'   : 22,
     'http'  : 80,
     'https' : 443,
     }
@@ -370,6 +374,8 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     QueryCompositionInterface.__init__(self)
     FragmentCompositionInterface.__init__(self)
 
+    self.username = ''
+    self.password = ''
     self.scheme = ''
     self._host = ''
     self._port = None
@@ -429,10 +435,17 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
 
   @property
   def netloc(self):
+    userpass = self.username
+    if self.password:
+      userpass += ':' + self.password
+    if userpass:
+      userpass += '@'
+
     netloc = self.host
     if self.port and self.port != self.DEFAULT_PORTS.get(self.scheme):
-      netloc = '%s:%i' % (self.host, self.port)
-    return netloc
+      netloc += ':' + str(self.port)
+
+    return userpass + netloc
 
   @netloc.setter
   def netloc(self, netloc):
@@ -444,7 +457,16 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     # Raises ValueError on malformed IPv6 addresses.
     urlparse.urlsplit('http://%s/' % netloc)
     
-    host = port = None
+    username = password = host = ''
+    port = None
+
+    if '@' in netloc:
+      userpass, netloc = netloc.split('@', 1)
+      if ':' in userpass:
+        username, password = userpass.split(':', 1)
+      else:
+        username = userpass
+
     if ':' in netloc:
       # IPv6 address literal.
       if ']' in netloc:
@@ -465,6 +487,8 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     # exception is raised when assigning self.port self.host isn't updated.
     self.port = port # Raises ValueError on invalid port.
     self.host = host
+    self.username = username
+    self.password = password
 
   @property
   def url(self):
@@ -517,9 +541,10 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     self.fragment.add(path=fragment_path, args=fragment_args)
     return self
 
-  def set(self, args=None, path=None, fragment=None, scheme=None, netloc=None,
+  def set(self, args=None, path=None, fragment=None, scheme=None, netloc='',
           fragment_path=None, fragment_args=None, fragment_separator=None,
-          host=None, port=None, query=None, query_params=None):
+          host='', port=None, query=None, query_params=None,
+          username='', password=''):
     """
     Set components of a url and return this furl instance, <self>.
 
@@ -561,6 +586,8 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
         between the fragment path and fragment query.
       host: Host string to adopt.
       port: Port number to adopt.
+      username: Username string to adopt.
+      password: Password string to adopt.
     Raises:
       ValueError on invalid port.
       UserWarning if <netloc> and (<host> and/or <port>) are provided.
@@ -597,6 +624,10 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
       self.netloc, self.port = oldnetloc, oldport
       raise
 
+    if username:
+      self.username = username
+    if password:
+      self.password = password
     if scheme:
       self.scheme = scheme
     if host:
@@ -615,7 +646,7 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
 
   def remove(self, args=None, path=None, fragment=None, query=None,
              query_params=None, port=None, fragment_path=None,
-             fragment_args=None):
+             fragment_args=None, username=None, password=None):
     """
     Remove components of url and return this furl instance, <self>.
 
@@ -635,8 +666,14 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
         fragment's path string.
       fragment_args: A list of query keys to remove from the fragment's query,
         if they exist.
+      username: If True, remove the username, if it exists.
+      password: If True, remove the password, if it exists.
     Returns: <self>.
     """
+    if username:
+      self.username = ''
+    if password:
+      self.password = ''
     if port:
       self.port = None
     self.path.remove(path)
