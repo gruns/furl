@@ -9,9 +9,9 @@
 #
 # License: Build Amazing Things (Unlicense)
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import unittest
-import urlparse
+import urllib.parse
 import warnings
 
 import furl
@@ -85,7 +85,7 @@ class TestPath(unittest.TestCase):
     unencoded = ['a+a', '/~haypepps/']
 
     for path in encoded:
-      assert str(furl.Path(path)) == urllib.unquote(path)
+      assert str(furl.Path(path)) == urllib.parse.unquote(path)
 
     for path in unencoded:
       assert str(furl.Path(path)) == path
@@ -307,7 +307,7 @@ class TestFurl(unittest.TestCase):
     # schemes, only those schemes in urlparse.uses_query. So this little helper
     # function will only work when provided urls whos schemes are also in
     # urlparse.uses_query.
-    params = urlparse.parse_qs(urlparse.urlsplit(url).query)
+    params = urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)
     return key in params and params[key][0] == val
 
   def test_username_and_password(self):
@@ -607,7 +607,7 @@ class TestFurl(unittest.TestCase):
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'm', 'm&m')
     assert str(f.fragment) == f.fragmentstr == '1?f=frp'
-    assert urlparse.urlsplit(f.url).path == '/kwl%20jump'
+    assert urllib.parse.urlsplit(f.url).path == '/kwl%20jump'
 
     assert f == f.add(path='dir', fragment_path='23', args={'b':'b'},
                         fragment_args={'b':'bewp'})
@@ -708,7 +708,7 @@ class TestFurl(unittest.TestCase):
     with warnings.catch_warnings(record=True) as w9:
       f.set(fragment='hi', fragment_args={'a':'a'})
       assert len(w9) == 1 and issubclass(w9[0].category, UserWarning)
-##      print f.fragmentstr
+##      print(f.fragmentstr)
       assert str(f.fragment) == 'hi?a=a'
     with warnings.catch_warnings(record=True) as w10:
       f.set(fragment='!?a=a', fragment_separator=False)
@@ -755,24 +755,24 @@ class TestFurl(unittest.TestCase):
   def test_urlsplit(self):
     # No changes to existing urlsplit() behavior for known schemes.
     url = 'http://www.pumps.com/'
-    assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
-    assert furl.urlsplit(url) == urlparse.urlsplit(url)
+    assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
+    assert furl.urlsplit(url) == urllib.parse.urlsplit(url)
 
     url = 'https://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#fragment'
-    assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
-    assert furl.urlsplit(url) == urlparse.urlsplit(url)
+    assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
+    assert furl.urlsplit(url) == urllib.parse.urlsplit(url)
 
     # Properly split the query from the path for unknown schemes.
     url = 'sup://192.168.1.102:8080///one//two////?s=kwl%20string#frag'
     correct = ('sup', '192.168.1.102:8080', '///one//two////',
                's=kwl%20string', 'frag')
-    assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
+    assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
     assert furl.urlsplit(url) == correct
 
     url = 'crazyyyyyy://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#fragment'
     correct = ('crazyyyyyy', 'www.yahoo.co.uk', '/one/two/three',
                'a=a&b=b&m=m%26m', 'fragment')
-    assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
+    assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
     assert furl.urlsplit(url) == correct
           
   def test_url_path_join(self):
