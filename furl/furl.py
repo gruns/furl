@@ -38,11 +38,11 @@ class Path(object):
 
   def parse(self, path=''):
     self.isabsolute = (path and path[0] == '/')
-    
-    if isinstance(path, list):
-      segments = url_path_join(*path).split('/')
-    else:
+
+    if hasattr(path, 'split') and callable(path.split):
       segments = path.split('/')
+    else:
+      segments = url_path_join(*path).split('/')
 
     if len(segments) > 1 and segments[0] == '':
       segments.pop(0)
@@ -56,7 +56,7 @@ class Path(object):
     Returns: <self>.
     """
     if path:
-      if isinstance(path, list):
+      if not isinstance(path, basestring):
         if self.segments[-1] == '':
           self.segments.pop(-1)
         self.segments += path
@@ -73,10 +73,10 @@ class Path(object):
     if path:
       if path == True:
         self.parse('')
-      elif isinstance(path, list):
-        self.parse(url_path_remove(str(self), '/'.join(path)))
-      else:
+      elif isinstance(path, basestring):
         self.parse(url_path_remove(str(self), path))
+      else:
+        self.parse(url_path_remove(str(self), '/'.join(path)))
     return self
 
   @property
@@ -164,7 +164,7 @@ class Query(object):
       self.parse(query)
 
   def parse(self, query):
-    if isinstance(query, dict):
+    if hasattr(query, 'iteritems') and callable(query.iteritems):
       # py2.7+: {k:urllib.unquote_plus(v) for k, v in query.iteritems()}
       tmp = dict((k,urllib.unquote_plus(v)) for (k,v) in query.iteritems())
       self.params = tmp
@@ -185,7 +185,7 @@ class Query(object):
   def remove(self, query=None):
     if query == True:
       self.parse('')
-    elif isinstance(query, list):
+    elif query:
       for key in query:
         self.params.pop(key, None)
     return self
