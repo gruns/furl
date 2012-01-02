@@ -5,8 +5,6 @@
 # grunseid.com
 # grunseid@gmail.com
 #
-# Copyright: LOLOLOL
-#
 # License: Build Amazing Things (Unlicense)
 
 import urllib
