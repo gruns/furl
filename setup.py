@@ -1,7 +1,7 @@
 import sys
 from setuptools import setup, find_packages
 
-import furl.__info__ as pkginfo
+import __info__ as pkginfo
 
 if sys.argv[-1] == 'publish':
   os.system('python setup.py sdist upload')
