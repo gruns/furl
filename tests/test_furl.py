@@ -11,8 +11,75 @@ import urllib
 import unittest
 import urlparse
 import warnings
+from itertools import izip
+from abc import ABCMeta, abstractmethod
+try:
+  from collections import OrderedDict as odict # Python 2.7+.
+except ImportError:
+  from ordereddict import OrderedDict as odict # Python 2.4-2.6.
 
 import furl
+from furl.omdict1D import omdict1D
+
+#
+# TODO(grun): Add tests for furl objects with strict=True. Make sure
+# UserWarnings are raised when improperly encoded path, query, and fragment
+# strings are provided.
+#
+
+# Utility list subclasses to expose allitems() and iterallitems() methods on
+# different kinds of item containers - lists, dictionaries, multivalue
+# dictionaries, and query strings. This provides a common iteration interface
+# for looping through their items (including items with repeated keys).
+# original() is also provided to get access to a copy of the original container.
+class itemcontainer(object):
+  __metaclass__ = ABCMeta
+  
+  @abstractmethod
+  def allitems(self):
+    pass
+
+  @abstractmethod
+  def iterallitems(self):
+    pass
+
+  @abstractmethod
+  def original(self):
+    """
+    Returns: A copy of the original data type. For example, an itemlist would
+    return a list, itemdict a dict, etc.
+    """
+    pass
+
+class itemlist(list, itemcontainer):
+  def allitems(self):
+    return list(self.iterallitems())
+  def iterallitems(self):
+    return iter(self)
+  def original(self):
+    return list(self)
+
+class itemdict(odict, itemcontainer):
+  def allitems(self):
+    return self.items()
+  def iterallitems(self):
+    return self.iteritems()
+  def original(self):
+    return dict(self)
+
+class itemomdict1D(omdict1D, itemcontainer):
+  def original(self):
+    return omdict1D(self)
+
+class itemstr(str, itemcontainer):
+  def allitems(self):
+    # Keys and values get unquoted. i.e. 'a=a%20a' -> ['a', 'a a'].
+    return urlparse.parse_qsl(self, keep_blank_values=True)
+  def iterallitems(self):
+    return iter(self.allitems())
+  def original(self):
+    return str(self)
+
 
 class TestPath(unittest.TestCase):
   def test_isdir_isfile(self):
@@ -79,43 +146,225 @@ class TestPath(unittest.TestCase):
     assert str(p) == '/a/b/c/'
 
   def test_encoding(self):
-    encoded = ['a%20a', '/%7haypepps/']
-    unencoded = ['a+a', '/~haypepps/']
+    encoded = ['a%20a', '/%7haypepps/', 'a/:@/a', 'a%2Fb']
+    unencoded = ['a+a', '/~haypepps/', 'a/:@/a', 'a/b']
 
     for path in encoded:
-      assert str(furl.Path(path)) == urllib.unquote(path)
-
-    for path in unencoded:
       assert str(furl.Path(path)) == path
 
-  def test_add(self):
-    p = furl.Path('a/b/c/')
-    assert p == p.add('d')
-    assert str(p) == 'a/b/c/d'
-    assert p == p.add('/')
-    assert str(p) == 'a/b/c/d/'
-    assert p == p.add(['e', 'f', 'e e', ''])
-    assert str(p) == 'a/b/c/d/e/f/e e/'
+    for path in unencoded:
+      assert str(furl.Path(path)) == urllib.quote(path, "/:@-._~!$&'()*+,;=")
+
+    # Valid path segment characters should not be encoded.
+    for char in ":@-._~!$&'()*+,;=":
+      f = furl.furl().set(path=char)
+      assert str(f.path) == f.url == '/' + char
+      assert f.path.segments == [char]
+
+    # Invalid path segment characters should be encoded.
+    for char in ' ^`<>[]"?':
+      f = furl.furl().set(path=char)
+      assert str(f.path) == f.url == '/' + urllib.quote(char)
+      assert f.path.segments == [char]
+
+    # Encode '/' within a path segment.
+    segment = 'a/b' # One path segment that includes the '/' character.
+    f = furl.furl().set(path=[segment])
+    assert str(f.path) == '/a%2Fb'
+    assert f.path.segments == [segment]
+    assert f.url == '/a%2Fb'
+
+  def test_load(self):
+    self._test_set_load(furl.Path.load)
 
   def test_set(self):
+    self._test_set_load(furl.Path.set)
+
+  def _test_set_load(self, path_set_or_load):
     p = furl.Path('a/b/c/')
-    assert p == p.set('asdf/asdf/')
+    assert path_set_or_load(p, 'asdf/asdf/') == p
+    assert not p.isabsolute
     assert str(p) == 'asdf/asdf/'
-    assert p == p.set(['a', 'b', 'c', ''])
+    assert path_set_or_load(p, ['a', 'b', 'c', '']) == p
+    assert not p.isabsolute
     assert str(p) == 'a/b/c/'
+    assert path_set_or_load(p, ['','a', 'b', 'c', '']) == p
+    assert p.isabsolute
+    assert str(p) == '/a/b/c/'
+
+  def test_add(self):
+    # absolute_if_not_empty is False.
+    p = furl.Path('a/b/c/', absolute_if_not_empty=False)
+    assert p.add('d') == p
+    assert not p.isabsolute
+    assert str(p) == 'a/b/c/d'
+    assert p.add('/') == p
+    assert not p.isabsolute
+    assert str(p) == 'a/b/c/d/'
+    assert p.add(['e', 'f', 'e e', '']) == p
+    assert not p.isabsolute
+    assert str(p) == 'a/b/c/d/e/f/e%20e/'
+
+    p = furl.Path(absolute_if_not_empty=False)
+    assert not p.isabsolute
+    assert p.add('/') == p
+    assert p.isabsolute
+    assert str(p) == '/'
+    assert p.add('pump') == p
+    assert p.isabsolute
+    assert str(p) == '/pump'
+
+    p = furl.Path(absolute_if_not_empty=False)
+    assert not p.isabsolute
+    assert p.add(['','']) == p
+    assert p.isabsolute
+    assert str(p) == '/'
+    assert p.add(['pump','dump','']) == p
+    assert p.isabsolute
+    assert str(p) == '/pump/dump/'
+
+    # absolute_if_not_empty is True.
+    p = furl.Path('a/b/c/', absolute_if_not_empty=True)
+    assert p.add('d') == p
+    assert p.isabsolute
+    assert str(p) == '/a/b/c/d'
+    assert p.add('/') == p
+    assert p.isabsolute
+    assert str(p) == '/a/b/c/d/'
+    assert p.add(['e', 'f', 'e e', '']) == p
+    assert p.isabsolute
+    assert str(p) == '/a/b/c/d/e/f/e%20e/'
+
+    p = furl.Path(absolute_if_not_empty=True)
+    assert not p.isabsolute
+    assert p.add('/') == p
+    assert p.isabsolute
+    assert str(p) == '/'
+    assert p.add('pump') == p
+    assert p.isabsolute
+    assert str(p) == '/pump'
+
+    p = furl.Path(absolute_if_not_empty=True)
+    assert not p.isabsolute
+    assert p.add(['','']) == p
+    assert p.isabsolute
+    assert str(p) == '/'
+    assert p.add(['pump','dump','']) == p
+    assert p.isabsolute
+    assert str(p) == '/pump/dump/'
 
   def test_remove(self):
+    # Remove lists of path segments.
     p = furl.Path('a/b/s%20s/')
-    assert p == p.remove(True)
+    assert p.remove(['b', 's s']) == p
+    assert str(p) == 'a/b/s%20s/'
+    assert p.remove(['b', 's s', '']) == p
+    assert str(p) == 'a/'
+    assert p.remove(['', 'a']) == p
+    assert str(p) == 'a/'
+    assert p.remove(['a']) == p
+    assert str(p) == 'a/'
+    assert p.remove(['a', '']) == p
     assert str(p) == ''
 
     p = furl.Path('a/b/s%20s/')
-    assert p == p.remove(['b', 's s'])
+    assert p.remove(['', 'b', 's s']) == p
+    assert str(p) == 'a/b/s%20s/'
+    assert p.remove(['', 'b', 's s', '']) == p
+    assert str(p) == 'a'
+    assert p.remove(['', 'a']) == p
+    assert str(p) == 'a'
+    assert p.remove(['a', '']) == p
+    assert str(p) == 'a'
+    assert p.remove(['a']) == p
+    assert str(p) == ''
+
+    p = furl.Path('a/b/s%20s/')
+    assert p.remove(['a', 'b', 's%20s', '']) == p
+    assert str(p) == 'a/b/s%20s/'
+    assert p.remove(['a', 'b', 's s', '']) == p
+    assert str(p) == ''
+
+    # Remove a path string.
+    p = furl.Path('a/b/s%20s/')
+    assert p.remove('b/s s/') == p # Encoding Warning.
     assert str(p) == 'a/'
 
     p = furl.Path('a/b/s%20s/')
-    assert p == p.remove(['', 'b', 's s'])
-    assert str(p) == 'a'
+    assert p.remove('b/s%20s/') == p
+    assert str(p) == 'a/'
+    assert p.remove('a') == p
+    assert str(p) == 'a/'
+    assert p.remove('/a') == p
+    assert str(p) == 'a/'
+    assert p.remove('a/') == p
+    assert str(p) == ''
+
+    p = furl.Path('a/b/s%20s/')
+    assert p.remove('b/s s') == p # Encoding Warning.
+    assert str(p) == 'a/b/s%20s/'
+
+    p = furl.Path('a/b/s%20s/')
+    assert p.remove('b/s%20s') == p
+    assert str(p) == 'a/b/s%20s/'
+    assert p.remove('s%20s') == p
+    assert str(p) == 'a/b/s%20s/'
+    assert p.remove('s s') == p # Encoding Warning.
+    assert str(p) == 'a/b/s%20s/'
+    assert p.remove('b/s%20s/') == p
+    assert str(p) == 'a/'
+    assert p.remove('/a') == p
+    assert str(p) == 'a/'
+    assert p.remove('a') == p
+    assert str(p) == 'a/'
+    assert p.remove('a/') == p
+    assert str(p) == ''
+
+    p = furl.Path('a/b/s%20s/')
+    assert p.remove('a/b/s s/') == p # Encoding Warning.
+    assert str(p) == ''
+
+    # Remove True.
+    p = furl.Path('a/b/s%20s/')
+    assert p.remove(True) == p
+    assert str(p) == ''
+
+  def test_isabsolute(self):
+    paths = ['', '/', 'pump', 'pump/dump', '/pump/dump', '/pump/dump']
+    for path in paths:
+      p = furl.Path(absolute_if_not_empty=True)
+      p.set(path)
+      if path:
+        assert p.isabsolute
+      else:
+        assert not p.isabsolute
+      with self.assertRaises(AttributeError):
+        p.isabsolute = False
+
+      p = furl.Path(absolute_if_not_empty=False)
+      p.set(path)
+      if path and path[0] == '/':
+        assert p.isabsolute
+      else:
+        assert not p.isabsolute
+
+  def test_nonzero(self):
+    p = furl.Path()
+    assert not p
+
+    p = furl.Path('')
+    assert not p
+
+    p = furl.Path('')
+    assert not p
+    p.segments = ['']
+    assert p
+    
+    p = furl.Path('asdf')
+    assert p
+
+    p = furl.Path('/asdf')
+    assert p
 
 
 class TestPathCompositionInterface(unittest.TestCase):
@@ -132,38 +381,139 @@ class TestPathCompositionInterface(unittest.TestCase):
     assert isinstance(t.path, furl.Path)
     assert t.pathstr == ''
 
-    t.path = 'asdf/asdf'
-    assert t.pathstr == 'asdf/asdf'
-    assert t.path.segments == ['asdf', 'asdf']
+    t.path = 'pump/dump'
+    assert isinstance(t.path, furl.Path)
+    assert t.pathstr == 'pump/dump'
+    assert t.path.segments == ['pump', 'dump']
     assert not t.path.isabsolute
 
 
 class TestQuery(unittest.TestCase):
-  def test_basics(self):
-    for query in ['', 'asdfasdf', '/asdf/asdf/sdf']:
-      q = furl.Query(query)
-      assert q.params == {}
-      assert str(q) == ''
+  def setUp(self):
+    # All interaction with parameters is unquoted unless that interaction is
+    # through an already encoded query string. In the case of an already encoded
+    # query string like 'a=a%20a&b=b', its keys and values will be unquoted.
+    self.itemlists = map(itemlist, [
+      [], [(1,1)], [(1,1), (2,2)], [(1,1), (1,11), (2,2), (3,3)], [('','')],
+      [('a',1), ('b',2), ('a',3)], [('a',1), ('b','b'), ('a',0.23)],
+      [(0.1, -0.9), (-0.1231,12312.3123)], [(None,None), (None, 'pumps')],
+      [('',''),('','')], [('','a'),('','b'),('b',''),('b','b')], [('<','>')],
+      [('=','><^%'),('><^%','=')], [("/?:@-._~!$'()*+,","/?:@-._~!$'()*+,=")],
+      [('+','-')], [('a%20a','a%20a')], [('/^`<>[]"','/^`<>[]"=')],
+      [("/?:@-._~!$'()*+,","/?:@-._~!$'()*+,=")],
+      ])
+    self.itemdicts = map(itemdict, [
+      {}, {1:1, 2:2}, {'1':'1', '2':'2', '3':'3'}, {None:None}, {5.4:4.5},
+      {'':''}, {'':'a','b':''}, {'pue':'pue', 'a':'a&a'}, {'=':'====='},
+      {'pue':'pue', 'a':'a%26a'}, {'%':'`','`':'%'}, {'+':'-'},
+      {"/?:@-._~!$'()*+,":"/?:@-._~!$'()*+,="}, {'%25':'%25','%60':'%60'},
+      ])
+    self.itemomdicts = map(itemomdict1D, self.itemlists)
+    self.itemstrs = map(itemstr, [
+      # Basics.
+      '', 'a=a', 'a=a&b=b', 'q=asdf&check_keywords=yes&area=default', '=asdf',
+      # Various quoted and unquoted parameters and values that will be unquoted.
+      'space=a+a&amp=a%26a', 'a a=a a&no encoding=sup', 'a+a=a+a', 'a%20=a+a',
+      'a%20a=a%20a', 'a+a=a%20a', 'space=a a&amp=a^a', 'a=a&s=s#s', '+=+',
+      "/?:@-._~!$&'()*+,=/?:@-._~!$'()*+,=", 'a=a&c=c%5Ec',
+      '<=>&^="', '%3C=%3E&%5E=%22', '%=%;`=`', '%25=%25&%60=%60',
+      # Only keys, no values.
+      'asdfasdf', '/asdf/asdf/sdf', '*******', '!@#(*&@!#(*@!#', 'a&b&', 'a;b',
+      # Repeated parameters.
+      'a=a&a=a', 'space=a+a&space=b+b',
+      # Empty keys and/or values.
+      '=', 'a=', 'a=a&a=', '=a&=b',
+      # Semicolon delimeter, like 'a=a;b=b'.
+      'a=a;a=a', 'space=a+a;space=b+b',
+      ])
+    self.items = (self.itemlists + self.itemdicts + self.itemomdicts +
+                  self.itemstrs)
 
-    q = furl.Query('=asdf')
-    assert q.params == {'':'asdf'}
-    assert str(q) == '=asdf'
+  def test_various(self):
+    for items in self.items:
+      q = furl.Query(items.original())
 
-    # URL encoding.
-    q = furl.Query('space=a+a&amp=a%26a')
-    assert q.params == {'space':'a a', 'amp':'a&a'}
-    assert str(q) == 'space=a+a&amp=a%26a' or str(q) == 'amp=a%26a&space=a+a'
+      assert q.params.allitems() == items.allitems()
+      pairs = map(lambda pair: '%s=%s' % (pair[0],pair[1]),
+                  self._quote_items(items))
 
-    q = furl.Query('space=a a&amp=a^a')
-    assert q.params == {'space':'a a', 'amp':'a^a'}
-    assert str(q) == 'space=a+a&amp=a%5Ea' or str(q) == 'amp=a%5Ea&space=a+a'
+      # encode() and __str__().
+      assert str(q) == q.encode() == q.encode('&') == '&'.join(pairs)
+      assert q.encode(';') == ';'.join(pairs)
 
-    # Duplicates are truncated.
-    q = furl.Query('space=a+a&space=b+b')
-    assert q.params == {'space':'a a'}
-    assert str(q) == 'space=a+a'
+      # __nonzero__().
+      if items.allitems():
+        assert q
+      else:
+        assert not q
+
+  def test_load(self):
+    for items in self.items:
+      q = furl.Query(items.original())
+      for update in self.items:
+        assert q.load(update) == q
+        assert q.params.allitems() == update.allitems()
+
+  def test_add(self):
+    for items in self.items:
+      q = furl.Query(items.original())
+      runningsum = list(items.allitems())
+      for itemupdate in self.items:
+        assert q.add(itemupdate.original()) == q
+        for item in itemupdate.iterallitems():
+          runningsum.append(item)
+        assert q.params.allitems() == runningsum
+
+  def test_set(self):
+    for items in self.items:
+      q = furl.Query(items.original())
+      items_omd = omdict1D(items.allitems())
+      for update in self.items:
+        q.set(update)
+        items_omd.updateall(update)
+        assert q.params.allitems() == items_omd.allitems()
+
+    # The examples.
+    q = furl.Query({1:1}).set([(1,None),(2,2)])
+    assert q.params.allitems() == [(1,None), (2,2)]
+
+    q = furl.Query({1:None,2:None}).set([(1,1),(2,2),(1,11)])
+    assert q.params.allitems() == [(1,1),(2,2),(1,11)]
+
+    q = furl.Query({1:None}).set([(1,[1,11,111])])
+    assert q.params.allitems() == [(1,1),(1,11),(1,111)]
+
+    # Further manual tests.
+    q = furl.Query([(2,None),(3,None),(1,None)])
+    q.set([(1,[1,11]),(2,2),(3,[3,33])])
+    assert q.params.allitems() == [(2,2),(3,3),(1,1),(1,11),(3,33)]
+
+  def test_remove(self):
+    for items in self.items:
+      # Remove one key at a time.
+      q = furl.Query(items.original())
+      for key in dict(items.iterallitems()):
+        assert key in q.params
+        assert q.remove(key) == q
+        assert key not in q.params
+
+      # Remove multiple keys at a time (in this case all of them).
+      q = furl.Query(items.original())
+      if items.allitems():
+        assert q.params
+      allkeys = [key for key,value in items.allitems()]
+      assert q.remove(allkeys) == q
+      assert len(q.params) == 0
+
+      # Remove the whole query string with True.
+      q = furl.Query(items.original())
+      if items.allitems():
+        assert q.params
+      assert q.remove(True) == q
+      assert len(q.params) == 0
 
   def test_params(self):
+    # Basics.
     q = furl.Query('a=a&b=b')
     assert q.params == {'a':'a', 'b':'b'}
     q.params['sup'] = 'sup'
@@ -173,32 +523,54 @@ class TestQuery(unittest.TestCase):
     q.params['b'] = 'BLROP'
     assert q.params == {'b':'BLROP', 'sup':'sup'}
 
-    # Non-string parameters are stringified
+    # Blanks keys and values are kept.
+    q = furl.Query('=')
+    assert q.params == {'':''} and str(q) == '='
+    q = furl.Query('=&=')
+    assert q.params.allitems() == [('',''), ('','')] and str(q) == '=&='
+    q = furl.Query('a=&=b')
+    assert q.params == {'a':'','':'b'} and str(q) == 'a=&=b'
+
+    # ';' is a valid query delimeter.
+    q = furl.Query('=;=')
+    assert q.params.allitems() == [('',''), ('','')] and str(q) == '=&='
+    q = furl.Query('a=a;b=b;c=')
+    assert q.params == {'a':'a','b':'b','c':''} and str(q) == 'a=a&b=b&c='
+
+    # Non-string parameters are coerved to string in the final query string.
     q.params.clear()
     q.params[99] = 99
+    q.params[None] = -1
     q.params['int'] = 1
     q.params['float'] = 0.39393
-    assert furl.parse_qs(str(q)) == {'int':'1', 'float':'0.39393', '99':'99'}
+    assert 'int=1' in str(q) and 'None=-1' in str(q)
+    assert 'float=0.39393' in str(q) and '99=99' in str(q)
 
-  def test_add(self):
-    q = furl.Query('a=a')
-    assert q == q.add({'b':'b', 's':'s s'})
-    comps = furl.parse_qs(str(q))
-    assert comps['a'] == 'a' and comps['b'] == 'b' and comps['s'] == 's s'
+    # Params is an omdict (ordered multivalue dictionary).
+    q.params.clear()
+    q.params.add('1', '1').set('2', '4').add('1', '11').addlist(3, [3,3,'3'])
+    assert q.params.getlist('1') == ['1', '11'] and q.params['1'] == '1'
+    assert q.params.getlist(3) == [3,3,'3']
 
-  def test_set(self):
-    q = furl.Query('a=a')
-    assert q == q.set({'b':'b', 's':'s s'})
-    comps = furl.parse_qs(str(q))
-    assert comps['b'] == 'b' and comps['s'] == 's s'
+    # Assign various things to Query.params and make sure Query.params is
+    # reinitialized, not replaced.
+    for items in self.items:
+      q.params = items.original()
+      assert isinstance(q.params, omdict1D)
 
-  def test_remove(self):
-    q = furl.Query('a=a&b=b&s=s s')
-    assert q == q.remove(['a', 'b'])
-    assert str(q) == 's=s+s'
+      for item1, item2 in izip(q.params.iterallitems(), items.iterallitems()):
+        assert item1 == item2
 
-    assert q == q.remove(query=True)
-    assert str(q) == ''
+  def _quote_items(self, items):
+    # Calculate the expected querystring with proper query encoding.
+    #   Valid query key characters: "/?:@-._~!$'()*+,;"
+    #   Valid query value characters: "/?:@-._~!$'()*+,;="
+    allitems_quoted = []
+    for key, value in items.iterallitems():
+      pair = (urllib.quote_plus(str(key), "/?:@-._~!$'()*+,;"),
+              urllib.quote_plus(str(value), "/?:@-._~!$'()*+,;="))
+      allitems_quoted.append(pair)
+    return allitems_quoted
 
 
 class TestQueryCompositionInterface(unittest.TestCase):
@@ -216,13 +588,14 @@ class TestQueryCompositionInterface(unittest.TestCase):
     assert t.querystr == ''
 
     t.query = 'a=a&s=s s'
+    assert isinstance(t.query, furl.Query)
     assert t.querystr == 'a=a&s=s+s'
     assert t.args == t.query.params == {'a':'a', 's':'s s'}
 
 
 class TestFragment(unittest.TestCase):
   def test_basics(self):
-    f = furl.Fragment('')
+    f = furl.Fragment()
     assert str(f.path) == '' and str(f.query) == '' and str(f) == ''
 
     f.args['sup'] = 'foo'
@@ -240,17 +613,48 @@ class TestFragment(unittest.TestCase):
     assert str(f) == ''
     f.args['no'] = 'dads'
     f.query.params['hi'] = 'gr8job'
-    assert str(f) == 'hi=gr8job&no=dads' or str(f) == 'no=dads&hi=higr8job'
+    assert str(f) == 'no=dads&hi=gr8job'
+
+  def test_load(self):
+    comps = [('','',{}),
+             ('?','%3F',{}),
+             ('??a??','%3F%3Fa%3F%3F',{}),
+             ('??a??=','',{'?a??':''}),
+             ('schtoot','schtoot',{}),
+             ('sch/toot/YOEP','sch/toot/YOEP',{}),
+             ('/sch/toot/YOEP','/sch/toot/YOEP',{}),
+             ('schtoot?','schtoot%3F',{}),
+             ('schtoot?NOP','schtoot%3FNOP',{}),
+             ('schtoot?NOP=','schtoot',{'NOP':''}),
+             ('schtoot?=PARNT','schtoot',{'':'PARNT'}),
+             ('schtoot?NOP=PARNT','schtoot',{'NOP':'PARNT'}),
+             ('dog?machine?yes','dog%3Fmachine%3Fyes',{}),
+             ('dog?machine=?yes','dog',{'machine':'?yes'}),
+             ('schtoot?a=a&hok%20sprm','schtoot',{'a':'a','hok sprm':''}),
+             ('schtoot?a=a&hok sprm','schtoot',{'a':'a','hok sprm':''}),
+             ('sch/toot?a=a&hok sprm','sch/toot',{'a':'a','hok sprm':''}),
+             ('/sch/toot?a=a&hok sprm','/sch/toot',{'a':'a','hok sprm':''}),
+             ]
+
+    for fragment, path, query in comps:
+      f = furl.Fragment()
+      f.load(fragment)
+      assert str(f.path) == path
+      assert f.query.params == query
 
   def test_add(self):
     f = furl.Fragment('')
     assert f == f.add(path='one two three', args={'a':'a', 's':'s s'})
-    assert str(f) == 'one two three?a=a&s=s+s'
+    assert str(f) == 'one%20two%20three?a=a&s=s+s'
+
+    f = furl.Fragment('break?legs=broken')
+    assert f == f.add(path='horse bones', args={'a':'a', 's':'s s'})
+    assert str(f) == 'break/horse%20bones?legs=broken&a=a&s=s+s'
 
   def test_set(self):
     f = furl.Fragment('asdf?lol=sup&foo=blorp')
     assert f == f.set(path='one two three', args={'a':'a', 's':'s s'})
-    assert str(f) == 'one two three?a=a&s=s+s'
+    assert str(f) == 'one%20two%20three?a=a&s=s+s'
 
     assert f == f.set(path='!', separator=False)
     assert f.separator == False
@@ -262,12 +666,70 @@ class TestFragment(unittest.TestCase):
     assert str(f) == 'a/path/great/?foo=blorp'
 
     assert f == f.remove(path=['path', 'great'], args=['foo'])
+    assert str(f) == 'a/path/great/'
+    assert f == f.remove(path=['path', 'great', ''])
     assert str(f) == 'a/'
 
     assert f == f.remove(fragment=True)
     assert str(f) == ''
 
+  def test_encoding(self):
+    f = furl.Fragment()
+    f.path = "/?:@-._~!$&'()*+,;="
+    assert str(f) == "/?:@-._~!$&'()*+,;="
+    f.query = {'a':'a','b b':'NOPE'}
+    assert str(f) == "/%3F:@-._~!$&'()*+,;=?a=a&b+b=NOPE"
+    f.separator = False
+    assert str(f) == "/?:@-._~!$&'()*+,;=a=a&b+b=NOPE"
 
+    f = furl.Fragment()
+    f.path = "/?:@-._~!$&'()*+,;= ^`<>[]"
+    assert str(f) == "/?:@-._~!$&'()*+,;=%20%5E%60%3C%3E%5B%5D"
+    f.query = {'a':'a','b b':'NOPE'}
+    assert str(f) == "/%3F:@-._~!$&'()*+,;=%20%5E%60%3C%3E%5B%5D?a=a&b+b=NOPE"
+    f.separator = False
+    assert str(f) == "/?:@-._~!$&'()*+,;=%20%5E%60%3C%3E%5B%5Da=a&b+b=NOPE"
+
+    f = furl.furl()
+    f.fragment = 'a?b?c?d?'
+    assert f.url == '#a?b?c?d?'
+    # TODO(grun): Once encoding has been fixed with URLPath and FragmentPath,
+    # the below line should be:
+    #
+    #  assert str(f.fragment) == str(f.path) == 'a?b?c?d?'
+    #
+    assert str(f.fragment) == 'a?b?c?d?'
+
+  def test_nonzero(self):
+    f = furl.Fragment()
+    assert not f
+
+    f = furl.Fragment('')
+    assert not f
+
+    f = furl.Fragment('asdf')
+    assert f
+
+    f = furl.Fragment()
+    f.path = 'sup'
+    assert f
+
+    f = furl.Fragment()
+    f.query = 'a=a'
+    assert f
+
+    f = furl.Fragment()
+    f.path = 'sup'
+    f.query = 'a=a'
+    assert f
+
+    f = furl.Fragment()
+    f.path = 'sup'
+    f.query = 'a=a'
+    f.separator = False
+    assert f
+
+    
 class TestFragmentCompositionInterface(unittest.TestCase):
   def test_interface(self):
     class tester(furl.FragmentCompositionInterface):
@@ -279,6 +741,7 @@ class TestFragmentCompositionInterface(unittest.TestCase):
           object.__setattr__(self, attr, value)
 
     t = tester()
+    assert isinstance(t.fragment, furl.Fragment)
     assert isinstance(t.fragment.path, furl.Path)
     assert isinstance(t.fragment.query, furl.Query)
     assert t.fragmentstr == ''
@@ -286,10 +749,14 @@ class TestFragmentCompositionInterface(unittest.TestCase):
     assert t.fragment.pathstr == ''
     assert t.fragment.querystr == ''
 
-    t.fragment.path = 'asdf/asdf'
-    t.fragment.query = 'a=a&s=s s'
-    assert t.fragment.pathstr == 'asdf/asdf'
-    assert t.fragment.path.segments == ['asdf', 'asdf']
+    t.fragment = 'animal meats'
+    assert isinstance(t.fragment, furl.Fragment)
+    t.fragment.path = 'pump/dump'
+    t.fragment.query = 'a=a&s=s+s'
+    assert isinstance(t.fragment.path, furl.Path)
+    assert isinstance(t.fragment.query, furl.Query)
+    assert t.fragment.pathstr == 'pump/dump'
+    assert t.fragment.path.segments == ['pump', 'dump']
     assert not t.fragment.path.isabsolute
     assert t.fragment.querystr == 'a=a&s=s+s'
     assert t.fragment.args == t.fragment.query.params == {'a':'a', 's':'s s'}
@@ -297,16 +764,15 @@ class TestFragmentCompositionInterface(unittest.TestCase):
 
 class TestFurl(unittest.TestCase):
   def setUp(self):
-    # Don't hide duplicate warnings - we want to test for them.
+    # Don't hide duplicate Warnings - test for all of them.
     warnings.simplefilter("always")
 
   def _param(self, url, key, val):
-    # Note: urlparse.urlsplit() doesn't separate query from path for all
-    # schemes, only those schemes in urlparse.uses_query. So this little helper
-    # function will only work when provided urls whos schemes are also in
-    # urlparse.uses_query.
-    params = urlparse.parse_qs(urlparse.urlsplit(url).query)
-    return key in params and params[key][0] == val
+    # Note: urlparse.urlsplit() doesn't separate the query from the path for all
+    # schemes, only those schemes in the list urlparse.uses_query. So, as a
+    # result of using urlparse.urlsplit(), this little helper function only
+    # works when provided urls whos schemes are also in urlparse.uses_query.
+    return (key, val) in urlparse.parse_qsl(urlparse.urlsplit(url).query, True)
 
   def test_username_and_password(self):
     # Empty usernames and passwords.
@@ -381,7 +847,7 @@ class TestFurl(unittest.TestCase):
         assert not f.username and not f.password
         assert f.url == baseurl
 
-    # Through network location.
+    # Username and password in the network location string.
     f = furl.furl()
     f.netloc = 'user@domain.com'
     assert f.username == 'user' and not f.password
@@ -428,12 +894,26 @@ class TestFurl(unittest.TestCase):
     assert f.netloc == '192.168.1.102:8080'
     assert f.host == '192.168.1.102'
     assert f.port == 8080
-    assert f.pathstr == str(f.path) == '///one//a b////'
+    assert f.pathstr == str(f.path) == '///one//a%20b////'
     assert f.querystr == str(f.query) == 's=kwl+string'
     assert f.args == f.query.params == {'s':'kwl string'}
     assert str(f.fragment) == f.fragmentstr == 'frag'
     query_quoted = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl+string#frag'
     assert f.url == str(f) == query_quoted
+
+    # URL paths are always absolute if not empty.
+    f = furl.furl()
+    f.path.segments = ['pumps']
+    assert str(f.path) == '/pumps'
+    f.path = 'pumps'
+    assert str(f.path) == '/pumps'
+
+    # Fragment paths are optionally absolute, and not absolute by default.
+    f = furl.furl()
+    f.fragment.path.segments = ['pumps']
+    assert str(f.fragment.path) == 'pumps'
+    f.fragment.path = 'pumps'
+    assert str(f.fragment.path) == 'pumps'
 
   def test_basic_manipulation(self):
     f = furl.furl('http://www.pumps.com/')
@@ -471,22 +951,15 @@ class TestFurl(unittest.TestCase):
     del f.args['foo']
     assert str(f) == 'sup://www.yahoo.com/hay%20supppp?space=1+2#sup'
 
-    f.query = 'a=a&s=s*s'
-    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?a=a&s=s%2As#sup'
-
-    f.query = 'a=a&c=c%5Ec'
-    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?a=a&c=c%5Ec#sup'
-
-    f.query = {'pue':'pue', 'a':'a&a'}
-    assert str(f) == 'sup://www.yahoo.com/hay%20supppp?a=a%26a&pue=pue#sup'
-
     f.host = 'ohay.com'
-    assert str(f) == 'sup://ohay.com/hay%20supppp?a=a%26a&pue=pue#sup'
+    assert str(f) == 'sup://ohay.com/hay%20supppp?space=1+2#sup'
     
   def test_odd_urls(self):
     # Empty.
     f = furl.furl('')
     assert f.scheme == ''
+    assert f.username == ''
+    assert f.password == ''
     assert f.host == ''
     assert f.port == None
     assert f.netloc == ''
@@ -496,23 +969,41 @@ class TestFurl(unittest.TestCase):
     assert str(f.fragment) == f.fragmentstr == ''
     assert f.url == ''
 
+    # Keep in mind that ';' is a query delimeter for both the URL query and the
+    # fragment query, resulting in the pathstr, querystr, and fragmentstr values
+    # below.
+    url = ("pron://example.com/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,"
+           "==?/?:@-._~!$'()*+,;=/?:@-._~!$'()*+,;==#/?:@-._~!$&'()*+,;=")
+    pathstr = "/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,=="
+    querystr = "/?:@-._~!$'()*+,=&=/?:@-._~!$'()*+,&=="
+    fragmentstr = "/?:@-._~!$=&'()*+,=&="
+    f = furl.furl(url)
+    assert f.scheme == 'pron'
+    assert f.host == 'example.com'
+    assert f.port == None
+    assert f.netloc == 'example.com'
+    assert f.pathstr == str(f.path) == pathstr
+    assert f.querystr == str(f.query) == querystr
+    assert f.fragmentstr == str(f.fragment) == fragmentstr
+
     # TODO(grun): Test more odd urls.
 
   def test_hosts(self):
     # No host.
     url = 'http:///index.html'
-    assert furl.furl(url).url == url
+    f = furl.furl(url)
+    assert f.host == '' and furl.furl(url).url == url
 
     # Valid IPv4 and IPv6 addresses.
     f = furl.furl('http://192.168.1.101')
     f = furl.furl('http://[2001:db8:85a3:8d3:1319:8a2e:370:7348]/')
 
-    # Invalid IPv4 shouldn't raise an exception because urlparse.urlsplit()
-    # doesn't raise an exception on invalid IPv4 addresses.
+    # Invalid IPv4 addresses shouldn't raise an exception because
+    # urlparse.urlsplit() doesn't raise an exception on invalid IPv4 addresses.
     f = furl.furl('http://1.2.3.4.5.6/')
 
-    # Invalid IPv6 shouldn't raise an exception because urlparse.urlsplit()
-    # doesn't raise an exception on invalid IPv6 addresses.
+    # Invalid IPv6 addresses shouldn't raise an exception because
+    # urlparse.urlsplit() doesn't raise an exception on invalid IPv6 addresses.
     furl.furl('http://[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]/')
 
     # Malformed IPv6 should raise an exception because urlparse.urlsplit()
@@ -601,25 +1092,27 @@ class TestFurl(unittest.TestCase):
     f = furl.furl('http://pumps.com/')
 
     assert f == f.add(args={'a':'a', 'm':'m&m'}, path='/kwl jump',
-                        fragment_path='1', fragment_args={'f':'frp'})
+                      fragment_path='1', fragment_args={'f':'frp'})
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'm', 'm&m')
-    assert str(f.fragment) == f.fragmentstr == '1?f=frp'
-    assert urlparse.urlsplit(f.url).path == '/kwl%20jump'
+    assert f.fragmentstr == str(f.fragment) == '1?f=frp'
+    assert f.pathstr == urlparse.urlsplit(f.url).path == '/kwl%20jump'
 
     assert f == f.add(path='dir', fragment_path='23', args={'b':'b'},
-                        fragment_args={'b':'bewp'})
+                      fragment_args={'b':'bewp'})
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'm', 'm&m')
     assert self._param(f.url, 'b', 'b')
-    assert f.pathstr == str(f.path) == '/kwl jump/dir'
-    assert str(f.fragment) == f.fragmentstr == '1/23?b=bewp&f=frp'
+    assert f.pathstr == str(f.path) == '/kwl%20jump/dir'
+    assert str(f.fragment) == f.fragmentstr == '1/23?f=frp&b=bewp'
 
-    # Test warnings for potentially overlapping parameters.
+    # Supplying both <args> and <query_params> should raise a warning.
     with warnings.catch_warnings(True) as w1:
       f.add(args={'a':'1'}, query_params={'a':'2'})
       assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
-      assert self._param(f.url, 'a', '2') # <query_params> takes precedence.
+      assert self._param(f.url, 'a', '1') and self._param(f.url, 'a', '2')
+      params = f.args.allitems()
+      assert params.index(('a','1')) < params.index(('a','2'))
 
   def test_set(self):
     f = furl.furl('http://pumps.com/kwl%20jump/dir')
@@ -631,30 +1124,37 @@ class TestFurl(unittest.TestCase):
     # No conflict warnings between <host>/<port> and <netloc>, or <query> and
     # <params>.
     assert f == f.set(args={'a':'a a'}, path='path path/dir', port='999',
-                        fragment='moresup', scheme='sup', host='host')
+                      fragment='moresup', scheme='sup', host='host')
+    assert f.pathstr == '/path%20path/dir'
     assert f.url == 'sup://host:999/path%20path/dir?a=a+a#moresup'
 
-    # Path as a list of paths to join.
+    # Path as a list of path segments to join.
     assert f == f.set(path=['d1', 'd2'])
     assert f.url == 'sup://host:999/d1/d2?a=a+a#moresup'
     assert f == f.add(path=['/d3/', '/d4/'])
-    assert f.url == 'sup://host:999/d1/d2//d3///d4/?a=a+a#moresup'
+    assert f.url == 'sup://host:999/d1/d2/%2Fd3%2F/%2Fd4%2F?a=a+a#moresup'
 
     # Set a lot of stuff (but avoid conflicts, which are tested below).
     f.set(query_params={'k':'k'}, fragment_path='no scrubs', scheme='morp',
-           host='myhouse', port=69, path='j$j*m#n', fragment_args={'f':'f'})
-    assert f.url == 'morp://myhouse:69/j%24j%2Am%23n?k=k#no scrubs?f=f'
+          host='myhouse', port=69, path='j$j*m#n', fragment_args={'f':'f'})
+    assert f.url == 'morp://myhouse:69/j$j*m%23n?k=k#no%20scrubs?f=f'
 
     # No side effects.
     oldurl = f.url
-    self.assertRaises(ValueError, f.set, args={'a':'a a'},
-                      path='path path/dir', port='INVALID_PORT',
-                      fragment='moresup', scheme='sup', host='host')
+    with self.assertRaises(ValueError):
+      f.set(args={'a':'a a'}, path='path path/dir', port='INVALID_PORT',
+            fragment='moresup', scheme='sup', host='host')
     assert f.url == oldurl
     with warnings.catch_warnings(True) as w1:
       self.assertRaises(ValueError, f.set, netloc='nope.com:99', port='NOPE')
       assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
     assert f.url == oldurl
+
+    # Separator isn't reset with set().
+    f = furl.Fragment()
+    f.separator = False
+    f.set(path='flush', args={'dad':'nope'})
+    assert str(f) == 'flushdad=nope'          
 
     # Test warnings for potentially overlapping parameters.
     f = furl.furl('http://pumps.com')
@@ -706,8 +1206,7 @@ class TestFurl(unittest.TestCase):
     with warnings.catch_warnings(True) as w9:
       f.set(fragment='hi', fragment_args={'a':'a'})
       assert len(w9) == 1 and issubclass(w9[0].category, UserWarning)
-      print f.fragmentstr
-      assert str(f.fragment) == 'hi?a=a'
+      assert str(f.fragment) == 'hia=a'
     with warnings.catch_warnings(True) as w10:
       f.set(fragment='!?a=a', fragment_separator=False)
       assert len(w10) == 1 and issubclass(w10[0].category, UserWarning)
@@ -717,38 +1216,29 @@ class TestFurl(unittest.TestCase):
     url = 'http://host:69/a/big/path/?a=a&b=b&s=s+s#a frag?with=args&a=a'
     
     f = furl.furl(url)
-    assert f == f.remove(fragment=True, args=['a', 'b'], path='path',
-                           port=True)
+    assert f == f.remove(fragment=True, args=['a', 'b'], path='path/',
+                         port=True)
     assert f.url == 'http://host/a/big/?s=s+s'
 
     # No errors are thrown when removing url components that don't exist.
     f = furl.furl(url)
     assert f == f.remove(fragment_path=['asdf'], fragment_args=['asdf'],
-                           args=['asdf'], path=['ppp', 'ump'])
+                         args=['asdf'], path=['ppp', 'ump'])
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'b', 'b')
     assert self._param(f.url, 's', 's s')
     assert f.pathstr == '/a/big/path/'
-    assert f.fragment.pathstr == 'a frag'
+    assert f.fragment.pathstr == 'a%20frag'
     assert f.fragment.args == {'a':'a', 'with':'args'}
-
+    
     # Path as a list of paths to join before removing.
     assert f == f.remove(fragment_path='a frag', fragment_args=['a'],
-                           query_params=['a','b'], path=['big', 'path'],
-                           port=True)
+                         query_params=['a','b'], path=['big', 'path', ''],
+                         port=True)
     assert f.url == 'http://host/a/?s=s+s#with=args'
 
     assert f == f.remove(path=True, query=True, fragment=True)
     assert f.url == 'http://host'
-
-  def test_parse_qs(self):
-    assert furl.parse_qs('a=a&b=b') == {'a':'a', 'b':'b'}
-
-    # Duplicates are truncated.
-    assert furl.parse_qs('a=a&b=b&a=c') == {'a':'a', 'b':'b'}
-
-    # URL encoding.
-    assert furl.parse_qs('space=a+a&amp=a%26a') == {'space':'a a', 'amp':'a&a'}
 
   def test_urlsplit(self):
     # No changes to existing urlsplit() behavior for known schemes.
@@ -772,87 +1262,187 @@ class TestFurl(unittest.TestCase):
                'a=a&b=b&m=m%26m', 'fragment')
     assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
     assert furl.urlsplit(url) == correct
-          
-  def test_url_path_join(self):
+
+  def test_join_path_segments(self):
+    jps = furl.join_path_segments
+    
+    # Empty.
+    assert jps() == []
+    assert jps([]) == []
+    assert jps([],[],[],[]) == []
+
+    # Null strings.
+    #   [''] means nothing, or an empty string, in the final path segments.
+    #   ['', ''] is preserved as a slash in the final path segments.
+    assert jps(['']) == []
+    assert jps([''],['']) == []
+    assert jps([''],[''],['']) == []
+    assert jps([''],['','']) == ['','']
+    assert jps([''],[''],[''],['']) == []
+    assert jps(['', ''],['', '']) == ['','','']
+    assert jps(['', '', ''],['', '']) == ['','','','']
+    assert jps(['', '', '', '', '', '']) == ['','','','','','']
+    assert jps(['', '', '', ''],['', '']) == ['','','','','']
+    assert jps(['', '', '', ''],['', ''],['']) == ['','','','','']
+    assert jps(['', '', '', ''],['', '', '']) == ['','','','','','']
+
     # Basics.
-    assert furl.url_path_join() == ''
-    assert furl.url_path_join('/', '') == '/'
-    assert furl.url_path_join('a') == 'a'
-    assert furl.url_path_join('/a') == '/a'
-    assert furl.url_path_join('/a/') == '/a/'
-    assert furl.url_path_join('///////a///////') == '/a/'
-    assert furl.url_path_join('/a', '') == '/a/'
+    assert jps(['a']) == ['a']
+    assert jps(['a','b']) == ['a','b']
+    assert jps(['a'],['b']) == ['a','b']
+    assert jps(['1','2','3'],['4','5']) == ['1','2','3','4','5']
 
-    # Slashes.
-    assert furl.url_path_join('/', '') == '/'
-    assert furl.url_path_join('/', '/') == '/'
-    assert furl.url_path_join('/', '/', '/') == '/'
+    # A trailing slash is preserved if no new slash is being added.
+    #   ex: ['a', ''] + ['b'] == ['a', 'b'], or 'a/' + 'b' == 'a/b'
+    assert jps(['a',''],['b']) == ['a','b']
+    assert jps(['a'],[''],['b']) == ['a','b']
+    assert jps(['','a',''],['b']) == ['','a','b']
+    assert jps(['','a',''],['b','']) == ['','a','b','']
 
-    # Multiple paths to join.
-    assert furl.url_path_join('a', 'b', 'c') == 'a/b/c'
-    assert furl.url_path_join('/a/', '/b/', '/c') == '/a/b/c'
-    assert furl.url_path_join('/a/', '/b/', '/c/') == '/a/b/c/'
-    assert furl.url_path_join('//////a/', '/b/////', '/c/////') == '/a/b/c/'
-    assert furl.url_path_join('a b', 'c d') == 'a b/c d'
-    assert furl.url_path_join('a%20b', 'c%20d') == 'a%20b/c%20d'
-    assert furl.url_path_join('a', 'b', 'c', 'd', 'e', 'f') == 'a/b/c/d/e/f'
-    assert furl.url_path_join('/a', 'b', 'c', 'd', 'e', 'f') == '/a/b/c/d/e/f'
-    assert furl.url_path_join('/a', 'b', 'c', 'd', 'e', 'f/') == '/a/b/c/d/e/f/'
+    # A new slash is preserved if no trailing slash exists.
+    #   ex: ['a'] + ['', 'b'] == ['a', 'b'], or 'a' + '/b' == 'a/b'
+    assert jps(['a'],['','b']) == ['a','b']
+    assert jps(['a'],[''],['b']) == ['a','b']
+    assert jps(['','a'],['','b']) == ['','a','b']
+    assert jps(['','a',''],['b','']) == ['','a','b','']
+    assert jps(['','a',''],['b'],['']) == ['','a','b']
+    assert jps(['','a',''],['b'],['','']) == ['','a','b','']
 
-  def test_url_path_remove(self):
+    # A trailing slash and a new slash means that an extra slash will exist
+    # afterwords.
+    #   ex: ['a', ''] + ['', 'b'] == ['a', '', 'b'], or 'a/' + '/b' == 'a//b'
+    assert jps(['a', ''],['','b']) == ['a','','b']
+    assert jps(['a'],[''],[''],['b']) == ['a','b']
+    assert jps(['','a',''],['','b']) == ['','a','','b']
+    assert jps(['','a'],[''],['b','']) == ['','a','b','']
+    assert jps(['','a'],[''],[''],['b'],['']) == ['','a','b']
+    assert jps(['','a'],[''],[''],['b'],['', '']) == ['','a','b','']
+    assert jps(['','a'],['', ''],['b'],['', '']) == ['','a','b','']
+    assert jps(['','a'],['','',''],['b']) == ['','a','','b']
+    assert jps(['','a',''],['','',''],['','b']) == ['','a','','','','b']
+    assert jps(['a','',''],['','',''],['','b']) == ['a','','','','','b']
+
+    # Path segments blocks without slashes, are combined as expected.
+    assert jps(['a','b'],['c','d']) == ['a','b','c','d']
+    assert jps(['a'],['b'],['c'],['d']) == ['a','b','c','d']
+    assert jps(['a','b','c','d'],['e']) == ['a','b','c','d','e']
+    assert jps(['a','b','c'],['d'],['e','f']) == ['a','b','c','d','e','f']
+
+    # Putting it all together.
+    assert jps(['a','','b'],['','c','d']) == ['a','','b','c','d']
+    assert jps(['a','','b',''],['c','d']) == ['a','','b','c','d']
+    assert jps(['a','','b',''],['c','d'],['','e']) == ['a','','b','c','d','e']
+    assert jps(['','a','','b',''],['','c']) == ['','a','','b','','c']
+    assert jps(['','a',''],['','b',''],['','c']) == ['','a','','b','','c']
+
+  def test_remove_path_segments(self):
+    rps = furl.remove_path_segments
+
+    # [''] represents a slash, equivalent to ['',''].
+
     # Basics.
-    assert furl.url_path_remove('', '') == ''
-    assert furl.url_path_remove('', '/') == ''
-    assert furl.url_path_remove('', 'asdf') == ''
-    assert furl.url_path_remove('', 'gr8pants/gr8pants') == ''
-    assert furl.url_path_remove('', '/gr8pants/gr8pants') == ''
-    assert furl.url_path_remove('/', '') == '/'
-    assert furl.url_path_remove('/', 'asdf') == '/'
-    assert furl.url_path_remove('/', 'gr8pants/gr8pants') == '/'
-    assert furl.url_path_remove('/', '/gr8pants/gr8pants') == '/'
+    assert rps([],[]) == []
+    assert rps([''], ['']) == []
+    assert rps(['a'], ['a']) == []
+    assert rps(['a'], ['','a']) == ['a']
+    assert rps(['a'], ['a','']) == ['a']
+    assert rps(['a'], ['','a','']) == ['a']
 
     # Slash manipulation.
-    assert furl.url_path_remove('/', '/') == ''
-    assert furl.url_path_remove('a/', '/') == 'a'
-    assert furl.url_path_remove('a/b', 'b') == 'a/'
-    assert furl.url_path_remove('a/b', '/b') == 'a'
-    assert furl.url_path_remove('a/b/', '/') == 'a/b'
-    assert furl.url_path_remove('/a/', '/') == '/a'
-    assert furl.url_path_remove('/a/b', 'b') == '/a/'
-    assert furl.url_path_remove('/a/b', '/b') == '/a'
-    assert furl.url_path_remove('/a/b', 'b/') == '/a/'
-    assert furl.url_path_remove('/a/b/', '/') == '/a/b'
-    assert furl.url_path_remove('/a/b/', 'b') == '/a/'
+    assert rps([''], ['','']) == []
+    assert rps(['',''], ['']) == []
+    assert rps(['',''], ['','']) == []
+    assert rps(['','a','b','c'], ['b','c']) == ['','a','']
+    assert rps(['','a','b','c'], ['','b','c']) == ['','a']
+    assert rps(['','a','',''], ['']) == ['','a','']
+    assert rps(['','a','',''], ['','']) == ['','a','']
+    assert rps(['','a','',''], ['','','']) == ['','a']
 
     # Remove a portion of the path from the tail of the original path.
-    assert furl.url_path_remove('/a/b/c', 'b/c') == '/a/'
-    assert furl.url_path_remove('/a/b/c', '/b/c') == '/a'
-    assert furl.url_path_remove('/a/b c/d/', 'b c/d/') == '/a/'
-    assert furl.url_path_remove('/a/b c/d/', '/b c/d/') == '/a'
-    assert furl.url_path_remove('/a/b%20c/d/', 'b%20c/d/') == '/a/'
-    assert furl.url_path_remove('/a/b%20c/d/', '/b%20c/d/') == '/a'
-    assert furl.url_path_remove('/a/b/c/', 'b/c') == '/a/'
-    assert furl.url_path_remove('/a/b/c/', '/b/c') == '/a'
-    assert furl.url_path_remove('/a/b/c/', 'b/c/') == '/a/'
-    assert furl.url_path_remove('/a/b/c/', '/b/c/') == '/a'
-    assert furl.url_path_remove('/a/b/c', '/a/b/c') == ''
-    assert furl.url_path_remove('/a/b/c/', '/a/b/c/') == ''
-    assert furl.url_path_remove('/a/b/c/', '/a/b/c') == '/'
+    assert rps(['','a','b',''], ['','a','b','']) == []
+    assert rps(['','a','b',''], ['a','b','']) == ['','']
+    assert rps(['','a','b',''], ['b','']) == ['','a','']
+    assert rps(['','a','b',''], ['','b','']) == ['','a']
+    assert rps(['','a','b',''], ['','']) == ['','a','b']
+    assert rps(['','a','b',''], ['']) == ['','a','b']
+    assert rps(['','a','b',''], []) == ['','a','b','']
 
+    assert rps(['','a','b','c'], ['','a','b','c']) == []
+    assert rps(['','a','b','c'], ['a','b','c']) == ['','']
+    assert rps(['','a','b','c'], ['b','c']) == ['','a','']
+    assert rps(['','a','b','c'], ['','b','c']) == ['','a']
+    assert rps(['','a','b','c'], ['c']) == ['','a','b','']
+    assert rps(['','a','b','c'], ['','c']) == ['','a','b']
+    assert rps(['','a','b','c'], []) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['']) == ['','a','b','c']
+    
     # Attempt to remove valid subsections, but subsections not from the end of
     # the original path.
-    assert furl.url_path_remove('a/b/c', 'a/b') == 'a/b/c'
-    assert furl.url_path_remove('a/b/c', 'a/b/') == 'a/b/c'
-    assert furl.url_path_remove('a/b/c', '/a/b/') == 'a/b/c'
-    assert furl.url_path_remove('/a/b/c', 'a/b') == '/a/b/c'
-    assert furl.url_path_remove('/a/b/c', 'a/b/') == '/a/b/c'
-    assert furl.url_path_remove('/a/b/c', '/a/b/') == '/a/b/c'
+    assert rps(['','a','b','c'], ['','a','b','']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','a','b']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['a','b']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['a','b','']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','a','b']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','a','b','']) == ['','a','b','c']
 
-  def test_isvalidport(self):
+    assert rps(['','a','b','c'], ['a']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','a']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['a','']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','a','']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','a','','']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','','a','','']) == ['','a','b','c']
+
+    assert rps(['','a','b','c'], ['']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['','']) == ['','a','b','c']
+    assert rps(['','a','b','c'], ['c','']) == ['','a','b','c']
+
+    # Attempt to remove segments longer than the original.
+    assert rps([], ['a']) == []
+    assert rps([], ['a','b']) == []
+    assert rps(['a'], ['a','b']) == ['a']
+    assert rps(['a','a'], ['a','a','a']) == ['a','a']
+
+  def test_is_valid_port(self):
     valids = [1, 2, 3, 65535, 119, 2930]
-    invalids = [-1, 0, 'a', [], (0), {1:1}, 65536, 99999]
+    invalids = [-1, -9999, 0, 'a', [], (0), {1:1}, 65536, 99999, {}, None]
 
     for port in valids:
-      assert furl.isvalidport(port)
+      assert furl.is_valid_port(port)
     for port in invalids:
-      assert not furl.isvalidport(port)
+      assert not furl.is_valid_port(port)
+
+  def test_is_valid_encoded_path_segment(segment):
+    valids = [('abcdefghijklmnopqrstuvwxyz'
+               'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+               '0123456789' '-._~' ":@!$&'()*+,;="),
+              '', 'a', 'asdf', 'a%20a', '%3F',]
+    invalids = [' ^`<>[]"#/?', ' ', '%3Z', '/', '?']
+
+    for valid in valids:
+      assert furl.is_valid_encoded_path_segment(valid)
+    for invalid in invalids:
+      assert not furl.is_valid_encoded_path_segment(invalid)
+
+  def test_is_valid_encoded_query_key(key):
+    valids = [('abcdefghijklmnopqrstuvwxyz'
+               'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+               '0123456789' '-._~' ":@!$&'()*+,;" '/?'),
+              '', 'a', 'asdf', 'a%20a', '%3F', 'a+a', '/', '?',]
+    invalids = [' ^`<>[]"#', ' ', '%3Z', '#']
+
+    for valid in valids:
+      assert furl.is_valid_encoded_query_key(valid)
+    for invalid in invalids:
+      assert not furl.is_valid_encoded_query_key(invalid)
+
+  def test_is_valid_encoded_query_value(value):
+    valids = [('abcdefghijklmnopqrstuvwxyz'
+               'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+               '0123456789' '-._~' ":@!$&'()*+,;" '/?='),
+              '', 'a', 'asdf', 'a%20a', '%3F', 'a+a', '/', '?', '=']
+    invalids = [' ^`<>[]"#', ' ', '%3Z', '#']
+
+    for valid in valids:
+      assert furl.is_valid_encoded_query_value(valid)
+    for invalid in invalids:
+      assert not furl.is_valid_encoded_query_value(invalid)

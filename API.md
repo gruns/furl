@@ -1,6 +1,5 @@
 # furl API
 
-***
 ### Basics
 
 furl objects let you access and modify the components of a URL
@@ -22,7 +21,6 @@ scheme://username:password@host:port/path?query#fragment
    separated by an optional '?' separator.
 
 
-***
 ### Scheme, Username, Password, Host, Port, and Network Location
 
 __scheme__, __username__, __password__, and __host__ are strings. __port__ is an
@@ -34,7 +32,7 @@ integer or None.
 ('http', 'user', 'pass', 'www.google.com', 99)
 ```
 
-furl infers the default port for common schemes
+furl infers the default port for common schemes.
 
 ```python
 >>> f = furl('https://secure.google.com/')
@@ -61,12 +59,13 @@ provided __scheme__.
 'user:pass@www.google.com:99'
 ```
 
-***
+
 ### Path
 
-URL paths are Path objects in furl, and are composed of zero or more path
-__segments__ that can be manipulated directly. __segments__ are maintaned URL
-decoded.
+URL paths are Path objects in furl and are composed of zero or more path
+__segments__ that can be manipulated directly. __segments__ are maintaned
+decoded and all interaction with __segments__ should take place with decoded
+segment strings.
 
 ```python
 >>> f = furl('http://www.google.com/a/larg%20ish/path')
@@ -75,7 +74,7 @@ Path('/a/larg ish/path')
 >>> f.path.segments
 ['a', 'larg ish', 'path']
 >>> str(f.path)
-'/a/larg ish/path'
+'/a/larg%20ish/path'
 ```
 
 Manipulation
@@ -85,14 +84,18 @@ Manipulation
 >>> str(f.path)
 '/a/new/path/'
 
->>> f.path = 'o/hi/there/with some encoding/'
+>>> f.path = 'o/hi/there/with%20some%20encoding/'
 >>> f.path.segments
 ['o', 'hi', 'there', 'with some encoding', '']
 >>> str(f.path)
-'o/hi/there/with some encoding/'
+'/o/hi/there/with%20some%20encoding/'
 
 >>> f.url
 'http://www.google.com/o/hi/there/with%20some%20encoding/'
+
+>>> f.path.segments = ['segments', 'are', 'maintained', 'decoded', '^`<>[]"#/?']
+>>> str(f.path)
+'/segments/are/maintained/decoded/%5E%60%3C%3E%5B%5D%22%23%2F%3F'
 ```
 
 A Path can be absolute or not, as specified by the boolean __isabsolute__. While
@@ -103,6 +106,11 @@ fragment paths.
 >>> f = furl('http://www.google.com/a/directory/#/absolute/fragment/path/')
 >>> f.path.isabsolute
 True
+>>> f.path.isabsolute = False
+Traceback (most recent call last):
+  ...
+AttributeError: Path.isabsolute is read only for URL paths. URL paths are always
+absolute if not empty.
 >>> f.fragment.path.isabsolute
 True
 >>> f.fragment.path.isabsolute = False
@@ -130,54 +138,107 @@ True
 ```
 
 
-***
 ### Query
 
-URL queries are Query objects in furl, and are composed of a dictionary of query
-keys and values, __params__. Query keys and values in __params__ are maintained
-unquoted.
+URL queries are Query objects in furl and are composed of a one dimensional
+[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of
+query keys and values, __params__. Query keys and values in __params__ are
+maintained decoded and all interaction with __params__ should take place with
+decoded strings.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f.query
-Query('two=2&one=1')
+Query('one=1&two=2')
 >>> f.query.params
-{'two': '2', 'one': '1'}
+omdict1D([('one', '1'), ('two', '2')])
 >>> str(f.query)
-'two=2&one=1'
+'one=1&two=2'
 ```
 
-Manipulation
-
-```python
->>> f.query = 'three=3&four=4'
->>> f.query.params
-{'four': '4', 'three': '3'}
->>> f.query.params['five'] = '5'
->>> del f.query.params['three']
-{'four': '4', 'five': '5'}
-```
-
-Both furl objects and Fragment objects (covered below) contain a Query instance,
-and __args__ is provided as a shortcut on these objects to access
-__query.params__.
+furl objects and Fragment objects (covered below) contain a Query object, and
+__args__ is provided as a shortcut on these objects to access __query.params__.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f.args
-{'two': '2', 'one': '1'}
+omdict1D([('one', '1'), ('two', '2')])
 >>> f.query.params
-{'two': '2', 'one': '1'}
->>> f.args == f.query.params
+omdict1D([('one', '1'), ('two', '2')])
+>>> id(f.args) == id(f.query.params)
 True
 ```
 
+Manipulation - __params__ is a one dimensional
+[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that
+maintains method parity with Python's standard dictionary.
 
-***
+```python
+>>> f.query = 'silicon=14&iron=26&inexorable%20progress=vae%20victus'
+>>> f.query.params
+omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus')])
+>>> del f.args['inexorable progress']
+>>> f.args['oxygen'] = '8'
+>>> f.args
+omdict1D([('silicon', '14'), ('iron', '26'), ('oxygen', '8')])
+```
+
+But because __params__ is a one dimensional
+[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict), it
+can also store multiple values for the same key.
+
+```python
+>>> f = furl('http://www.google.com/?space=jams&space=slams')
+>>> f.args['space']
+'jams'
+>>> f.args.getlist('space')
+['jams', 'slams']
+>>> f.args.addlist('repeated', ['1', '2', '3'])
+>>> f.querystr
+'space=jams&space=slams&repeated=1&repeated=2&repeated=3'
+>>> f.args.popvalue('space')
+'slams'
+>>> f.args.popvalue('repeated', '2')
+'2'
+>>> f.querystr
+'space=jams&repeated=1&repeated=3'
+```
+
+__params__ is one dimensional - if a list of values is provided as a query
+value, that list is interpretted as multiple values.
+
+```python
+>>> f = furl()
+>>> f.args['repeated'] = ['1', '2', '3']
+>>> f.add(args={'space':['jams', 'slams']})
+>>> f.querystr
+'repeated=1&repeated=2&repeated=3&space=jams&space=slams'
+```
+
+This makes sense - URL queries are inherently one dimensional. Query values
+cannot have subvalues.
+
+See the [omdict](https://github.com/gruns/orderedmultidict) documentation for
+more information on interacting with the ordered multivalue dictionary
+__params__.
+
+
+Output - __encode(delimeter='&')__ can be used to encode query strings with
+delimeter like ';'.
+
+```python
+>>> f.query = 'space=jams&woofs=squeeze+dog'
+>>> f.query.encode()
+'space=jams&woofs=squeeze+dog'
+>>> f.query.encode(';')
+'space=jams;woofs=squeeze+dog'
+```
+
+
 ### Fragment
 
-URL fragments are Fragment objects in furl, and are composed of a __path__ and
-__query__ separated by an optional '?' __separator__.
+URL fragments are Fragment objects in furl and are composed of a Path __path__
+and Query __query__ separated by an optional '?' __separator__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -230,13 +291,58 @@ True
 'http://www.google.com/#!a=dict&of=args'
 ```
 
+### Encoding
 
-***
+Furl handles encoding automatically, and furl's philosophy on encoding is
+simple.
+
+Whole path, query, and fragment strings should be encoded as always.
+
+```python
+>>> f = furl()
+>>> f.path = 'supply%20encoded/whole%20path%20strings'
+>>> f.path.segments
+['supply encoded', 'whole path strings']
+
+>>> f.set(query='supply+encoded=query+strings,+too')
+>>> f.query.params
+omdict1D([('supply encoded', 'query strings, too')])
+
+>>> f.set(fragment='encoded%20path%20string?and+encoded=query+string+too')
+>>> f.fragment.path.segments
+['encoded path string']
+>>> f.fragment.args
+omdict1D([('and encoded', 'query string too')])
+```
+
+Path, Query, and Fragment subcomponents should be decoded.
+
+```python
+>>> f = furl()
+>>> f.set(path=['path segments are', 'decoded', '<>[]"#'])
+>>> f.pathstr
+'/path%20segments%20are/decoded/%3C%3E%5B%5D%22%23'
+
+>>> f.set(args={'query parameters':'and values', 'are':'decoded, too'})
+>>> f.querystr
+'query+parameters=and+values&are=decoded,+too'
+
+>>> f.fragment.path.segments = ['decoded', 'path segments']
+>>> f.fragment.args = {'and decoded':'query parameters and values'}
+>>> f.fragmentstr
+'decoded/path%20segments?and+decoded=query+parameters+and+values'
+```
+
+Python's __urllib.quote()__ and __urllib.unquote()__ can be used to encode and
+decode path strings. Similarly, __urllib.quote_plus()__ and
+__urllib.unquote_plus()__ can be used encoded and decode query strings.
+
+
 ### Inline modification
 
 For quick, single-line URL editing, the __add()__, __set()__, and __remove()__
 methods of furl objects let you manipulate various components of the url and
-return the furl object itself for further use.
+return the furl object itself for method chaining.
 
 ```python
 >>> url = 'http://www.google.com/#fragment' 
@@ -287,7 +393,7 @@ __set()__ sets items of a furl object with the optional arguments
 ```python
 >>> furl().set(scheme='https', host='secure.google.com', port=99,
                path='index.html', args={'some':'args'}, fragment='great job').url
-'https://secure.google.com:99/index.html?some=args#great job'
+'https://secure.google.com:99/index.html?some=args#great%20job'
 ```
 
 __remove()__ removes items from a furl object with the optional arguments
@@ -313,6 +419,6 @@ __remove()__ removes items from a furl object with the optional arguments
 
 ```python
 >>> url = 'https://secure.google.com:99/a/path/?some=args#great job'
->>> furl(url).remove(args=['some'], path='path', fragment=True, port=True).url
+>>> furl(url).remove(args=['some'], path='path/', fragment=True, port=True).url
 'https://secure.google.com/a/'
 ```
