@@ -13,25 +13,26 @@ from orderedmultidict import omdict
 
 class omdict1D(omdict):
   """
-  Ordered Multivalue 1-Dimensional dictionary. Whenever a list is passed to
-  set(), __setitem__(), add(), update(), or updateall(), it's treated as a call
-  to setlist() or addlist(). For example:
+  One dimensional ordered multivalue dictionary. Whenever a list of values is
+  passed to set(), __setitem__(), add(), update(), or updateall(), it's treated
+  as multiple values and the appropriate 'list' method is called on that list,
+  like setlist() or addlist(). For example:
   
     omd = omdict1D()
 
     omd[1] = [1,2,3]
-    omd[1] == 1 # True.
     omd[1] != [1,2,3] # True.
+    omd[1] == 1 # True.
     omd.getlist(1) == [1,2,3] # True.
 
     omd.add(2, [2,3,4])
-    omd[2] == 2 # True.
     omd[2] != [2,3,4] # True.
+    omd[2] == 2 # True.
     omd.getlist(2) == [2,3,4] # True.
 
     omd.update([(3, [3,4,5])])
-    omd[3] == 3 # True.
     omd[3] != [3,4,5] # True.
+    omd[3] == 3 # True.
     omd.getlist(3) == [3,4,5] # True.
 
     omd = omdict([(1,None),(2,None)])
@@ -55,23 +56,23 @@ class omdict1D(omdict):
     return self._set(key, value)
 
   def _bin_update_items(self, items, replace_at_most_one,
-                            replacements, leftovers):
+                        replacements, leftovers):
     """
-    Subclassed from omdict._update_process_items to modify the behavior of
-    update() and updateall().
+    Subclassed from omdict._bin_update_items() to make update() and updateall()
+    process lists of values as multiple values.
     
     <replacements and <leftovers> are modified directly, ala pass by reference.
     """
     for key, values in items:
-      # Not a list or an empty list.
+      # <values> is not a list or an empty list.
       if (not self._quacks_like_a_list_but_not_str(values) or
           self._quacks_like_a_list_but_not_str(values) and not values):
         values = [values]
 
       for value in values:
-        # If the value is [], remove any existing leftovers with key <key> and set
-        # the list of values itself to [], which in turn will later delete <key>
-        # when [] is passed as the list of values to to omdict.setlist() in
+        # If the value is [], remove any existing leftovers with key <key> and
+        # set the list of values itself to [], which in turn will later delete
+        # <key> when [] is passed to omdict.setlist() in
         # omdict._update_updateall().
         if value == []:
           replacements[key] = []
