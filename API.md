@@ -334,13 +334,12 @@ Path, Query, and Fragment subcomponents strings should always be decoded.
 ```
 
 Python's
-[__urllib.quote()__](http://docs.python.org/library/urllib.html#urllib.quote)
-and
-[__urllib.unquote()__](http://docs.python.org/library/urllib.html#urllib.unquote)
+[urllib.quote()](http://docs.python.org/library/urllib.html#urllib.quote) and
+[urllib.unquote()](http://docs.python.org/library/urllib.html#urllib.unquote)
 can be used to encode and decode path strings. Similarly,
-[__urllib.quote_plus()__](http://docs.python.org/library/urllib.html#urllib.quote_plus)
+[urllib.quote_plus()](http://docs.python.org/library/urllib.html#urllib.quote_plus)
 and
-[__urllib.unquote_plus()__](http://docs.python.org/library/urllib.html#urllib.unquote_plus)
+[urllib.unquote_plus()](http://docs.python.org/library/urllib.html#urllib.unquote_plus)
 can be used encoded and decode query strings.
 
 
