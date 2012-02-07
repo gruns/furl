@@ -140,7 +140,7 @@ True
 
 ### Query
 
-URL queries are Query objects in furl and are composed of a one dimensional
+URL queries are Query objects in furl and have a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of
 query keys and values, __params__. Query keys and values in __params__ are
 maintained decoded and all interaction with __params__ should take place with
@@ -161,11 +161,11 @@ __args__ is provided as a shortcut on these objects to access __query.params__.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
->>> f.args
-omdict1D([('one', '1'), ('two', '2')])
 >>> f.query.params
 omdict1D([('one', '1'), ('two', '2')])
->>> id(f.args) == id(f.query.params)
+>>> f.args
+omdict1D([('one', '1'), ('two', '2')])
+>>> id(f.query.params) == id(f.args)
 True
 ```
 
@@ -178,14 +178,14 @@ maintains method parity with Python's standard dictionary.
 >>> f.query.params
 omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus')])
 >>> del f.args['inexorable progress']
->>> f.args['oxygen'] = '8'
+>>> f.args[magnesium'] = '12'
 >>> f.args
-omdict1D([('silicon', '14'), ('iron', '26'), ('oxygen', '8')])
+omdict1D([('silicon', '14'), ('iron', '26'), (magnesium', '12')])
 ```
 
-But because __params__ is a one dimensional
-[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict), it
-can also store multiple values for the same key.
+__params__ can also store multiple values for the same key because it is a one
+dimensional
+[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict).
 
 ```python
 >>> f = furl('http://www.google.com/?space=jams&space=slams')
@@ -204,8 +204,8 @@ can also store multiple values for the same key.
 'space=jams&repeated=1&repeated=3'
 ```
 
-__params__ is one dimensional - if a list of values is provided as a query
-value, that list is interpretted as multiple values.
+__params__ is one dimensional. If a list of values is provided as a query value,
+that list is interpretted as multiple values.
 
 ```python
 >>> f = furl()
@@ -223,8 +223,8 @@ more information on interacting with the ordered multivalue dictionary
 __params__.
 
 
-Output - __encode(delimeter='&')__ can be used to encode query strings with
-delimeter like ';'.
+__encode(delimeter='&')__ can be used to encode query strings with delimeters
+like ';'.
 
 ```python
 >>> f.query = 'space=jams&woofs=squeeze+dog'
@@ -253,7 +253,7 @@ True
 ```
 
 Manipulation of Fragments is done through the Fragment's Path and Query
-instances.
+instances, __path__ and __query__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -296,7 +296,7 @@ True
 Furl handles encoding automatically, and furl's philosophy on encoding is
 simple.
 
-Whole path, query, and fragment strings should be encoded as always.
+Whole path, query, and fragment strings should always be encoded.
 
 ```python
 >>> f = furl()
@@ -315,7 +315,7 @@ omdict1D([('supply encoded', 'query strings, too')])
 omdict1D([('and encoded', 'query string too')])
 ```
 
-Path, Query, and Fragment subcomponents should be decoded.
+Path, Query, and Fragment subcomponents should always be decoded.
 
 ```python
 >>> f = furl()
@@ -333,16 +333,22 @@ Path, Query, and Fragment subcomponents should be decoded.
 'decoded/path%20segments?and+decoded=query+parameters+and+values'
 ```
 
-Python's __urllib.quote()__ and __urllib.unquote()__ can be used to encode and
-decode path strings. Similarly, __urllib.quote_plus()__ and
-__urllib.unquote_plus()__ can be used encoded and decode query strings.
+Python's
+[__urllib.quote()__](http://docs.python.org/library/urllib.html#urllib.quote)
+and
+[__urllib.unquote()__](http://docs.python.org/library/urllib.html#urllib.unquote)
+can be used to encode and decode path strings. Similarly,
+[__urllib.quote_plus()__](http://docs.python.org/library/urllib.html#urllib.quote_plus)
+and
+[__urllib.unquote_plus()__](http://docs.python.org/library/urllib.html#urllib.unquote_plus)
+can be used encoded and decode query strings.
 
 
-### Inline modification
+### Inline manipulation
 
-For quick, single-line URL editing, the __add()__, __set()__, and __remove()__
-methods of furl objects let you manipulate various components of the url and
-return the furl object itself for method chaining.
+For quick, single-line URL manipulation, the __add()__, __set()__, and
+__remove()__ methods of furl objects let you manipulate various components of
+the URL and return the furl object for method chaining.
 
 ```python
 >>> url = 'http://www.google.com/#fragment' 
