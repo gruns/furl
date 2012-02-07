@@ -62,10 +62,10 @@ provided __scheme__.
 
 ### Path
 
-URL paths are Path objects in furl and are composed of zero or more path
-__segments__ that can be manipulated directly. __segments__ are maintaned
-decoded and all interaction with __segments__ should take place with decoded
-segment strings.
+URL paths in furl are Path objects that have zero or more path segments that can
+be manipulated directly, __segments__. Path segments in __segments__ are
+maintaned decoded and all interaction with __segments__ should take place with
+decoded segment strings.
 
 ```python
 >>> f = furl('http://www.google.com/a/larg%20ish/path')
@@ -140,7 +140,7 @@ True
 
 ### Query
 
-URL queries are Query objects in furl and have a one dimensional
+URL queries in furl are Query objects that have a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of
 query keys and values, __params__. Query keys and values in __params__ are
 maintained decoded and all interaction with __params__ should take place with
@@ -237,8 +237,8 @@ like ';'.
 
 ### Fragment
 
-URL fragments are Fragment objects in furl and are composed of a Path __path__
-and Query __query__ separated by an optional '?' __separator__.
+URL fragments in furl are Fragment objects that have a Path __path__ and Query
+__query__ separated by an optional '?' __separator__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -272,8 +272,8 @@ instances, __path__ and __query__.
 ```
 
 Creating hash-bang fragments with furl illustrates the use of Fragment's
-__separator__. When __separator__ is False, the '?' separating the Fragment's
-Path and Query isn't included.
+__separator__. When __separator__ is False, the '?' separating __path__ and
+__query__ isn't included.
 
 ```python
 >>> f = furl('http://www.google.com/')
@@ -315,7 +315,7 @@ omdict1D([('supply encoded', 'query strings, too')])
 omdict1D([('and encoded', 'query string too')])
 ```
 
-Path, Query, and Fragment subcomponents should always be decoded.
+Path, Query, and Fragment subcomponents strings should always be decoded.
 
 ```python
 >>> f = furl()
