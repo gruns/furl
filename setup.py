@@ -8,7 +8,7 @@ if sys.argv[-1] == 'publish':
 
 long_description = ('''furl: URL parsing and manipulation made simple.
 
-Information and documentation at: https://github.com/gruns/furl''')
+Information and documentation at https://github.com/gruns/furl.''')
 
 setup(name='furl',
       version='0.3', # Keep synchronized with __init__.py.
