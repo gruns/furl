@@ -62,10 +62,10 @@ provided __scheme__.
 
 ### Path
 
-URL paths in furl are Path objects that have zero or more path segments that can
-be manipulated directly, __segments__. Path segments in __segments__ are
-maintaned decoded and all interaction with __segments__ should take place with
-decoded segment strings.
+URL paths in furl are Path objects that have __segments__, a list of zero or
+more path segments that can be manipulated directly. Path segments in
+__segments__ are maintaned decoded and all interaction with __segments__ should
+take place with decoded segment strings.
 
 ```python
 >>> f = furl('http://www.google.com/a/larg%20ish/path')
@@ -140,11 +140,11 @@ True
 
 ### Query
 
-URL queries in furl are Query objects that have a one dimensional
+URL queries in furl are Query objects that have __params__, a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of
-query keys and values, __params__. Query keys and values in __params__ are
-maintained decoded and all interaction with __params__ should take place with
-decoded strings.
+query keys and values. Query keys and values in __params__ are maintained
+decoded and all interaction with __params__ should take place with decoded
+strings.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
@@ -169,7 +169,9 @@ omdict1D([('one', '1'), ('two', '2')])
 True
 ```
 
-Manipulation - __params__ is a one dimensional
+Manipulation
+
+__params__ is a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that
 maintains method parity with Python's standard dictionary.
 
@@ -178,9 +180,9 @@ maintains method parity with Python's standard dictionary.
 >>> f.query.params
 omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus')])
 >>> del f.args['inexorable progress']
->>> f.args[magnesium'] = '12'
+>>> f.args['magnesium'] = '12'
 >>> f.args
-omdict1D([('silicon', '14'), ('iron', '26'), (magnesium', '12')])
+omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 ```
 
 __params__ can also store multiple values for the same key because it is a one
@@ -340,14 +342,14 @@ can be used to encode and decode path strings. Similarly,
 [urllib.quote_plus()](http://docs.python.org/library/urllib.html#urllib.quote_plus)
 and
 [urllib.unquote_plus()](http://docs.python.org/library/urllib.html#urllib.unquote_plus)
-can be used encoded and decode query strings.
+can be used to encode and decode query strings.
 
 
 ### Inline manipulation
 
 For quick, single-line URL manipulation, the __add()__, __set()__, and
-__remove()__ methods of furl objects let you manipulate various components of
-the URL and return the furl object for method chaining.
+__remove()__ methods of furl objects manipulate various components of the URL
+and return the furl object for method chaining.
 
 ```python
 >>> url = 'http://www.google.com/#fragment' 
@@ -414,8 +416,8 @@ __remove()__ removes items from a furl object with the optional arguments
  * __port__: If True, remove the port from the network location string, if it
    exists.
  * __fragment_path__: A list of path segments to remove from the end of the
-   fragment's path segments or a path string to remove from the end of the
-   fragment's path string.
+   fragment's path segments, or a path string to remove from the end of the
+   fragment's path string, or True to remove the fragment path entirely.
  * __fragment_args__: A list of query keys to remove from the fragment's query,
    if they exist.
  * __username__: If True, remove the username, if it exists.
