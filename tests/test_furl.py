@@ -875,6 +875,7 @@ class TestFurl(unittest.TestCase):
     assert f.args == f.query.params == {}
     assert str(f.fragment) == f.fragmentstr == ''
     assert f.url == str(f) == url.lower()
+    assert f.url == furl.furl(f).url == furl.furl(f.url).url
 
     url = 'HTTPS://wWw.YAHOO.cO.UK/one/two/three?a=a&b=b&m=m%26m#fragment'
     f = furl.furl(url)
@@ -887,6 +888,7 @@ class TestFurl(unittest.TestCase):
     assert f.args == f.query.params == {'a':'a', 'b':'b', 'm':'m&m'}
     assert str(f.fragment) == f.fragmentstr == 'fragment'
     assert f.url == str(f) == url.lower()
+    assert f.url == furl.furl(f).url == furl.furl(f.url).url
 
     url = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl%20string#frag'
     f = furl.furl(url)
@@ -900,6 +902,7 @@ class TestFurl(unittest.TestCase):
     assert str(f.fragment) == f.fragmentstr == 'frag'
     query_quoted = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl+string#frag'
     assert f.url == str(f) == query_quoted
+    assert f.url == furl.furl(f).url == furl.furl(f.url).url
 
     # URL paths are always absolute if not empty.
     f = furl.furl()

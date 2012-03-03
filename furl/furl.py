@@ -656,7 +656,7 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     self._host = ''
     self._port = None
 
-    self.load(url) # Raises ValueError on invalid url.
+    self.load(str(url)) # Raises ValueError on invalid url.
 
   def load(self, url):
     """
