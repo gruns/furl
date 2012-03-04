@@ -22,9 +22,8 @@ _absent = object()
 # QueryCompositionInterface into two subclasses each - one for the URL and one
 # for the Fragment.
 #
-# Subclasses here will clean up the code because the valid encodings are
-# different between a URL Path and a Fragment Path and a URL Query and a
-# Fragment Query.
+# Subclasses will clean up the code because the valid encodings are different
+# between a URL Path and a Fragment Path and a URL Query and a Fragment Query.
 #
 # For example, '?' and '#' don't need to be encoded in Fragment Path segments
 # but they must be encoded in URL Path segments.
@@ -650,12 +649,6 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     FragmentCompositionInterface.__init__(self, strict=strict)
     self.strict = strict
 
-    self.username = ''
-    self.password = ''
-    self.scheme = ''
-    self._host = ''
-    self._port = None
-
     self.load(str(url)) # Raises ValueError on invalid url.
 
   def load(self, url):
@@ -665,6 +658,9 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     Raises: ValueError on invalid URL (for example malformed IPv6 address or
     invalid port).
     """
+    self.username = self.password = self.scheme = self._host = ''
+    self._port = None
+
     tokens = urlsplit(url) # Raises ValueError on malformed IPv6 address.
 
     self.netloc = tokens.netloc # Raises ValueError.
@@ -979,6 +975,13 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
       self.fragment.query.remove(fragment_args)
     return self
 
+  def join(self, url):
+    self.load(urljoin(self.url, url))
+    return self
+
+  def copy(self):
+    return self.__class__(self)
+
   def __setattr__(self, attr, value):
     if (not PathCompositionInterface.__setattr__(self, attr, value) and
         not QueryCompositionInterface.__setattr__(self, attr, value) and
@@ -994,17 +997,47 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     return "%s('%s')" % (self.__class__.__name__, str(self))
 
 
+"""
+urlparse.urlsplit() and urlparse.urljoin() don't separate the query string from
+the path for schemes not in the list urlparse.uses_query, but furl should
+support proper parsing of query strings and paths for all schemes users may use.
+
+As a workaround, use 'http' (a scheme in urlparse.uses_query) for the purposes
+of urlparse.urlsplit() and urlparse.urljoin(), but then revert back to the
+original scheme provided once urlsplit() or urljoin() has completed.
+
+_get_scheme() and _change_scheme() are helper methods for getting and setting
+the scheme of URL strings. Used to change the scheme to 'http' and back again.
+"""
+def _get_scheme(url):
+  i = url.find(':')
+  if i > 0:
+    return url[:i] or ''
+  return ''
+
+def _set_scheme(url, newscheme):
+  scheme = _get_scheme(url)
+  if scheme:
+    return newscheme + url[len(scheme):]
+  return url
+
+def urljoin(base, url):
+  """
+  Parameters:
+    base: Base URL to join with <url>.
+    url: Relative or absolute URL to join with <base>.
+
+  Returns: The resultant URL from joining <base> and <url>.
+  """
+  base_scheme, url_scheme = _get_scheme(base), _get_scheme(url)
+  httpbase = _set_scheme(base, 'http')
+  joined = urlparse.urljoin(httpbase, url)
+  if not url_scheme:
+    joined = _set_scheme(joined, base_scheme)
+  return joined
+
 def urlsplit(url):
   """
-  urlparse.urlsplit() doesn't separate the query string from the path for
-  schemes not in the list urlparse.uses_query, but furl should support proper
-  parsing of query strings and paths for any scheme users decide to use (custom
-  schemes, internal schemes, etc).
-
-  So as a workaround, use 'http', a scheme in urlparse.uses_query, for the
-  purposes of urlparse.urlsplit(), but then revert back to the original scheme
-  provided.
-
   Parameters:
     url: URL string to split.
 
@@ -1018,14 +1051,9 @@ def urlsplit(url):
     l = list(tup)
     l[0] = scheme
     return tuple(l)
-    
-  toks = urlparse.urlsplit(url)
-  if not toks.scheme or toks.scheme in urlparse.uses_query:
-    return toks
 
-  original_scheme = toks.scheme
-  httpurl = _change_urltoks_scheme(toks, 'http')
-  toks = urlparse.urlsplit(urlparse.urlunsplit(httpurl))
+  original_scheme = _get_scheme(url)
+  toks = urlparse.urlsplit(_set_scheme(url, 'http'))
   return urlparse.SplitResult(*_change_urltoks_scheme(toks, original_scheme))
 
 def join_path_segments(*args):

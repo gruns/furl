@@ -644,33 +644,33 @@ class TestFragment(unittest.TestCase):
 
   def test_add(self):
     f = furl.Fragment('')
-    assert f == f.add(path='one two three', args={'a':'a', 's':'s s'})
+    assert f is f.add(path='one two three', args={'a':'a', 's':'s s'})
     assert str(f) == 'one%20two%20three?a=a&s=s+s'
 
     f = furl.Fragment('break?legs=broken')
-    assert f == f.add(path='horse bones', args={'a':'a', 's':'s s'})
+    assert f is f.add(path='horse bones', args={'a':'a', 's':'s s'})
     assert str(f) == 'break/horse%20bones?legs=broken&a=a&s=s+s'
 
   def test_set(self):
     f = furl.Fragment('asdf?lol=sup&foo=blorp')
-    assert f == f.set(path='one two three', args={'a':'a', 's':'s s'})
+    assert f is f.set(path='one two three', args={'a':'a', 's':'s s'})
     assert str(f) == 'one%20two%20three?a=a&s=s+s'
 
-    assert f == f.set(path='!', separator=False)
+    assert f is f.set(path='!', separator=False)
     assert f.separator == False
     assert str(f) == '!a=a&s=s+s'
 
   def test_remove(self):
     f = furl.Fragment('a/path/great/job?lol=sup&foo=blorp')
-    assert f == f.remove(path='job', args=['lol'])
+    assert f is f.remove(path='job', args=['lol'])
     assert str(f) == 'a/path/great/?foo=blorp'
 
-    assert f == f.remove(path=['path', 'great'], args=['foo'])
+    assert f is f.remove(path=['path', 'great'], args=['foo'])
     assert str(f) == 'a/path/great/'
-    assert f == f.remove(path=['path', 'great', ''])
+    assert f is f.remove(path=['path', 'great', ''])
     assert str(f) == 'a/'
 
-    assert f == f.remove(fragment=True)
+    assert f is f.remove(fragment=True)
     assert str(f) == ''
 
   def test_encoding(self):
@@ -876,6 +876,7 @@ class TestFurl(unittest.TestCase):
     assert str(f.fragment) == f.fragmentstr == ''
     assert f.url == str(f) == url.lower()
     assert f.url == furl.furl(f).url == furl.furl(f.url).url
+    assert f is not f.copy() and f.url == f.copy().url
 
     url = 'HTTPS://wWw.YAHOO.cO.UK/one/two/three?a=a&b=b&m=m%26m#fragment'
     f = furl.furl(url)
@@ -889,6 +890,7 @@ class TestFurl(unittest.TestCase):
     assert str(f.fragment) == f.fragmentstr == 'fragment'
     assert f.url == str(f) == url.lower()
     assert f.url == furl.furl(f).url == furl.furl(f.url).url
+    assert f is not f.copy() and f.url == f.copy().url
 
     url = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl%20string#frag'
     f = furl.furl(url)
@@ -903,6 +905,7 @@ class TestFurl(unittest.TestCase):
     query_quoted = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl+string#frag'
     assert f.url == str(f) == query_quoted
     assert f.url == furl.furl(f).url == furl.furl(f.url).url
+    assert f is not f.copy() and f.url == f.copy().url
 
     # URL paths are always absolute if not empty.
     f = furl.furl()
@@ -1094,14 +1097,14 @@ class TestFurl(unittest.TestCase):
   def test_add(self):
     f = furl.furl('http://pumps.com/')
 
-    assert f == f.add(args={'a':'a', 'm':'m&m'}, path='/kwl jump',
+    assert f is f.add(args={'a':'a', 'm':'m&m'}, path='/kwl jump',
                       fragment_path='1', fragment_args={'f':'frp'})
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'm', 'm&m')
     assert f.fragmentstr == str(f.fragment) == '1?f=frp'
     assert f.pathstr == urlparse.urlsplit(f.url).path == '/kwl%20jump'
 
-    assert f == f.add(path='dir', fragment_path='23', args={'b':'b'},
+    assert f is f.add(path='dir', fragment_path='23', args={'b':'b'},
                       fragment_args={'b':'bewp'})
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'm', 'm&m')
@@ -1119,22 +1122,22 @@ class TestFurl(unittest.TestCase):
 
   def test_set(self):
     f = furl.furl('http://pumps.com/kwl%20jump/dir')
-    assert f == f.set(args={'no':'nope'}, fragment='sup')
+    assert f is f.set(args={'no':'nope'}, fragment='sup')
     assert 'a' not in f.args
     assert 'b' not in f.args
     assert f.url == 'http://pumps.com/kwl%20jump/dir?no=nope#sup'
 
     # No conflict warnings between <host>/<port> and <netloc>, or <query> and
     # <params>.
-    assert f == f.set(args={'a':'a a'}, path='path path/dir', port='999',
+    assert f is f.set(args={'a':'a a'}, path='path path/dir', port='999',
                       fragment='moresup', scheme='sup', host='host')
     assert f.pathstr == '/path%20path/dir'
     assert f.url == 'sup://host:999/path%20path/dir?a=a+a#moresup'
 
     # Path as a list of path segments to join.
-    assert f == f.set(path=['d1', 'd2'])
+    assert f is f.set(path=['d1', 'd2'])
     assert f.url == 'sup://host:999/d1/d2?a=a+a#moresup'
-    assert f == f.add(path=['/d3/', '/d4/'])
+    assert f is f.add(path=['/d3/', '/d4/'])
     assert f.url == 'sup://host:999/d1/d2/%2Fd3%2F/%2Fd4%2F?a=a+a#moresup'
 
     # Set a lot of stuff (but avoid conflicts, which are tested below).
@@ -1219,13 +1222,13 @@ class TestFurl(unittest.TestCase):
     url = 'http://host:69/a/big/path/?a=a&b=b&s=s+s#a frag?with=args&a=a'
     
     f = furl.furl(url)
-    assert f == f.remove(fragment=True, args=['a', 'b'], path='path/',
+    assert f is f.remove(fragment=True, args=['a', 'b'], path='path/',
                          port=True)
     assert f.url == 'http://host/a/big/?s=s+s'
 
     # No errors are thrown when removing url components that don't exist.
     f = furl.furl(url)
-    assert f == f.remove(fragment_path=['asdf'], fragment_args=['asdf'],
+    assert f is f.remove(fragment_path=['asdf'], fragment_args=['asdf'],
                          args=['asdf'], path=['ppp', 'ump'])
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'b', 'b')
@@ -1235,13 +1238,53 @@ class TestFurl(unittest.TestCase):
     assert f.fragment.args == {'a':'a', 'with':'args'}
     
     # Path as a list of paths to join before removing.
-    assert f == f.remove(fragment_path='a frag', fragment_args=['a'],
+    assert f is f.remove(fragment_path='a frag', fragment_args=['a'],
                          query_params=['a','b'], path=['big', 'path', ''],
                          port=True)
     assert f.url == 'http://host/a/?s=s+s#with=args'
 
-    assert f == f.remove(path=True, query=True, fragment=True)
+    assert f is f.remove(path=True, query=True, fragment=True)
     assert f.url == 'http://host'
+
+  def test_join_urljoin(self):
+    empty_tests = ['', '/meat', '/meat/pump?a=a&b=b#fragsup',
+                   'http://www.pumps.org/brg/pap/mrf?a=b&c=d#frag?sup',]
+    run_tests = [
+      # Join full urls.
+      ('unknown://www.yahoo.com', 'unknown://www.yahoo.com'),
+      ('unknown://www.yahoo.com?one=two&three=four',
+       'unknown://www.yahoo.com?one=two&three=four'),
+      ('unknown://www.yahoo.com/new/url/?one=two#blrp',
+       'unknown://www.yahoo.com/new/url/?one=two#blrp'),
+
+      # Absolute paths ('/foo').
+      ('/pump', 'unknown://www.yahoo.com/pump'),
+      ('/pump/2/dump', 'unknown://www.yahoo.com/pump/2/dump'),
+      ('/pump/2/dump/', 'unknown://www.yahoo.com/pump/2/dump/'),
+      
+      # Relative paths ('../foo').
+      ('./crit/', 'unknown://www.yahoo.com/pump/2/dump/crit/'),
+      ('.././../././././srp', 'unknown://www.yahoo.com/pump/2/srp'),
+      ('../././../nop', 'unknown://www.yahoo.com/nop'),
+
+      # Query included.
+      ('/erp/?one=two', 'unknown://www.yahoo.com/erp/?one=two'),
+      ('morp?three=four', 'unknown://www.yahoo.com/erp/morp?three=four'),
+      ('/root/pumps?five=six', 'unknown://www.yahoo.com/root/pumps?five=six'),
+
+      # Fragment included.
+      ('#sup', 'unknown://www.yahoo.com/root/pumps?five=six#sup'),
+      ('/reset?one=two#yepYEP', 'unknown://www.yahoo.com/reset?one=two#yepYEP'),
+      ('./slurm#uwantpump?', 'unknown://www.yahoo.com/slurm#uwantpump?')
+      ]
+
+    for test in empty_tests:
+      f = furl.furl().join(test)
+      assert f.url == test
+
+    f = furl.furl('')
+    for join, result in run_tests:
+      assert f is f.join(join) and f.url == result
 
   def test_urlsplit(self):
     # No changes to existing urlsplit() behavior for known schemes.
@@ -1254,6 +1297,11 @@ class TestFurl(unittest.TestCase):
     assert furl.urlsplit(url) == urlparse.urlsplit(url)
 
     # Properly split the query from the path for unknown schemes.
+    url = 'unknown://www.yahoo.com?one=two&three=four'
+    correct = ('unknown', 'www.yahoo.com', '', 'one=two&three=four', '')
+    assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
+    assert furl.urlsplit(url) == correct
+    
     url = 'sup://192.168.1.102:8080///one//two////?s=kwl%20string#frag'
     correct = ('sup', '192.168.1.102:8080', '///one//two////',
                's=kwl%20string', 'frag')

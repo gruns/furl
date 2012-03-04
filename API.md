@@ -429,3 +429,33 @@ __remove()__ removes items from a furl object with the optional arguments
 >>> furl(url).remove(args=['some'], path='path/', fragment=True, port=True).url
 'https://secure.google.com/a/'
 ```
+
+
+### Miscellaneous
+
+__copy()__ creates and returns a new furl object with an identical URL.
+
+```python
+>>> f = furl('http://www.google.com')
+>>> f.copy().set(path='/new/path').url
+'http://www.google.com/new/path'
+>>> f.url
+'http://www.google.com'
+```
+
+__join()__ joins the furl object's url with the provided relative or absolute
+URL and returns the furl object for method chaining.
+
+```python
+>>> f = furl('http://www.google.com')
+>>> f.join('new/path').url
+'http://www.google.com/new/path'
+>>> f.join('replaced').url
+'http://www.google.com/new/replaced'
+>>> f.join('../parent').url
+'http://www.google.com/parent'
+>>> f.join('path?query=yes#fragment').url
+'http://www.google.com/path?query=yes#fragment'
+>>> f.join('unknown://www.yahoo.com/new/url/').url
+'unknown://www.yahoo.com/new/url/'
+```
