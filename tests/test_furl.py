@@ -1246,7 +1246,7 @@ class TestFurl(unittest.TestCase):
     assert f is f.remove(path=True, query=True, fragment=True)
     assert f.url == 'http://host'
 
-  def test_join_urljoin(self):
+  def test_join(self):
     empty_tests = ['', '/meat', '/meat/pump?a=a&b=b#fragsup',
                    'http://www.pumps.org/brg/pap/mrf?a=b&c=d#frag?sup',]
     run_tests = [

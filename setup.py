@@ -11,7 +11,7 @@ long_description = ('''furl: URL parsing and manipulation made simple.
 Information and documentation at https://github.com/gruns/furl.''')
 
 setup(name='furl',
-      version='0.3', # Keep synchronized with __init__.py.
+      version='0.3.1', # Keep synchronized with __init__.py.
       author='Arthur Grunseid',
       author_email='grunseid@gmail.com',
       url='https://github.com/gruns/furl',
