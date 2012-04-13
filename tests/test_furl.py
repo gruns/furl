@@ -1287,6 +1287,12 @@ class TestFurl(unittest.TestCase):
       assert f is f.join(join) and f.url == result
 
   def test_urlsplit(self):
+    # Without any delimeters like '://' or '/', the input should become a path.
+    urls = ['sup', '127.0.0.1', 'www.google.com', '192.168.1.1:8000']
+    for url in urls:
+      assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
+      assert furl.urlsplit(url) == urlparse.urlsplit(url)
+    
     # No changes to existing urlsplit() behavior for known schemes.
     url = 'http://www.pumps.com/'
     assert isinstance(furl.urlsplit(url), urlparse.SplitResult)

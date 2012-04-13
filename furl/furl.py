@@ -663,6 +663,8 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
 
     tokens = urlsplit(url) # Raises ValueError on malformed IPv6 address.
 
+    print 'tokens', tokens
+
     self.netloc = tokens.netloc # Raises ValueError.
     self.scheme = tokens.scheme.lower()
     if not self.port:
@@ -1047,6 +1049,11 @@ def urlsplit(url):
 
     http://docs.python.org/library/urlparse.html#urlparse.urlsplit
   """
+  # If a scheme wasn't provided, we shouldn't add one by setting the scheme to
+  # 'http'. We can use urlparse.urlsplit(url) as-is.
+  if '://' not in url:
+    return urlparse.urlsplit(url)
+  
   def _change_urltoks_scheme(tup, scheme):
     l = list(tup)
     l[0] = scheme
