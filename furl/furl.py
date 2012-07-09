@@ -301,8 +301,8 @@ class Query(object):
       encoded query strings are provided to methods that take such strings, like
       load(), add(), set(), remove(), etc.
   """
-  SAFE_KEY_CHARS   = "/?:@-._~!$'()*+,"
-  SAFE_VALUE_CHARS = "/?:@-._~!$'()*+,="
+  SAFE_KEY_CHARS   = "/?:@-._~!$'()*,"
+  SAFE_VALUE_CHARS = "/?:@-._~!$'()*,="
   
   def __init__(self, query='', strict=False):
     self.strict = strict
