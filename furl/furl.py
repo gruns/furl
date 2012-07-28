@@ -301,8 +301,8 @@ class Query(object):
       encoded query strings are provided to methods that take such strings, like
       load(), add(), set(), remove(), etc.
   """
-  SAFE_KEY_CHARS   = "/?:@-._~!$'()*+,"
-  SAFE_VALUE_CHARS = "/?:@-._~!$'()*+,="
+  SAFE_KEY_CHARS   = "/?:@-._~!$'()*,"
+  SAFE_VALUE_CHARS = "/?:@-._~!$'()*,="
   
   def __init__(self, query='', strict=False):
     self.strict = strict
@@ -662,8 +662,6 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     self._port = None
 
     tokens = urlsplit(url) # Raises ValueError on malformed IPv6 address.
-
-    print 'tokens', tokens
 
     self.netloc = tokens.netloc # Raises ValueError.
     self.scheme = tokens.scheme.lower()

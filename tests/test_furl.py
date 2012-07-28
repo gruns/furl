@@ -537,14 +537,19 @@ class TestQuery(unittest.TestCase):
     q = furl.Query('a=a;b=b;c=')
     assert q.params == {'a':'a','b':'b','c':''} and str(q) == 'a=a&b=b&c='
 
-    # Non-string parameters are coerved to string in the final query string.
+    # Non-string parameters are coerced to strings in the final query string.
     q.params.clear()
     q.params[99] = 99
     q.params[None] = -1
     q.params['int'] = 1
     q.params['float'] = 0.39393
-    assert 'int=1' in str(q) and 'None=-1' in str(q)
-    assert 'float=0.39393' in str(q) and '99=99' in str(q)
+    assert str(q) == '99=99&None=-1&int=1&float=0.39393'
+
+    # Spaces are encoded as '+'s. '+'s are encoded as '%2B'.
+    q.params.clear()
+    q.params['s s'] = 's s'
+    q.params['p+p'] = 'p+p'
+    assert str(q) == 's+s=s+s&p%2Bp=p%2Bp'
 
     # Params is an omdict (ordered multivalue dictionary).
     q.params.clear()
@@ -563,12 +568,12 @@ class TestQuery(unittest.TestCase):
 
   def _quote_items(self, items):
     # Calculate the expected querystring with proper query encoding.
-    #   Valid query key characters: "/?:@-._~!$'()*+,;"
-    #   Valid query value characters: "/?:@-._~!$'()*+,;="
+    #   Valid query key characters: "/?:@-._~!$'()*,;"
+    #   Valid query value characters: "/?:@-._~!$'()*,;="
     allitems_quoted = []
     for key, value in items.iterallitems():
-      pair = (urllib.quote_plus(str(key), "/?:@-._~!$'()*+,;"),
-              urllib.quote_plus(str(value), "/?:@-._~!$'()*+,;="))
+      pair = (urllib.quote_plus(str(key), "/?:@-._~!$'()*,;"),
+              urllib.quote_plus(str(value), "/?:@-._~!$'()*,;="))
       allitems_quoted.append(pair)
     return allitems_quoted
 
@@ -1287,7 +1292,8 @@ class TestFurl(unittest.TestCase):
       assert f is f.join(join) and f.url == result
 
   def test_urlsplit(self):
-    # Without any delimeters like '://' or '/', the input should become a path.
+    # Without any delimeters like '://' or '/', the input should be treated as a
+    # path.
     urls = ['sup', '127.0.0.1', 'www.google.com', '192.168.1.1:8000']
     for url in urls:
       assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
