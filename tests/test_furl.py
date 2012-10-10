@@ -911,6 +911,12 @@ class TestFurl(unittest.TestCase):
     assert f.url == str(f) == query_quoted
     assert f.url == furl.furl(f).url == furl.furl(f.url).url
     assert f is not f.copy() and f.url == f.copy().url
+    f.add({'page': 1})
+    assert f.url == 'sup://192.168.1.102:8080///one//a%20b////?s=kwl+string&page=1#frag'
+    f.remove('page')
+    assert f.url == 'sup://192.168.1.102:8080///one//a%20b////?s=kwl+string#frag'
+
+
 
     # URL paths are always absolute if not empty.
     f = furl.furl()

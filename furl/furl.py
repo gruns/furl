@@ -956,7 +956,7 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
       self.username = ''
     if password:
       self.password = ''
-    if port:
+    if port is not _absent:
       self.port = None
 
     if path is not _absent:
