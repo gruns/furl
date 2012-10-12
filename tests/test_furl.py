@@ -1224,11 +1224,18 @@ class TestFurl(unittest.TestCase):
       assert str(f.fragment) == '!a=a'
 
   def test_remove(self):
-    url = 'http://host:69/a/big/path/?a=a&b=b&s=s+s#a frag?with=args&a=a'
-    
+    url = 'http://u:p@host:69/a/big/path/?a=a&b=b&s=s+s#a frag?with=args&a=a'
     f = furl.furl(url)
+
+    # Remove without parameters removes nothing.
+    assert f.url == f.remove().url
+
+    # username, password, and port must be True.
+    assert f == f.copy().remove(username='nope', password='nope', port='nope')
+
+    # Basics.
     assert f is f.remove(fragment=True, args=['a', 'b'], path='path/',
-                         port=True)
+                         username=True, password=True, port=True)
     assert f.url == 'http://host/a/big/?s=s+s'
 
     # No errors are thrown when removing url components that don't exist.
@@ -1246,9 +1253,10 @@ class TestFurl(unittest.TestCase):
     assert f is f.remove(fragment_path='a frag', fragment_args=['a'],
                          query_params=['a','b'], path=['big', 'path', ''],
                          port=True)
-    assert f.url == 'http://host/a/?s=s+s#with=args'
+    assert f.url == 'http://u:p@host/a/?s=s+s#with=args'
 
-    assert f is f.remove(path=True, query=True, fragment=True)
+    assert f is f.remove(path=True, query=True, fragment=True, username=True,
+                         password=True)
     assert f.url == 'http://host'
 
   def test_join(self):
@@ -1290,6 +1298,13 @@ class TestFurl(unittest.TestCase):
     f = furl.furl('')
     for join, result in run_tests:
       assert f is f.join(join) and f.url == result
+
+  def test_equality(self):
+    assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
+
+    url = 'https://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#fragment'
+    assert furl.furl(url) == furl.furl(url)
+    assert furl.furl(url).remove(path=True) != furl.furl(url)
 
   def test_urlsplit(self):
     # Without any delimeters like '://' or '/', the input should be treated as a

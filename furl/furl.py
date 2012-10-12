@@ -927,10 +927,10 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     return self
 
   def remove(self, args=_absent, path=_absent, fragment=_absent, query=_absent,
-             query_params=_absent, port=_absent, fragment_path=_absent,
-             fragment_args=_absent, username=_absent, password=_absent):
+             query_params=_absent, port=False, fragment_path=_absent,
+             fragment_args=_absent, username=False, password=False):
     """
-    Remove components of url and return this furl instance, <self>.
+    Remove components of this furl's URL and return this furl instance, <self>.
 
     Parameters:
       args: Shortcut for query_params.
@@ -952,13 +952,12 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
       password: If True, remove the password, if it exists.
     Returns: <self>.
     """
-    if username:
-      self.username = ''
-    if password:
-      self.password = ''
-    if port:
+    if port is True:
       self.port = None
-
+    if username is True:
+      self.username = ''
+    if password is True:
+      self.password = ''
     if path is not _absent:
       self.path.remove(path)
     if args is not _absent:
@@ -981,6 +980,9 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
 
   def copy(self):
     return self.__class__(self)
+
+  def __eq__(self, other):
+    return self.url == other.url
 
   def __setattr__(self, attr, value):
     if (not PathCompositionInterface.__setattr__(self, attr, value) and
