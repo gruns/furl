@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 if sys.argv[-1] == 'publish':
   '''
-  Publish Furl to PyPi.
+  Publish to PyPi.
   '''
   os.system('python setup.py sdist upload')
   sys.exit()
@@ -13,7 +13,7 @@ long_description = (
   'Information and documentation at https://github.com/gruns/furl.')
 
 setup(name='furl',
-      version='0.3.2', # Keep synchronized with furl/__init__.py.
+      version='0.3.3', # Keep synchronized with furl/__init__.py.
       author='Arthur Grunseid',
       author_email='grunseid@gmail.com',
       url='https://github.com/gruns/furl',
