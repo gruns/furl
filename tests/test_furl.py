@@ -926,6 +926,13 @@ class TestFurl(unittest.TestCase):
     f.fragment.path = 'pumps'
     assert str(f.fragment.path) == 'pumps'
 
+    # netloc URLs should be the netloc only.
+    f = furl.furl()
+    assert f.set(host='foo').url == 'foo'
+    assert f.set(host='pumps.com').url == 'pumps.com'
+    assert f.set(host='pumps.com', port=88).url == 'pumps.com:88'
+    assert f.set(netloc='pumps.com:88').url == 'pumps.com:88'
+    
   def test_basic_manipulation(self):
     f = furl.furl('http://www.pumps.com/')
 

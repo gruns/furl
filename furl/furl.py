@@ -993,7 +993,10 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
   def __str__(self):
     tokens = (self.scheme, self.netloc, self.pathstr, self.querystr,
               self.fragmentstr)
-    return urlparse.urlunsplit(tokens)
+    url = urlparse.urlunsplit(tokens)
+    if not self.scheme and url.startswith('//'):
+      url = url[2:]
+    return url
 
   def __repr__(self):
     return "%s('%s')" % (self.__class__.__name__, str(self))
