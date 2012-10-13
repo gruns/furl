@@ -926,7 +926,8 @@ class TestFurl(unittest.TestCase):
     f.fragment.path = 'pumps'
     assert str(f.fragment.path) == 'pumps'
 
-    # netloc URLs should be the netloc only.
+    # URLs comprised of only a netloc string should not be prefixed with '//'
+    # (the default behavior of urlparse.urlunsplit()).
     f = furl.furl()
     assert f.set(host='foo').url == 'foo'
     assert f.set(host='pumps.com').url == 'pumps.com'
