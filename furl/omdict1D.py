@@ -1,5 +1,5 @@
 #
-# furl: URL manipulation made simple.
+# furl - URL manipulation made simple.
 #
 # Arthur Grunseid
 # grunseid.com

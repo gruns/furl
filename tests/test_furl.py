@@ -1,5 +1,5 @@
 #
-# furl: URL manipulation made simple.
+# furl - URL manipulation made simple.
 #
 # Arthur Grunseid
 # grunseid.com
@@ -926,8 +926,8 @@ class TestFurl(unittest.TestCase):
     f.fragment.path = 'pumps'
     assert str(f.fragment.path) == 'pumps'
 
-    # URLs comprised of only a netloc string should not be prefixed with '//'
-    # (the default behavior of urlparse.urlunsplit()).
+    # URLs comprised of a netloc string only should not be prefixed with '//',
+    # as-is the default behavior of urlparse.urlunsplit().
     f = furl.furl()
     assert f.set(host='foo').url == 'foo'
     assert f.set(host='pumps.com').url == 'pumps.com'
