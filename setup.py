@@ -13,7 +13,7 @@ long_description = (
   'Information and documentation at https://github.com/gruns/furl.')
 
 setup(name='furl',
-      version='0.3.3', # Keep synchronized with furl/__init__.py.
+      version='0.3.4', # Keep synchronized with furl/__init__.py.
       author='Arthur Grunseid',
       author_email='grunseid@gmail.com',
       url='https://github.com/gruns/furl',
@@ -31,7 +31,7 @@ setup(name='furl',
                    'Programming Language :: Python :: 2.6',
                    'Programming Language :: Python :: 2.7',
                    ],
-      install_requires=['orderedmultidict >= 0.7'],
+      install_requires=['orderedmultidict >= 0.7.1'],
       test_suite='tests',
       tests_require=[],
       )
