@@ -9,6 +9,11 @@ manipulations proves tedious. Furl makes manipulating URLs simple.
 Furl is [Unlicensed](http://unlicense.org/) in the public domain so you can
 build amazing things.
 
+Note: __pathstr__, __querystr__, and __fragmentstr__ will be deprecated in favor
+of `str(f.path)`, `str(f.query)`, and `str(f.fragment)` in the next version of
+furl, v0.3.5. There should be one, and preferably only one, obvious way to
+serialize the URL component objects to strings.
+
 Query arguments are easy. Really easy.
 
 ```pycon

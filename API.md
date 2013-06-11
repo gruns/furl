@@ -185,8 +185,7 @@ omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus
 omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 ```
 
-__params__ can also store multiple values for the same key because it is a one
-dimensional
+__params__ can also store multiple values for the same key because it is an
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict).
 
 ```pycon
@@ -196,13 +195,13 @@ dimensional
 >>> f.args.getlist('space')
 ['jams', 'slams']
 >>> f.args.addlist('repeated', ['1', '2', '3'])
->>> f.querystr
+>>> str(f.query)
 'space=jams&space=slams&repeated=1&repeated=2&repeated=3'
 >>> f.args.popvalue('space')
 'slams'
 >>> f.args.popvalue('repeated', '2')
 '2'
->>> f.querystr
+>>> str(f.query)
 'space=jams&repeated=1&repeated=3'
 ```
 
@@ -213,7 +212,7 @@ that list is interpretted as multiple values.
 >>> f = furl()
 >>> f.args['repeated'] = ['1', '2', '3']
 >>> f.add(args={'space':['jams', 'slams']})
->>> f.querystr
+>>> str(f.query)
 'repeated=1&repeated=2&repeated=3&space=jams&space=slams'
 ```
 
@@ -317,21 +316,21 @@ omdict1D([('supply encoded', 'query strings, too')])
 omdict1D([('and encoded', 'query string too')])
 ```
 
-Path, Query, and Fragment subcomponents strings should always be decoded.
+Path, Query, and Fragment strings should always be decoded.
 
 ```pycon
 >>> f = furl()
 >>> f.set(path=['path segments are', 'decoded', '<>[]"#'])
->>> f.pathstr
+>>> str(f.path)
 '/path%20segments%20are/decoded/%3C%3E%5B%5D%22%23'
 
 >>> f.set(args={'query parameters':'and values', 'are':'decoded, too'})
->>> f.querystr
+>>> str(f.query)
 'query+parameters=and+values&are=decoded,+too'
 
 >>> f.fragment.path.segments = ['decoded', 'path segments']
 >>> f.fragment.args = {'and decoded':'query parameters and values'}
->>> f.fragmentstr
+>>> str(f.fragment)
 'decoded/path%20segments?and+decoded=query+parameters+and+values'
 ```
 
@@ -443,8 +442,11 @@ __copy()__ creates and returns a new furl object with an identical URL.
 'http://www.google.com'
 ```
 
-__join()__ joins the furl object's url with the provided relative or absolute
+__join()__ joins the furl object's URL with the provided relative or absolute
 URL and returns the furl object for method chaining.
+
+__join()__'s action is the same as clicking on the provided relative or absolute
+URL in a browser.
 
 ```pycon
 >>> f = furl('http://www.google.com')
