@@ -233,6 +233,7 @@ class PathCompositionInterface(object):
   
   @property
   def pathstr(self):
+    """This method will be deprecated in favor of str(f.path) in furl v0.3.5."""
     return str(self._path)
 
   def __setattr__(self, attr, value):
@@ -462,6 +463,9 @@ class QueryCompositionInterface(object):
 
   @property
   def querystr(self):
+    """
+    This method will be deprecated in favor of str(f.query) in furl v0.3.5.
+    """
     return str(self._query)
 
   @property
@@ -595,6 +599,9 @@ class FragmentCompositionInterface(object):
 
   @property
   def fragmentstr(self):
+    """
+    This method will be deprecated in favor of str(f.fragmentstr) in furl v0.3.5.
+    """
     return str(self._fragment)
   
   def __setattr__(self, attr, value):
@@ -620,14 +627,15 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     strict: Boolean whether or not UserWarnings should be raised if improperly
       encoded path, query, or fragment strings are provided to methods that take
       such strings, like load(), add(), set(), remove(), etc.
-    username: Username string for authentication.
-    password: Password string for authentication with <username>.
-    scheme: URL scheme ('http', 'https', etc). All lowercase.
+    username: Username string for authentication. Initially None.
+    password: Password string for authentication with <username>. Initially
+      None.
+    scheme: URL scheme ('http', 'https', etc). All lowercase. Initially None.
     host: URL host (domain, IPv4 address, or IPv6 address), not including
-      port. All lowercase.
+      port. All lowercase. Initially None.
     port: Port. Valid port values are 1-65535, or None meaning no port
       specified.
-    netloc: Network location. Combined host and port string.
+    netloc: Network location. Combined host and port string. Initially None.
     path: Path object from PathCompositionInterface.
     query: Query object from QueryCompositionInterface.
     fragment: Fragment object from FragmentCompositionInterface.
@@ -658,13 +666,13 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     Raises: ValueError on invalid URL (for example malformed IPv6 address or
     invalid port).
     """
-    self.username = self.password = self.scheme = self._host = ''
+    self.username = self.password = self.scheme = self._host = None
     self._port = None
 
     tokens = urlsplit(url) # Raises ValueError on malformed IPv6 address.
 
     self.netloc = tokens.netloc # Raises ValueError.
-    self.scheme = tokens.scheme.lower()
+    self.scheme = tokens.scheme.lower() or None
     if not self.port:
       self._port = self.DEFAULT_PORTS.get(self.scheme)
     self.path.load(tokens.path)
@@ -706,17 +714,18 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
 
   @property
   def netloc(self):
-    userpass = self.username
-    if self.password:
+    userpass = self.username or ''
+    if self.password is not None:
       userpass += ':' + self.password
-    if userpass:
+    if userpass or self.username is not None:
       userpass += '@'
 
-    netloc = self.host
+    netloc = self.host or ''
     if self.port and self.port != self.DEFAULT_PORTS.get(self.scheme):
       netloc += ':' + str(self.port)
 
-    return userpass + netloc
+    netloc = ((userpass or '') + (netloc or ''))
+    return netloc if (netloc or self.host == '') else None
 
   @netloc.setter
   def netloc(self, netloc):
@@ -728,8 +737,7 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     # Raises ValueError on malformed IPv6 addresses.
     urlparse.urlsplit('http://%s/' % netloc)
     
-    username = password = host = ''
-    port = None
+    username = password = host = port = None
 
     if '@' in netloc:
       userpass, netloc = netloc.split('@', 1)
@@ -755,11 +763,11 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
       host = netloc.lower()
 
     # Avoid side effects by assigning self.port before self.host so that if an
-    # exception is raised when assigning self.port self.host isn't updated.
+    # exception is raised when assigning self.port, self.host isn't updated.
     self.port = port # Raises ValueError on invalid port.
-    self.host = host
-    self.username = username
-    self.password = password
+    self.host = host or None
+    self.username = username or None
+    self.password = password or None
 
   @property
   def url(self):
@@ -955,9 +963,9 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     if port is True:
       self.port = None
     if username is True:
-      self.username = ''
+      self.username = None
     if password is True:
-      self.password = ''
+      self.password = None
     if path is not _absent:
       self.path.remove(path)
     if args is not _absent:
@@ -994,8 +1002,12 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     tokens = (self.scheme, self.netloc, self.pathstr, self.querystr,
               self.fragmentstr)
     url = urlparse.urlunsplit(tokens)
-    if not self.scheme and url.startswith('//'):
+    if not self.scheme and url.startswith('//'): # No scheme.
       url = url[2:]
+    elif self.scheme is not None and url == '': # Scheme only.
+      url += '://'
+    elif self.scheme is not None and url == '%s:' % self.scheme: # Scheme only.
+      url += '//'
     return url
 
   def __repr__(self):

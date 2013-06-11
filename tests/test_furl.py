@@ -783,7 +783,7 @@ class TestFurl(unittest.TestCase):
     # Empty usernames and passwords.
     for url in ['', 'http://www.pumps.com/']:
       f = furl.furl(url)
-      assert not f.username and not f.password
+      assert f.username is None and f.password is None
 
     usernames = ['user', 'a-user_NAME$%^&09']
     passwords = ['pass', 'a-PASS_word$%^&09']
@@ -793,36 +793,36 @@ class TestFurl(unittest.TestCase):
     userurl = 'http://%s@www.google.com/'
     for username in usernames:
       f = furl.furl(userurl % username)
-      assert f.username == username and not f.password
+      assert f.username == username and f.password is None
 
       f = furl.furl(baseurl)
       f.username = username
-      assert f.username == username and not f.password
+      assert f.username == username and f.password is None
       assert f.url == userurl % username
 
       f = furl.furl(baseurl)
       f.set(username=username)
-      assert f.username == username and not f.password
+      assert f.username == username and f.password is None
       assert f.url == userurl % username
 
       f.remove(username=True)
-      assert not f.username and not f.password
+      assert f.username is None and f.password is None
       assert f.url == baseurl
 
     # Password only.
     passurl = 'http://:%s@www.google.com/'
     for password in passwords:
       f = furl.furl(passurl % password)
-      assert f.password == password and f.username == ''
+      assert f.password == password and f.username is None
 
       f = furl.furl(baseurl)
       f.password = password
-      assert f.password == password and f.username == ''
+      assert f.password == password and f.username is None
       assert f.url == passurl % password
 
       f = furl.furl(baseurl)
       f.set(password=password)
-      assert f.password == password and f.username == ''
+      assert f.password == password and f.username is None
       assert f.url == passurl % password
 
       f.remove(password=True)
@@ -867,6 +867,23 @@ class TestFurl(unittest.TestCase):
     f.netloc = 'user:pass@domain.com'
     assert f.username == 'user' and f.password == 'pass'
     assert f.netloc == 'user:pass@domain.com'
+
+    f = furl.furl()
+    assert f.username is f.password is None
+    f.username = 'uu'
+    assert f.username == 'uu' and f.password is None and f.url == 'uu@'
+    f.password = 'pp'
+    assert f.username  == 'uu' and f.password == 'pp' and f.url == 'uu:pp@'
+    f.username = ''
+    assert f.username == '' and f.password == 'pp' and f.url == ':pp@'
+    f.password = ''
+    assert f.username == f.password == '' and f.url == ':@'
+    f.password = None
+    assert f.username == '' and f.password is None and f.url == '@'
+    f.username = None
+    assert f.username is f.password is None and f.url == ''
+    f.password = ''
+    assert f.username is None and f.password == '' and f.url == ':@'
 
   def test_basics(self):
     url = 'hTtP://www.pumps.com/'
@@ -976,12 +993,8 @@ class TestFurl(unittest.TestCase):
   def test_odd_urls(self):
     # Empty.
     f = furl.furl('')
-    assert f.scheme == ''
-    assert f.username == ''
-    assert f.password == ''
-    assert f.host == ''
-    assert f.port == None
-    assert f.netloc == ''
+    assert f.username is f.password is None
+    assert f.scheme is f.host is f.port is f.netloc is None
     assert f.pathstr == str(f.path) == ''
     assert f.querystr == str(f.query) == ''
     assert f.args == f.query.params == {}
@@ -1005,13 +1018,42 @@ class TestFurl(unittest.TestCase):
     assert f.querystr == str(f.query) == querystr
     assert f.fragmentstr == str(f.fragment) == fragmentstr
 
+    # Scheme only.
+    f = furl.furl('sup://')
+    assert f.scheme == 'sup'
+    assert f.host is f.port is f.netloc is None
+    assert f.pathstr == str(f.path) == ''
+    assert f.querystr == str(f.query) == ''
+    assert f.args == f.query.params == {}
+    assert str(f.fragment) == f.fragmentstr == ''
+    assert f.url == 'sup://' and f.netloc is None
+    f.scheme = None
+    assert f.scheme is None and f.netloc is None and f.url == ''
+    f.scheme = ''
+    assert f.scheme == '' and f.netloc is None and f.url == '://'
+
+    # Host only.
+    f = furl.furl().set(host='pumps.meat')
+    assert f.url == 'pumps.meat' and f.netloc == f.host == 'pumps.meat'
+    f.host = None
+    assert f.url == '' and f.host is f.netloc is None
+    f.host = ''
+    assert f.url == '' and f.host == f.netloc == ''
+
+    # Port only.
+    f = furl.furl()
+    f.port = 99
+    assert f.url == ':99' and f.netloc is not None
+    f.port = None
+    assert f.url == '' and f.netloc is None
+
     # TODO(grun): Test more odd urls.
 
   def test_hosts(self):
     # No host.
     url = 'http:///index.html'
     f = furl.furl(url)
-    assert f.host == '' and furl.furl(url).url == url
+    assert f.host is None and furl.furl(url).url == url
 
     # Valid IPv4 and IPv6 addresses.
     f = furl.furl('http://192.168.1.101')
