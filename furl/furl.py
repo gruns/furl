@@ -1039,7 +1039,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     return self
 
   def join(self, url):
-    self.load(urljoin(self.url, url))
+    self.load(urljoin(self.url, str(url)))
     return self
 
   def copy(self):
