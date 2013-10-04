@@ -69,9 +69,9 @@ $ pip install furl
 ```
 
 
-### Future
+### Deprecated
 
- __f.pathstr__, __f.querystr__, and __f.fragmentstr__ will be deprecated in
-favor of `str(f.path)`, `str(f.query)`, and `str(f.fragment)` in the next
-version of furl, v0.3.5. There should be one, and preferably only one, obvious
-way to serialize URL component objects to strings.
+ __f.pathstr__, __f.querystr__, and __f.fragmentstr__ were deprecated in favor
+of `str(f.path)`, `str(f.query)`, and `str(f.fragment)`. There should be one,
+and preferably only one, obvious way to serialize URL component objects to
+strings.
