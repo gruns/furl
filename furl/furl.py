@@ -1058,7 +1058,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     tokens = (self.scheme, self.netloc, str(self.path), str(self.query),
               str(self.fragment))
     url = urlparse.urlunsplit(tokens)
-    if not self.scheme and url.startswith('//'): # No scheme.
+    if (not self.scheme and url.startswith('//') and # No scheme.
+        not str(self.path).startswith('//')):
       url = url[2:]
     elif self.scheme is not None and url == '': # Scheme only.
       url += '://'

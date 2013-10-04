@@ -1080,6 +1080,11 @@ class TestFurl(unittest.TestCase):
     f.port = None
     assert f.url == '' and f.netloc is None
 
+    # urlparse.urlsplit() treats the first two '//' as the beginning of a
+    # netloc, even if the netloc is empty.
+    f = furl.furl('////path')
+    assert f.url == '//path' and str(f.path) == '//path'
+
     # TODO(grun): Test more odd urls.
 
   def test_hosts(self):
