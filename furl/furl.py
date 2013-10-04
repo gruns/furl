@@ -140,10 +140,10 @@ class Path(object):
     Raises: AttributeError if _force_absolute(self) returns True.
     """
     if self._force_absolute(self):
-      errstr = ('Path.isabsolute is read only for non-empty URL paths when a '
-                'netloc and/or scheme is defined. URL paths must be absolute '
-                'if a prior URL component exists.')
-      raise AttributeError(errstr)
+      s = ('Path.isabsolute is read only for URLs with a netloc (a username, '
+           'password, host, and/or port). URL paths must be absolute if a netloc'
+           ' exists.')
+      raise AttributeError(s)
     self._isabsolute = isabsolute
 
   @property

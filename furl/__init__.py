@@ -8,7 +8,7 @@
 # License: Build Amazing Things (Unlicense)
 
 __title__   = 'furl'
-__version__ = '0.3.4' # Keep synchronized with ../setup.py.
+__version__ = '0.3.5' # Keep synchronized with ../setup.py.
 __author__  = 'Arthur Grunseid'
 __contact__ = 'grunseid@gmail.com'
 __license__ = 'Unlicense'

@@ -13,7 +13,7 @@ long_description = (
   'Information and documentation at https://github.com/gruns/furl.')
 
 setup(name='furl',
-      version='0.3.4', # Keep synchronized with furl/__init__.py.
+      version='0.3.5', # Keep synchronized with furl/__init__.py.
       author='Arthur Grunseid',
       author_email='grunseid@gmail.com',
       url='https://github.com/gruns/furl',
