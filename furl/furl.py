@@ -234,7 +234,11 @@ class PathCompositionInterface(object):
   
   @property
   def pathstr(self):
-    """This method will be deprecated in favor of str(f.path) in furl v0.3.5."""
+    """This method is deprecated. Use str(furl.path) instead."""
+    s = ('furl.pathstr is deprecated. Use str(furl.path) instead. There '
+         'should be one, and preferably only one, obvious way to serialize '
+         'a Path object to a string.')
+    warnings.warn(s, DeprecationWarning)
     return str(self._path)
 
   def __setattr__(self, attr, value):
@@ -513,9 +517,11 @@ class QueryCompositionInterface(object):
 
   @property
   def querystr(self):
-    """
-    This method will be deprecated in favor of str(f.query) in furl v0.3.5.
-    """
+    """This method is deprecated. Use str(furl.query) instead."""
+    s = ('furl.querystr is deprecated. Use str(furl.query) instead. There '
+         'should be one, and preferably only one, obvious way to serialize '
+         'a Query object to a string.')
+    warnings.warn(s, DeprecationWarning)
     return str(self._query)
 
   @property
@@ -648,9 +654,11 @@ class FragmentCompositionInterface(object):
 
   @property
   def fragmentstr(self):
-    """
-    This method will be deprecated in favor of str(f.fragmentstr) in furl v0.3.5.
-    """
+    """This method is deprecated. Use str(furl.fragment) instead."""
+    s = ('furl.fragmentstr is deprecated. Use str(furl.fragment) instead. There'
+         ' should be one, and preferably only one, obvious way to serialize '
+         'a Fragment object to a string.')
+    warnings.warn(s, DeprecationWarning)
     return str(self._fragment)
   
   def __setattr__(self, attr, value):
@@ -1047,8 +1055,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       object.__setattr__(self, attr, value)
 
   def __str__(self):
-    tokens = (self.scheme, self.netloc, self.pathstr, self.querystr,
-              self.fragmentstr)
+    tokens = (self.scheme, self.netloc, str(self.path), str(self.query),
+              str(self.fragment))
     url = urlparse.urlunsplit(tokens)
     if not self.scheme and url.startswith('//'): # No scheme.
       url = url[2:]

@@ -623,11 +623,11 @@ class TestQueryCompositionInterface(unittest.TestCase):
 
     t = tester()
     assert isinstance(t.query, furl.Query)
-    assert t.querystr == ''
+    assert str(t.query) == ''
 
     t.query = 'a=a&s=s s'
     assert isinstance(t.query, furl.Query)
-    assert t.querystr == 'a=a&s=s+s'
+    assert str(t.query) == 'a=a&s=s+s'
     assert t.args == t.query.params == {'a':'a', 's':'s s'}
 
 
@@ -642,7 +642,7 @@ class TestFragment(unittest.TestCase):
     assert str(f) == 'yasup?sup=foo'
     f.path = '/yasup'
     assert str(f) == '/yasup?sup=foo'
-    assert str(f.query) == f.querystr == 'sup=foo'
+    assert str(f.query) == 'sup=foo'
     f.query.params['sup'] = 'kwlpumps'
     assert str(f) == '/yasup?sup=kwlpumps'
     f.query = ''
@@ -782,10 +782,10 @@ class TestFragmentCompositionInterface(unittest.TestCase):
     assert isinstance(t.fragment, furl.Fragment)
     assert isinstance(t.fragment.path, furl.Path)
     assert isinstance(t.fragment.query, furl.Query)
-    assert t.fragmentstr == ''
+    assert str(t.fragment) == ''
     assert t.fragment.separator
-    assert t.fragment.pathstr == ''
-    assert t.fragment.querystr == ''
+    assert str(t.fragment.path) == ''
+    assert str(t.fragment.query) == ''
 
     t.fragment = 'animal meats'
     assert isinstance(t.fragment, furl.Fragment)
@@ -793,10 +793,10 @@ class TestFragmentCompositionInterface(unittest.TestCase):
     t.fragment.query = 'a=a&s=s+s'
     assert isinstance(t.fragment.path, furl.Path)
     assert isinstance(t.fragment.query, furl.Query)
-    assert t.fragment.pathstr == 'pump/dump'
+    assert str(t.fragment.path) == 'pump/dump'
     assert t.fragment.path.segments == ['pump', 'dump']
     assert not t.fragment.path.isabsolute
-    assert t.fragment.querystr == 'a=a&s=s+s'
+    assert str(t.fragment.query) == 'a=a&s=s+s'
     assert t.fragment.args == t.fragment.query.params == {'a':'a', 's':'s s'}
 
 
@@ -925,10 +925,10 @@ class TestFurl(unittest.TestCase):
     assert f.netloc == 'www.pumps.com'
     assert f.host == 'www.pumps.com'
     assert f.port == 80
-    assert str(f.path) == f.pathstr == '/'
-    assert str(f.query) == f.querystr  == ''
+    assert str(f.path) == '/'
+    assert str(f.query) == ''
     assert f.args == f.query.params == {}
-    assert str(f.fragment) == f.fragmentstr == ''
+    assert str(f.fragment) == ''
     assert f.url == str(f) == url.lower()
     assert f.url == furl.furl(f).url == furl.furl(f.url).url
     assert f is not f.copy() and f.url == f.copy().url
@@ -939,10 +939,10 @@ class TestFurl(unittest.TestCase):
     assert f.netloc == 'www.yahoo.co.uk'
     assert f.host == 'www.yahoo.co.uk'
     assert f.port == 443
-    assert f.pathstr == str(f.path) == '/one/two/three'
-    assert f.querystr == str(f.query) == 'a=a&b=b&m=m%26m'
+    assert str(f.path) == '/one/two/three'
+    assert str(f.query) == 'a=a&b=b&m=m%26m'
     assert f.args == f.query.params == {'a':'a', 'b':'b', 'm':'m&m'}
-    assert str(f.fragment) == f.fragmentstr == 'fragment'
+    assert str(f.fragment) == 'fragment'
     assert f.url == str(f) == url.lower()
     assert f.url == furl.furl(f).url == furl.furl(f.url).url
     assert f is not f.copy() and f.url == f.copy().url
@@ -953,10 +953,10 @@ class TestFurl(unittest.TestCase):
     assert f.netloc == '192.168.1.102:8080'
     assert f.host == '192.168.1.102'
     assert f.port == 8080
-    assert f.pathstr == str(f.path) == '///one//a%20b////'
-    assert f.querystr == str(f.query) == 's=kwl+string'
+    assert str(f.path) == '///one//a%20b////'
+    assert str(f.query) == 's=kwl+string'
     assert f.args == f.query.params == {'s':'kwl string'}
-    assert str(f.fragment) == f.fragmentstr == 'frag'
+    assert str(f.fragment) == 'frag'
     query_quoted = 'sup://192.168.1.102:8080///one//a%20b////?s=kwl+string#frag'
     assert f.url == str(f) == query_quoted
     assert f.url == furl.furl(f).url == furl.furl(f.url).url
@@ -1028,15 +1028,15 @@ class TestFurl(unittest.TestCase):
     f = furl.furl('')
     assert f.username is f.password is None
     assert f.scheme is f.host is f.port is f.netloc is None
-    assert f.pathstr == str(f.path) == ''
-    assert f.querystr == str(f.query) == ''
+    assert str(f.path) == ''
+    assert str(f.query) == ''
     assert f.args == f.query.params == {}
-    assert str(f.fragment) == f.fragmentstr == ''
+    assert str(f.fragment) == ''
     assert f.url == ''
 
     # Keep in mind that ';' is a query delimeter for both the URL query and the
-    # fragment query, resulting in the pathstr, querystr, and fragmentstr values
-    # below.
+    # fragment query, resulting in the str(path), str(query), and str(fragment)
+    # values below.
     url = ("pron://example.com/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,"
            "==?/?:@-._~!$'()*+,;=/?:@-._~!$'()*+,;==#/?:@-._~!$&'()*+,;=")
     pathstr = "/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,=="
@@ -1047,18 +1047,18 @@ class TestFurl(unittest.TestCase):
     assert f.host == 'example.com'
     assert f.port == None
     assert f.netloc == 'example.com'
-    assert f.pathstr == str(f.path) == pathstr
-    assert f.querystr == str(f.query) == querystr
-    assert f.fragmentstr == str(f.fragment) == fragmentstr
+    assert str(f.path) == pathstr
+    assert str(f.query) == querystr
+    assert str(f.fragment) == fragmentstr
 
     # Scheme only.
     f = furl.furl('sup://')
     assert f.scheme == 'sup'
     assert f.host is f.port is f.netloc is None
-    assert f.pathstr == str(f.path) == ''
-    assert f.querystr == str(f.query) == ''
+    assert str(f.path) == ''
+    assert str(f.query) == ''
     assert f.args == f.query.params == {}
-    assert str(f.fragment) == f.fragmentstr == ''
+    assert str(f.fragment) == ''
     assert f.url == 'sup://' and f.netloc is None
     f.scheme = None
     assert f.scheme is None and f.netloc is None and f.url == ''
@@ -1189,16 +1189,16 @@ class TestFurl(unittest.TestCase):
                       fragment_path='1', fragment_args={'f':'frp'})
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'm', 'm&m')
-    assert f.fragmentstr == str(f.fragment) == '1?f=frp'
-    assert f.pathstr == urlparse.urlsplit(f.url).path == '/kwl%20jump'
+    assert str(f.fragment) == '1?f=frp'
+    assert str(f.path) == urlparse.urlsplit(f.url).path == '/kwl%20jump'
 
     assert f is f.add(path='dir', fragment_path='23', args={'b':'b'},
                       fragment_args={'b':'bewp'})
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'm', 'm&m')
     assert self._param(f.url, 'b', 'b')
-    assert f.pathstr == str(f.path) == '/kwl%20jump/dir'
-    assert str(f.fragment) == f.fragmentstr == '1/23?f=frp&b=bewp'
+    assert str(f.path) == '/kwl%20jump/dir'
+    assert str(f.fragment) == '1/23?f=frp&b=bewp'
 
     # Supplying both <args> and <query_params> should raise a warning.
     with warnings.catch_warnings(True) as w1:
@@ -1219,7 +1219,7 @@ class TestFurl(unittest.TestCase):
     # <params>.
     assert f is f.set(args={'a':'a a'}, path='path path/dir', port='999',
                       fragment='moresup', scheme='sup', host='host')
-    assert f.pathstr == '/path%20path/dir'
+    assert str(f.path) == '/path%20path/dir'
     assert f.url == 'sup://host:999/path%20path/dir?a=a+a#moresup'
 
     # Path as a list of path segments to join.
@@ -1328,8 +1328,8 @@ class TestFurl(unittest.TestCase):
     assert self._param(f.url, 'a', 'a')
     assert self._param(f.url, 'b', 'b')
     assert self._param(f.url, 's', 's s')
-    assert f.pathstr == '/a/big/path/'
-    assert f.fragment.pathstr == 'a%20frag'
+    assert str(f.path) == '/a/big/path/'
+    assert str(f.fragment.path) == 'a%20frag'
     assert f.fragment.args == {'a':'a', 'with':'args'}
     
     # Path as a list of paths to join before removing.
