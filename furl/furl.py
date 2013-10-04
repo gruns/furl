@@ -1055,16 +1055,17 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       object.__setattr__(self, attr, value)
 
   def __str__(self):
-    tokens = (self.scheme, self.netloc, str(self.path), str(self.query),
-              str(self.fragment))
-    url = urlparse.urlunsplit(tokens)
-    if (not self.scheme and url.startswith('//') and # No scheme.
-        not str(self.path).startswith('//')):
+    path, query, fragment = str(self.path), str(self.query), str(self.fragment)
+    url = urlparse.urlunsplit((self.scheme, self.netloc, path, query, fragment))
+
+    # Special cases.
+    if not self.scheme and url.startswith('//') and not path.startswith('//'):
       url = url[2:]
-    elif self.scheme is not None and url == '': # Scheme only.
+    elif self.scheme is not None and url == '':
       url += '://'
-    elif self.scheme is not None and url == '%s:' % self.scheme: # Scheme only.
+    elif self.scheme is not None and url == '%s:' % self.scheme:
       url += '//'
+
     return url
 
   def __repr__(self):
