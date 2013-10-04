@@ -1382,7 +1382,7 @@ class TestFurl(unittest.TestCase):
     for join, result in run_tests:
       assert f is f.join(join) and f.url == result
 
-    # Join to other furl object, which serializes to a string with str().
+    # Join other furl object, which serialize to strings with str().
     f = furl.furl('')
     for join, result in run_tests:
       tojoin = furl.furl(join)
