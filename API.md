@@ -98,24 +98,48 @@ Manipulation
 '/segments/are/maintained/decoded/%5E%60%3C%3E%5B%5D%22%23%2F%3F'
 ```
 
-A Path can be absolute or not, as specified by the boolean __isabsolute__. While
-URL paths are always absolute if they aren't empty, __isabsolute__ is useful for
-fragment paths.
+A path that starts with '/' is considered absolute, and a Path can be absolute
+or not as specified or set by the mutable boolean attribute __isabsolute__. URL
+paths have a special restriction: they must be absolute if there's a __netloc__
+(username, password, host, and/or port) because a path must start with a '/' to
+separate itself from a __netloc__. Fragment paths have no such limitation and
+__isabsolute__ and can be be True or False without restriction.
+
+Here's a URL Path example that shows how __isabsolute__ becomes True and
+read-only in the presence of a __netloc__.
 
 ```pycon
->>> f = furl('http://www.google.com/a/directory/#/absolute/fragment/path/')
+>>> f = furl('/url/path')
+>>> f.path.isabsolute
+True
+>>> f.path.isabsolute = False
+>>> f.url
+'url/path'
+>>> f.host = 'arc.io'
+>>> f.url
+'arc.io/url/path'
 >>> f.path.isabsolute
 True
 >>> f.path.isabsolute = False
 Traceback (most recent call last):
   ...
-AttributeError: Path.isabsolute is read only for URL paths. URL paths are always
-absolute if not empty.
+AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a username, password, host, and/or port). URL paths must be absolute if a netloc exists.
+>>> f.url
+'arc.io/url/path'
+```
+
+Here's a fragment Path example.
+
+```pycon
+>>> f = furl('http://www.google.com/#/absolute/fragment/path/')
 >>> f.fragment.path.isabsolute
 True
 >>> f.fragment.path.isabsolute = False
 >>> f.url
-'http://www.google.com/a/directory/#absolute/fragment/path/'
+'http://www.google.com/#absolute/fragment/path/'
+>>> f.fragment.path.isabsolute = True
+>>> f.url
+'http://www.google.com/#/absolute/fragment/path/'
 ```
 
 A path that ends with '/' is considered a directory, and otherwise considered a
