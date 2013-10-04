@@ -26,14 +26,10 @@ _absent = object()
 # between a URL Path and a Fragment Path and a URL Query and a Fragment Query.
 #
 # For example, '?' and '#' don't need to be encoded in Fragment Path segments
-# but they must be encoded in URL Path segments.
+# but must be encoded in URL Path segments.
 #
 # Similarly, '#' doesn't need to be encoded in Fragment Query keys and values,
 # but must be encoded in URL Query keys and values.
-#
-# Also, force_absolute_if_not_empty is True in URL Paths but False in Fragment
-# Paths. This is already handled, but its implementation can change once the new
-# classes are implemented.
 #
 
 class Path(object):
@@ -42,16 +38,16 @@ class Path(object):
 
     http://tools.ietf.org/html/rfc3986#section-3.3
 
-  Path parameters are currently not supported.
+  Path parameters aren't supported.
 
   Attributes:
-    _absolute_if_not_empty: Boolean whether or not isabsolute should be forced
-      to True if the path is non-empty. If true, isabsolute is read
-      only. _absolute_if_not_empty is True for URL paths, False for Fragment
-      paths. URL paths are always absolute (isabsolute is True) if they are not
-      empty, and thus the user shouldn't be able to set isabsolute, only read
-      it. Fragment paths can be optionally absolute, and thus it makes sense to
-      allow the user to set isabsolute to True or False.
+    _force_absolute: Function whos boolean return value specifies whether
+      self.isabsolute should be forced to True or not. If _force_absolute(self)
+      returns True, isabsolute is read only and raises an AttributeError if
+      assigned to. If _force_absolute(self) returns False, isabsolute is mutable
+      and can be set to True or False. URL paths use _force_absolute and return
+      True if the netloc is non-empty (not equal to ''). Fragment paths are
+      never read-only and their _force_absolute(self) always returns False.
     segments: List of zero or more path segments comprising this path. If the
       path string has a trailing '/', the last segment will be '' and self.isdir
       will be True and self.isfile will be False. An empty segment list
@@ -65,12 +61,12 @@ class Path(object):
   """
   SAFE_SEGMENT_CHARS = ":@-._~!$&'()*+,;="
   
-  def __init__(self, path='', absolute_if_not_empty=False, strict=False):
+  def __init__(self, path='', force_absolute=lambda _: False, strict=False):
     self.segments = []
 
     self.strict = strict
     self._isabsolute = False
-    self._absolute_if_not_empty = absolute_if_not_empty
+    self._force_absolute = force_absolute
 
     self.load(path)
 
@@ -88,7 +84,7 @@ class Path(object):
     else: # List interface.
       segments = path
 
-    if self._absolute_if_not_empty:
+    if self._force_absolute(self):
       self._isabsolute = True if segments else False
     else:
       self._isabsolute = (segments and segments[0] == '')
@@ -134,18 +130,19 @@ class Path(object):
 
   @property
   def isabsolute(self):
-    if self._absolute_if_not_empty and self.segments:
+    if self._force_absolute(self):
       return True
     return self._isabsolute
 
   @isabsolute.setter
   def isabsolute(self, isabsolute):
     """
-    Raises: AttributeError if _absolute_if_not_empty is True.
+    Raises: AttributeError if _force_absolute(self) returns True.
     """
-    if self._absolute_if_not_empty:
-      errstr = ('Path.isabsolute is read only for URL paths.'
-                'URL paths are always absolute if not empty.')
+    if self._force_absolute(self):
+      errstr = ('Path.isabsolute is read only for non-empty URL paths when a '
+                'netloc and/or scheme is defined. URL paths must be absolute '
+                'if a prior URL component exists.')
       raise AttributeError(errstr)
     self._isabsolute = isabsolute
 
@@ -170,8 +167,11 @@ class Path(object):
 
   def __str__(self):
     segments = list(self.segments)
-    if self.isabsolute and self.segments:
-      segments.insert(0, '')
+    if self.isabsolute:
+      if not segments:
+        segments = ['', '']
+      else:
+        segments.insert(0, '')
     return self._path_from_segments(segments, quoted=True)
     
   def __repr__(self):
@@ -219,13 +219,14 @@ class PathCompositionInterface(object):
   Abstract class interface for a parent class that contains a Path.
   """
   __metaclass__ = abc.ABCMeta
-  def __init__(self, absolute_if_not_empty=False, strict=False):
+  def __init__(self, strict=False):
     """
     Params:
-      absolute_if_not_empty: See Path._absolute_if_not_empty.
+      force_absolute: See Path._force_absolute.
+
+    Assignments to <self> in __init__() must be added to __setattr__() below.
     """
-    self._path = Path(absolute_if_not_empty=absolute_if_not_empty,
-                      strict=strict)
+    self._path = Path(force_absolute=self._force_absolute, strict=strict)
 
   @property
   def path(self):
@@ -240,9 +241,58 @@ class PathCompositionInterface(object):
     """
     Returns: True if this attribute is handled and set here, False otherwise.
     """
-    if attr == 'path':
+    if attr == '_path':
+      self.__dict__[attr] = value
+      return True
+    elif attr == 'path':
       self._path.load(value)
       return True
+    return False
+
+  @abc.abstractmethod
+  def _force_absolute(self, path):
+    """
+    Subclass me.
+    """
+    pass
+
+
+class URLPathCompositionInterface(PathCompositionInterface):
+  """
+  Abstract class interface for a parent class that contains a URL Path.
+
+  A URL path's isabsolute attribute is absolute and read-only if a netloc is
+  defined. A path cannot start without '/' if there's a netloc. For example, the
+  URL 'http://google.coma/path' makes no sense. It should be
+  'http://google.com/a/path'.
+
+  A URL path's isabsolute attribute is mutable if there's no netloc. The scheme
+  doesn't matter. For example, the isabsolute attribute of the URL path in
+  'mailto:user@domain.com', with scheme 'mailto' and path 'user@domain.com', is
+  mutable because there is no netloc. See
+
+    http://en.wikipedia.org/wiki/URI_scheme#Examples
+  """
+  __metaclass__ = abc.ABCMeta
+  def __init__(self, strict=False):
+    PathCompositionInterface.__init__(self, strict=strict)
+
+  def _force_absolute(self, path):
+    return bool(path) and self.netloc
+
+
+class FragmentPathCompositionInterface(PathCompositionInterface):
+  """
+  Abstract class interface for a parent class that contains a Fragment Path.
+
+  Fragment Paths they be set to absolute (self.isabsolute = True) or not
+  absolute (self.isabsolute = False).
+  """
+  __metaclass__ = abc.ABCMeta
+  def __init__(self, strict=False):
+    PathCompositionInterface.__init__(self, strict=strict)
+
+  def _force_absolute(self, path):
     return False
 
 
@@ -485,7 +535,7 @@ class QueryCompositionInterface(object):
     return False
 
 
-class Fragment(PathCompositionInterface, QueryCompositionInterface):
+class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
   """
   Represents a URL fragment, comprised internally of a Path and Query optionally
   separated by a '?' character.
@@ -493,8 +543,8 @@ class Fragment(PathCompositionInterface, QueryCompositionInterface):
     http://tools.ietf.org/html/rfc3986#section-3.5
 
   Attributes:
-    path: Path object representing the path portion of this fragment.
-    query: Query object representing the query portion of this fragment.
+    path: Path object from FragmentPathCompositionInterface.
+    query: Query object from QueryCompositionInterface.
     separator: Boolean whether or not a '?' separator should be included in the
       string representation of this fragment. When False, a '?' character will
       not separate the fragment path from the fragment query in the fragment
@@ -502,8 +552,7 @@ class Fragment(PathCompositionInterface, QueryCompositionInterface):
       where no separating '?' is desired.
   """
   def __init__(self, fragment='', strict=False):
-    PathCompositionInterface.__init__(self, absolute_if_not_empty=False,
-                                      strict=strict)
+    FragmentPathCompositionInterface.__init__(self, strict=strict)
     QueryCompositionInterface.__init__(self, strict=strict)
     self.strict = strict
     self.separator = True
@@ -614,7 +663,7 @@ class FragmentCompositionInterface(object):
     return False
 
 
-class furl(PathCompositionInterface, QueryCompositionInterface,
+class furl(URLPathCompositionInterface, QueryCompositionInterface,
            FragmentCompositionInterface):
   """
   Object for simple parsing and manipulation of a URL and its components.
@@ -636,7 +685,7 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     port: Port. Valid port values are 1-65535, or None meaning no port
       specified.
     netloc: Network location. Combined host and port string. Initially None.
-    path: Path object from PathCompositionInterface.
+    path: Path object from URLPathCompositionInterface.
     query: Query object from QueryCompositionInterface.
     fragment: Fragment object from FragmentCompositionInterface.
   """
@@ -651,8 +700,7 @@ class furl(PathCompositionInterface, QueryCompositionInterface,
     """
     Raises: ValueError on invalid url.
     """
-    PathCompositionInterface.__init__(self, absolute_if_not_empty=True,
-                                      strict=strict)
+    URLPathCompositionInterface.__init__(self, strict=strict)
     QueryCompositionInterface.__init__(self, strict=strict)
     FragmentCompositionInterface.__init__(self, strict=strict)
     self.strict = strict
