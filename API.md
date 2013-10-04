@@ -100,9 +100,9 @@ Manipulation
 
 A path that starts with '/' is considered absolute, and a Path can be absolute
 or not as specified or set by the mutable boolean attribute __isabsolute__. URL
-paths have a special restriction: they must be absolute if there's a __netloc__
-(username, password, host, and/or port) because a path must start with a '/' to
-separate itself from a __netloc__. Fragment paths have no such limitation and
+Paths have a special restriction: they must be absolute if there's a __netloc__
+(username, password, host, and/or port) because a path must start with '/' to
+separate itself from a __netloc__. Fragment Paths have no such limitation and
 __isabsolute__ and can be be True or False without restriction.
 
 Here's a URL Path example that shows how __isabsolute__ becomes True and
