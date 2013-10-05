@@ -69,7 +69,7 @@ $ pip install furl
 ```
 
 
-### Deprecated
+### Deprecated methods
 
 __f.pathstr__, __f.querystr__, and __f.fragmentstr__ are deprecated in favor of
 `str(f.path)`, `str(f.query)`, and `str(f.fragment)`. There should be one, and
