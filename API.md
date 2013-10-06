@@ -320,9 +320,7 @@ True
 ### Encoding
 
 Furl handles encoding automatically, and furl's philosophy on encoding is
-simple.
-
-Whole path, query, and fragment strings should always be encoded.
+simple: whole path, query, and fragment strings should always be encoded.
 
 ```pycon
 >>> f = furl()
