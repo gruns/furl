@@ -101,9 +101,9 @@ Manipulation
 A path that starts with '/' is considered absolute, and a Path can be absolute
 or not as specified (or set) by the boolean attribute __isabsolute__. URL Paths
 have a special restriction: they must be absolute if there's a __netloc__
-(username, password, host, and/or port). This restriction exists because a path
-must start with '/' to separate itself from a __netloc__. Fragment Paths have no
-such limitation and __isabsolute__ and can be be True or False without
+(username, password, host, and/or port). This restriction exists because a URL
+path must start with '/' to separate itself from a __netloc__. Fragment Paths
+have no such limitation and __isabsolute__ and can be be True or False without
 restriction.
 
 Here's a URL Path example that shows how __isabsolute__ becomes True and
@@ -190,7 +190,7 @@ __args__ is provided as a shortcut on these objects to access __query.params__.
 omdict1D([('one', '1'), ('two', '2')])
 >>> f.args
 omdict1D([('one', '1'), ('two', '2')])
->>> id(f.query.params) == id(f.args)
+>>> f.args is f.query.params
 True
 ```
 
@@ -319,8 +319,8 @@ True
 
 ### Encoding
 
-Furl handles encoding automatically, and furl's philosophy on encoding is
-simple: whole path, query, and fragment strings should always be encoded.
+Furl handles encoding for you, and furl's philosophy on encoding is simple:
+whole path, query, and fragment strings should always be encoded.
 
 ```pycon
 >>> f = furl()
@@ -466,10 +466,8 @@ __copy()__ creates and returns a new furl object with an identical URL.
 ```
 
 __join()__ joins the furl object's URL with the provided relative or absolute
-URL and returns the furl object for method chaining.
-
-__join()__'s action is the same as clicking on the provided relative or absolute
-URL in a browser.
+URL and returns the furl object for method chaining. __join()__'s action is the
+same as clicking on the provided relative or absolute URL in a browser.
 
 ```pycon
 >>> f = furl('http://www.google.com')
