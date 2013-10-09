@@ -4,7 +4,7 @@
 
 Python's standard __urllib__ and __urlparse__ modules provide a number of URL
 manipulation functions, but using these functions to perform common URL
-manipulations proves tedious. Furl makes manipulating URLs simple.
+manipulations is tedious. Furl makes manipulating URLs simple.
 
 Furl is [Unlicensed](http://unlicense.org/) in the public domain so you can
 build amazing things.
@@ -73,4 +73,4 @@ $ pip install furl
 
 __f.pathstr__, __f.querystr__, and __f.fragmentstr__ are deprecated in favor of
 `str(f.path)`, `str(f.query)`, and `str(f.fragment)`. There should be one, and
-preferably only one, obvious way to serialize URL component objects to strings.
+preferably only one, obvious way to serialize URL components to strings.
