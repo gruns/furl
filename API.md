@@ -241,7 +241,7 @@ that list is interpretted as multiple values.
 'repeated=1&repeated=2&repeated=3&space=jams&space=slams'
 ```
 
-This makes sense - URL queries are inherently one dimensional. Query values
+This makes sense -- URL queries are inherently one dimensional. Query values
 cannot have subvalues.
 
 See the [omdict](https://github.com/gruns/orderedmultidict) documentation for
