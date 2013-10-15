@@ -1,5 +1,5 @@
 #
-# omdict - Ordered Multivalue Dictionary.
+# furl - URL manipulation made simple.
 #
 # Arthur Grunseid
 # grunseid.com
