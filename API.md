@@ -101,12 +101,12 @@ Manipulation
 A path that starts with '/' is considered absolute, and a Path can be absolute
 or not as specified (or set) by the boolean attribute __isabsolute__. URL Paths
 have a special restriction: they must be absolute if there's a __netloc__
-(username, password, host, and/or port). This restriction exists because a URL
-path must start with '/' to separate itself from a __netloc__. Fragment Paths
-have no such limitation and __isabsolute__ and can be be True or False without
-restriction.
+(username, password, host, and/or port) present. This restriction exists because
+a URL path must start with '/' to separate itself from a __netloc__. Fragment
+Paths have no such limitation and __isabsolute__ and can be be True or False
+without restriction.
 
-Here's a URL Path example that shows how __isabsolute__ becomes True and
+Here's a URL Path example that illustrates how __isabsolute__ becomes True and
 read-only in the presence of a __netloc__.
 
 ```pycon
@@ -250,7 +250,7 @@ __params__.
 
 
 __encode(delimeter='&')__ can be used to encode query strings with delimeters
-like ';'.
+like `;`.
 
 ```pycon
 >>> f.query = 'space=jams&woofs=squeeze+dog'
