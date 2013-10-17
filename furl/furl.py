@@ -1054,7 +1054,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     return self.__class__(self)
 
   def __eq__(self, other):
-    return self.url == other.url
+    return self.url == str(other)
 
   def __setattr__(self, attr, value):
     if (not PathCompositionInterface.__setattr__(self, attr, value) and
