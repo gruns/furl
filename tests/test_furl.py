@@ -420,6 +420,19 @@ class TestPath(unittest.TestCase):
     p = furl.Path('/asdf')
     assert p
 
+  def test_equality_comparison(self):
+    a = furl.Path('asdf')
+    b = furl.Path('asdf')
+    assert a == b
+
+    c = furl.Path('asdf/a')
+    c.remove('/a')
+    assert a == b == c
+
+    d = furl.Path('/some/long/path/possibly/')
+    e = furl.Path('/some/long/path/possibly/')
+    assert d == e
+
 
 class TestQuery(unittest.TestCase):
   def setUp(self):
@@ -1397,7 +1410,7 @@ class TestFurl(unittest.TestCase):
     assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
 
     url = 'https://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#fragment'
-    assert furl.furl(url) == furl.furl(url)
+    assert furl.furl(url) == furl.furl(url) == url
     assert furl.furl(url).remove(path=True) != furl.furl(url)
 
   def test_urlsplit(self):
