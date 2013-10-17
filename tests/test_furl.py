@@ -420,6 +420,19 @@ class TestPath(unittest.TestCase):
     p = furl.Path('/asdf')
     assert p
 
+  def test_equality_comparison(self):
+    a = furl.Path('asdf')
+    b = furl.Path('asdf')
+    assert a == b
+
+    c = furl.Path('asdf/a')
+    c.remove('/a')
+    assert a == b == c
+
+    d = furl.Path('/some/long/path/possibly/')
+    e = furl.Path('/some/long/path/possibly/')
+    assert d == e
+
 
 class TestQuery(unittest.TestCase):
   def setUp(self):

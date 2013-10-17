@@ -177,6 +177,14 @@ class Path(object):
   def __repr__(self):
     return "%s('%s')" % (self.__class__.__name__, str(self))
 
+  def __eq__(self, other):
+    try:
+      is_equal = str(self) == str(other)
+    except (TypeError, ValueError):
+      is_equal = False
+
+    return is_equal
+
   def _segments_from_path(self, path):
     """
     Returns: The list of path segments from the path string <path>.
