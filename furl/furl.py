@@ -962,23 +962,24 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             (query is not _absent and query_params is not _absent) or
                 (args is not _absent and query_params is not _absent)):
             warnstr = ('Possible parameter overlap: <query>, <args>, and/or'
-                       '<query_params> provided. See furl.set() documentation for more'
-                       'details.')
+                       '<query_params> provided. See furl.set() documentation '
+                       'for more details.')
             warnings.warn(warnstr, UserWarning)
         if (fragment is not _absent and
             (fragment_path is not _absent or fragment_args is not _absent or
              (fragment_separator is not _absent))):
-            warnstr = ('Possible parameter overlap: <fragment> and (<fragment_path>'
-                       'and/or <fragment_args>) or <fragment> and '
-                       '<fragment_separator> provided. See furl.set() documentation'
-                       'for more details.')
+            warnstr = ('Possible parameter overlap: <fragment> and '
+                       '(<fragment_path>and/or <fragment_args>) or <fragment> '
+                       'and <fragment_separator> provided. See furl.set() '
+                       'documentation for more details.')
             warnings.warn(warnstr, UserWarning)
 
         # Avoid side effects if exceptions are raised.
         oldnetloc, oldport = self.netloc, self.port
         try:
             if netloc is not _absent:
-                self.netloc = netloc  # Raises ValueError on invalid port or malformed IP.
+                # Raises ValueError on invalid port or malformed IP.
+                self.netloc = netloc
             if port is not _absent:
                 self.port = port  # Raises ValueError on invalid port.
         except ValueError:
@@ -1017,24 +1018,25 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         query_params=_absent, port=False, fragment_path=_absent,
             fragment_args=_absent, username=False, password=False):
         """
-        Remove components of this furl's URL and return this furl instance, <self>.
+        Remove components of this furl's URL and return this furl instance,
+        <self>.
 
         Parameters:
           args: Shortcut for query_params.
-          path: A list of path segments to remove from the end of the existing path
-            segments list, or a path string to remove from the end of the existing
-            path string, or True to remove the path entirely.
+          path: A list of path segments to remove from the end of the existing
+            path segments list, or a path string to remove from the end of the
+            existing path string, or True to remove the path entirely.
           query: If True, remove the query portion of the URL entirely.
           query_params: A list of query keys to remove from the query, if they
             exist.
-          port: If True, remove the port from the network location string, if it
-            exists.
+          port: If True, remove the port from the network location string, if
+            it exists.
           fragment: If True, remove the fragment portion of the URL entirely.
           fragment_path: A list of path segments to remove from the end of the
-            fragment's path segments or a path string to remove from the end of the
-            fragment's path string.
-          fragment_args: A list of query keys to remove from the fragment's query,
-            if they exist.
+            fragment's path segments or a path string to remove from the end of
+            the fragment's path string.
+          fragment_args: A list of query keys to remove from the fragment's
+            query, if they exist.
           username: If True, remove the username, if it exists.
           password: If True, remove the password, if it exists.
         Returns: <self>.
@@ -1074,7 +1076,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     def __setattr__(self, attr, value):
         if (not PathCompositionInterface.__setattr__(self, attr, value) and
             not QueryCompositionInterface.__setattr__(self, attr, value) and
-                not FragmentCompositionInterface.__setattr__(self, attr, value)):
+            not FragmentCompositionInterface.__setattr__(self, attr, value)):
             object.__setattr__(self, attr, value)
 
     def __str__(self):
@@ -1084,7 +1086,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             (self.scheme, self.netloc, path, query, fragment))
 
         # Special cases.
-        if not self.scheme and url.startswith('//') and not path.startswith('//'):
+        if all([not self.scheme,
+                url.startswith('//'),
+                not path.startswith('//')]):
             url = url[2:]
         elif self.scheme is not None and url == '':
             url += '://'
@@ -1100,7 +1104,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 """
 urlparse.urlsplit() and urlparse.urljoin() don't separate the query string from
 the path for schemes not in the list urlparse.uses_query, but furl should
-support proper parsing of query strings and paths for all schemes users may use.
+support proper parsing of query strings and paths for all schemes users may
+use.
 
 As a workaround, use 'http' (a scheme in urlparse.uses_query) for the purposes
 of urlparse.urlsplit() and urlparse.urljoin(), but then revert back to the
@@ -1148,12 +1153,13 @@ def urlsplit(url):
 
     Returns: urlparse.SplitResult tuple subclass, just like urlparse.urlsplit()
     returns, with fields (scheme, netloc, path, query, fragment, username,
-    password, hostname, port). See the url below for more details on urlsplit().
+    password, hostname, port). See the url below for more details on
+    urlsplit().
 
       http://docs.python.org/library/urlparse.html#urlparse.urlsplit
     """
-    # If a scheme wasn't provided, we shouldn't add one by setting the scheme to
-    # 'http'. We can use urlparse.urlsplit(url) as-is.
+    # If a scheme wasn't provided, we shouldn't add one by setting the scheme
+    # to 'http'. We can use urlparse.urlsplit(url) as-is.
     if '://' not in url:
         return urlparse.urlsplit(url)
 
@@ -1170,7 +1176,8 @@ def urlsplit(url):
 def join_path_segments(*args):
     """
     Join multiple lists of path segments together, intelligently handling path
-    segments borders to preserve intended slashes of the final constructed path.
+    segments borders to preserve intended slashes of the final constructed
+    path.
 
     This function is not encoding aware - it does not test for or change the
     encoding of path segments it is passed.

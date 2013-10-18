@@ -16,9 +16,9 @@ class omdict1D(omdict):
 
     """
     One dimensional ordered multivalue dictionary. Whenever a list of values is
-    passed to set(), __setitem__(), add(), update(), or updateall(), it's treated
-    as multiple values and the appropriate 'list' method is called on that list,
-    like setlist() or addlist(). For example:
+    passed to set(), __setitem__(), add(), update(), or updateall(), it's
+    treated as multiple values and the appropriate 'list' method is called on
+    that list, like setlist() or addlist(). For example:
 
       omd = omdict1D()
 
@@ -61,10 +61,11 @@ class omdict1D(omdict):
     def _bin_update_items(self, items, replace_at_most_one,
                           replacements, leftovers):
         """
-        Subclassed from omdict._bin_update_items() to make update() and updateall()
-        process lists of values as multiple values.
+        Subclassed from omdict._bin_update_items() to make update() and
+        updateall() process lists of values as multiple values.
 
-        <replacements and <leftovers> are modified directly, ala pass by reference.
+        <replacements and <leftovers> are modified directly, ala pass by
+        reference.
         """
         for key, values in items:
             # <values> is not a list or an empty list.
@@ -73,21 +74,24 @@ class omdict1D(omdict):
                 values = [values]
 
             for value in values:
-                # If the value is [], remove any existing leftovers with key <key> and
-                # set the list of values itself to [], which in turn will later delete
-                # <key> when [] is passed to omdict.setlist() in
-                # omdict._update_updateall().
+                # If the value is [], remove any existing leftovers with key
+                # <key> and set the list of values itself to [], which in turn
+                # will later delete <key> when [] is passed to omdict.setlist()
+                # in omdict._update_updateall().
                 if value == []:
                     replacements[key] = []
                     leftovers[:] = filter(
                         lambda item: key != item[0], leftovers)
                     continue
 
-                # If there are existing items with key <key> that have yet to be marked
-                # for replacement, mark that item's value to be replaced by <value> by
-                # appending it to <replacements>.
-                if (key in self and (key not in replacements or
-                                     (key in replacements and replacements[key] == []))):
+                # If there are existing items with key <key> that have yet to
+                # be marked for replacement, mark that item's value to be
+                # replaced by <value> by appending it to <replacements>.
+                # TODO: Refactor for clarity
+                if (key in self and
+                    (key not in replacements or
+                     (key in replacements and
+                      replacements[key] == []))):
                     replacements[key] = [value]
                 elif (key in self and not replace_at_most_one and
                       len(replacements[key]) < len(self.values(key))):
