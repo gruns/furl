@@ -176,7 +176,7 @@ strings.
 >>> f.query
 Query('one=1&two=2')
 >>> f.query.params
-omdict1D([('one', '1'), ('two', '2')])
+OneDimensionalOrderedMultidict([('one', '1'), ('two', '2')])
 >>> str(f.query)
 'one=1&two=2'
 ```
@@ -187,9 +187,9 @@ __args__ is provided as a shortcut on these objects to access __query.params__.
 ```pycon
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f.query.params
-omdict1D([('one', '1'), ('two', '2')])
+OneDimensionalOrderedMultidict([('one', '1'), ('two', '2')])
 >>> f.args
-omdict1D([('one', '1'), ('two', '2')])
+OneDimensionalOrderedMultidict([('one', '1'), ('two', '2')])
 >>> f.args is f.query.params
 True
 ```
@@ -203,11 +203,11 @@ maintains method parity with Python's standard dictionary.
 ```pycon
 >>> f.query = 'silicon=14&iron=26&inexorable%20progress=vae%20victus'
 >>> f.query.params
-omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus')])
+OneDimensionalOrderedMultidict([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus')])
 >>> del f.args['inexorable progress']
 >>> f.args['magnesium'] = '12'
 >>> f.args
-omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
+OneDimensionalOrderedMultidict([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 ```
 
 __params__ can also store multiple values for the same key because it is an
@@ -319,7 +319,7 @@ True
 
 ### Encoding
 
-Furl handles encoding for you, and furl's philosophy on encoding is simple:
+furl handles encoding for you, and furl's philosophy on encoding is simple:
 whole path, query, and fragment strings should always be encoded.
 
 ```pycon
@@ -330,13 +330,13 @@ whole path, query, and fragment strings should always be encoded.
 
 >>> f.set(query='supply+encoded=query+strings,+too')
 >>> f.query.params
-omdict1D([('supply encoded', 'query strings, too')])
+OneDimensionalOrderedMultidict([('supply encoded', 'query strings, too')])
 
 >>> f.set(fragment='encoded%20path%20string?and+encoded=query+string+too')
 >>> f.fragment.path.segments
 ['encoded path string']
 >>> f.fragment.args
-omdict1D([('and encoded', 'query string too')])
+OneDimensionalOrderedMultidict([('and encoded', 'query string too')])
 ```
 
 Path, Query, and Fragment strings should always be decoded.
