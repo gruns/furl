@@ -1,19 +1,20 @@
 import os
 import sys
+from sys import version_info
 from setuptools import setup, find_packages
 
 if sys.argv[-1] == 'publish':
-  '''
-  Publish to PyPi.
-  '''
-  os.system('python setup.py sdist upload')
-  sys.exit()
+    '''
+    Publish to PyPi.
+    '''
+    os.system('python setup.py sdist upload')
+    sys.exit()
 
 long_description = (
-  'Information and documentation at https://github.com/gruns/furl.')
+    'Information and documentation at https://github.com/gruns/furl.')
 
 setup(name='furl',
-      version='0.3.5', # Keep synchronized with furl/__init__.py.
+      version='0.3.5',  # Keep synchronized with furl/__init__.py.
       author='Arthur Grunseid',
       author_email='grunseid@gmail.com',
       url='https://github.com/gruns/furl',
@@ -33,5 +34,6 @@ setup(name='furl',
                    ],
       install_requires=['orderedmultidict >= 0.7.1'],
       test_suite='tests',
-      tests_require=[],
+      tests_require=(
+        [] if version_info[0] >= 2 and version_info[1] >= 7 else ['unittest2']),
       )
