@@ -15,10 +15,11 @@ from orderedmultidict import omdict
 class omdict1D(omdict):
 
     """
-    One dimensional ordered multivalue dictionary. Whenever a list of values is
-    passed to set(), __setitem__(), add(), update(), or updateall(), it's
-    treated as multiple values and the appropriate 'list' method is called on
-    that list, like setlist() or addlist(). For example:
+    One dimensional ordered multivalue dictionary. Whenever a list of
+    values is passed to set(), __setitem__(), add(), update(), or
+    updateall(), it's treated as multiple values and the appropriate
+    'list' method is called on that list, like setlist() or
+    addlist(). For example:
 
       omd = omdict1D()
 
@@ -74,20 +75,21 @@ class omdict1D(omdict):
                 values = [values]
 
             for value in values:
-                # If the value is [], remove any existing leftovers with key
-                # <key> and set the list of values itself to [], which in turn
-                # will later delete <key> when [] is passed to omdict.setlist()
-                # in omdict._update_updateall().
+                # If the value is [], remove any existing leftovers with
+                # key <key> and set the list of values itself to [],
+                # which in turn will later delete <key> when [] is
+                # passed to omdict.setlist() in
+                # omdict._update_updateall().
                 if value == []:
                     replacements[key] = []
                     leftovers[:] = filter(
                         lambda item: key != item[0], leftovers)
                     continue
 
-                # If there are existing items with key <key> that have yet to
-                # be marked for replacement, mark that item's value to be
-                # replaced by <value> by appending it to <replacements>.
-                # TODO: Refactor for clarity
+                # If there are existing items with key <key> that have
+                # yet to be marked for replacement, mark that item's
+                # value to be replaced by <value> by appending it to
+                # <replacements>.  TODO: Refactor for clarity
                 if (key in self and
                     (key not in replacements or
                      (key in replacements and

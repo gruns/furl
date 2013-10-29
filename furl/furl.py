@@ -19,48 +19,54 @@ _absent = object()
 
 #
 # TODO(grun): Subclass Path, PathCompositionInterface, Query, and
-# QueryCompositionInterface into two subclasses each - one for the URL and one
-# for the Fragment.
+# QueryCompositionInterface into two subclasses each - one for the URL
+# and one for the Fragment.
 #
-# Subclasses will clean up the code because the valid encodings are different
-# between a URL Path and a Fragment Path and a URL Query and a Fragment Query.
+# Subclasses will clean up the code because the valid encodings are
+# different between a URL Path and a Fragment Path and a URL Query and a
+# Fragment Query.
 #
-# For example, '?' and '#' don't need to be encoded in Fragment Path segments
-# but must be encoded in URL Path segments.
+# For example, '?' and '#' don't need to be encoded in Fragment Path
+# segments but must be encoded in URL Path segments.
 #
-# Similarly, '#' doesn't need to be encoded in Fragment Query keys and values,
-# but must be encoded in URL Query keys and values.
+# Similarly, '#' doesn't need to be encoded in Fragment Query keys and
+# values, but must be encoded in URL Query keys and values.
 #
 
 
 class Path(object):
 
     """
-    Represents a URL path comprised of zero or more path segments.
+    Represents a path comprised of zero or more path segments.
 
       http://tools.ietf.org/html/rfc3986#section-3.3
 
     Path parameters aren't supported.
 
     Attributes:
-      _force_absolute: Function whos boolean return value specifies whether
-        self.isabsolute should be forced to True or not. If _force_absolute(self)
-        returns True, isabsolute is read only and raises an AttributeError if
-        assigned to. If _force_absolute(self) returns False, isabsolute is mutable
-        and can be set to True or False. URL paths use _force_absolute and return
-        True if the netloc is non-empty (not equal to ''). Fragment paths are
-        never read-only and their _force_absolute(self) always returns False.
-      segments: List of zero or more path segments comprising this path. If the
-        path string has a trailing '/', the last segment will be '' and self.isdir
-        will be True and self.isfile will be False. An empty segment list
-        represents an empty path, not '/' (though they have the same meaning).
-      isabsolute: Boolean whether or not this is an absolute path or not. An
-        absolute path starts with a '/'. self.isabsolute is False if the path is
-        empty (self.segments == [] and str(path) == '').
-      strict: Boolean whether or not UserWarnings should be raised if improperly
-        encoded path strings are provided to methods that take such strings, like
-        load(), add(), set(), remove(), etc.
+      _force_absolute: Function whos boolean return value specifies
+        whether self.isabsolute should be forced to True or not. If
+        _force_absolute(self) returns True, isabsolute is read only and
+        raises an AttributeError if assigned to. If
+        _force_absolute(self) returns False, isabsolute is mutable and
+        can be set to True or False. URL paths use _force_absolute and
+        return True if the netloc is non-empty (not equal to
+        ''). Fragment paths are never read-only and their
+        _force_absolute(self) always returns False.
+      segments: List of zero or more path segments comprising this
+        path. If the path string has a trailing '/', the last segment
+        will be '' and self.isdir will be True and self.isfile will be
+        False. An empty segment list represents an empty path, not '/'
+        (though they have the same meaning).
+      isabsolute: Boolean whether or not this is an absolute path or
+        not. An absolute path starts with a '/'. self.isabsolute is
+        False if the path is empty (self.segments == [] and str(path) ==
+        '').
+      strict: Boolean whether or not UserWarnings should be raised if
+        improperly encoded path strings are provided to methods that
+        take such strings, like load(), add(), set(), remove(), etc.
     """
+
     SAFE_SEGMENT_CHARS = ":@-._~!$&'()*+,;="
 
     def __init__(self, path='', force_absolute=lambda _: False, strict=False):
@@ -74,16 +80,16 @@ class Path(object):
 
     def load(self, path):
         """
-        Load <path>, replacing any existing path. <path> can either be a list of
-        segments or a path string to adopt.
+        Load <path>, replacing any existing path. <path> can either be a
+        list of segments or a path string to adopt.
 
         Returns: <self>.
         """
         if not path:
             segments = []
-        elif hasattr(path, 'split') and callable(path.split):  # String interface.
+        elif hasattr(path, 'split') and callable(path.split):# String interface.
             segments = self._segments_from_path(path)
-        else:  # List interface.
+        else: # List interface.
             segments = path
 
         if self._force_absolute(self):
@@ -99,21 +105,25 @@ class Path(object):
 
     def add(self, path):
         """
-        Add <path> to the existing path. <path> can either be a list of segments or
-        a path string to append to the existing path.
+        Add <path> to the existing path. <path> can either be a list of
+        segments or a path string to append to the existing path.
 
         Returns: <self>.
         """
-        newsegments = path  # List interface.
-        if hasattr(path, 'split') and callable(path.split):  # String interface.
+        newsegments = path # List interface.
+        if hasattr(path, 'split') and callable(path.split): # String interface.
             newsegments = self._segments_from_path(path)
 
-        # Preserve the opening '/' if one exists already (self.segments ==
-        # ['']).
+        # Preserve the opening '/' if one exists already (self.segments
+        # == ['']).
         if self.segments == [''] and newsegments and newsegments[0] != '':
             newsegments.insert(0, '')
 
-        self.load(join_path_segments(self.segments, newsegments))
+        segments = self.segments
+        if self.isabsolute and self.segments and self.segments[0] != '':
+            segments.insert(0, '')
+
+        self.load(join_path_segments(segments, newsegments))
         return self
 
     def set(self, path):
@@ -124,8 +134,8 @@ class Path(object):
         if path is True:
             self.load('')
         else:
-            segments = path  # List interface.
-            if isinstance(path, basestring):  # String interface.
+            segments = path # List interface.
+            if isinstance(path, basestring): # String interface.
                 segments = self._segments_from_path(path)
             base = ([''] if self.isabsolute else []) + self.segments
             self.load(remove_path_segments(base, segments))
@@ -143,25 +153,27 @@ class Path(object):
         Raises: AttributeError if _force_absolute(self) returns True.
         """
         if self._force_absolute(self):
-            s = ('Path.isabsolute is True and read-only for URLs with a netloc (a '
-                 'username, password, host, and/or port). A URL path must start with '
-                 "a '/' to separate itself from a netloc.")
+            s = ('Path.isabsolute is True and read-only for URLs with a netloc '
+                 '(a username, password, host, and/or port). A URL path must '
+                 "start with a '/' to separate itself from a netloc.")
             raise AttributeError(s)
         self._isabsolute = isabsolute
 
     @property
     def isdir(self):
         """
-        Returns: True if the path ends on a directory, False otherwise. If True, the
-        last segment is '', representing the trailing '/' of the path.
+        Returns: True if the path ends on a directory, False
+        otherwise. If True, the last segment is '', representing the
+        trailing '/' of the path.
         """
         return self.segments == [] or (self.segments and self.segments[-1] == '')
 
     @property
     def isfile(self):
         """
-        Returns: True if the path ends on a file, False otherwise. If True, the last
-        segment is not '', representing some file as the last segment of the path.
+        Returns: True if the path ends on a file, False otherwise. If
+        True, the last segment is not '', representing some file as the
+        last segment of the path.
         """
         return not self.isdir
 
@@ -184,29 +196,32 @@ class Path(object):
         """
         Returns: The list of path segments from the path string <path>.
 
-        Raises: UserWarning if <path> is an improperly encoded path string and self.strict
-        is True.
+        Raises: UserWarning if <path> is an improperly encoded path
+        string and self.strict is True.
         """
-        # Raise a warning if self.strict is True and the user provided an improperly
-        # encoded path string.
+        # Raise a warning if self.strict is True and the user provided
+        # an improperly encoded path string.
         segments = path.split('/')
         if self.strict:
             for segment in segments:
                 if not is_valid_encoded_path_segment(segment):
-                    warnstr = (("Improperly encoded path string received: '%s'. "
-                                "Proceeding, but did you mean '%s'?") %
-                               (path, self._path_from_segments(segments, quoted=True)))
+                    warnstr = (
+                        ("Improperly encoded path string received: '%s'. "
+                         "Proceeding, but did you mean '%s'?") %
+                        (path, self._path_from_segments(segments, quoted=True)))
                     warnings.warn(warnstr, UserWarning)
                     break
         return map(urllib.unquote, segments)
 
     def _path_from_segments(self, segments, quoted=True):
         """
-        Combine the provided path segments <segments> into a path string. If
-        <quoted> is True, each path segment will be quoted. If <quoted> is False,
-        each path segment will be unquoted.
+        Combine the provided path segments <segments> into a path
+        string. If <quoted> is True, each path segment will be
+        quoted. If <quoted> is False, each path segment will be
+        unquoted.
 
-        Returns: A path string, with either quoted or unquoted path segments.
+        Returns: A path string, with either quoted or unquoted path
+        segments.
         """
         segments_str = ''.join(segments)
         if quoted and '%' not in segments_str:
@@ -222,6 +237,7 @@ class PathCompositionInterface(object):
     """
     Abstract class interface for a parent class that contains a Path.
     """
+
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
@@ -229,7 +245,8 @@ class PathCompositionInterface(object):
         Params:
           force_absolute: See Path._force_absolute.
 
-        Assignments to <self> in __init__() must be added to __setattr__() below.
+        Assignments to <self> in __init__() must be added to
+        __setattr__() below.
         """
         self._path = Path(force_absolute=self._force_absolute, strict=strict)
 
@@ -248,7 +265,8 @@ class PathCompositionInterface(object):
 
     def __setattr__(self, attr, value):
         """
-        Returns: True if this attribute is handled and set here, False otherwise.
+        Returns: True if this attribute is handled and set here, False
+        otherwise.
         """
         if attr == '_path':
             self.__dict__[attr] = value
@@ -269,20 +287,23 @@ class PathCompositionInterface(object):
 class URLPathCompositionInterface(PathCompositionInterface):
 
     """
-    Abstract class interface for a parent class that contains a URL Path.
+    Abstract class interface for a parent class that contains a URL
+    Path.
 
-    A URL path's isabsolute attribute is absolute and read-only if a netloc is
-    defined. A path cannot start without '/' if there's a netloc. For example, the
-    URL 'http://google.coma/path' makes no sense. It should be
-    'http://google.com/a/path'.
+    A URL path's isabsolute attribute is absolute and read-only if a
+    netloc is defined. A path cannot start without '/' if there's a
+    netloc. For example, the URL 'http://google.coma/path' makes no
+    sense. It should be 'http://google.com/a/path'.
 
-    A URL path's isabsolute attribute is mutable if there's no netloc. The scheme
-    doesn't matter. For example, the isabsolute attribute of the URL path in
-    'mailto:user@domain.com', with scheme 'mailto' and path 'user@domain.com', is
-    mutable because there is no netloc. See
+    A URL path's isabsolute attribute is mutable if there's no
+    netloc. The scheme doesn't matter. For example, the isabsolute
+    attribute of the URL path in 'mailto:user@domain.com', with scheme
+    'mailto' and path 'user@domain.com', is mutable because there is no
+    netloc. See
 
       http://en.wikipedia.org/wiki/URI_scheme#Examples
     """
+
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
@@ -295,11 +316,13 @@ class URLPathCompositionInterface(PathCompositionInterface):
 class FragmentPathCompositionInterface(PathCompositionInterface):
 
     """
-    Abstract class interface for a parent class that contains a Fragment Path.
+    Abstract class interface for a parent class that contains a Fragment
+    Path.
 
-    Fragment Paths they be set to absolute (self.isabsolute = True) or not
-    absolute (self.isabsolute = False).
+    Fragment Paths they be set to absolute (self.isabsolute = True) or
+    not absolute (self.isabsolute = False).
     """
+
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
@@ -312,8 +335,8 @@ class FragmentPathCompositionInterface(PathCompositionInterface):
 class Query(object):
 
     """
-    Represents a URL query comprised of zero or more unique parameters and their
-    respective values.
+    Represents a URL query comprised of zero or more unique parameters
+    and their respective values.
 
       http://tools.ietf.org/html/rfc3986#section-3.4
 
@@ -325,47 +348,51 @@ class Query(object):
     means the intended value for 'a' is 'a%5E', not 'a^'.
 
 
-    Query.params is implemented as an omdict1D object - a one dimensional ordered
-    multivalue dictionary. This provides support for repeated URL parameters, like
-    'a=1&a=2'. omdict1D is a subclass of omdict, an ordered multivalue
-    dictionary. Documentation for omdict can be found here
+    Query.params is implemented as an omdict1D object - a one
+    dimensional ordered multivalue dictionary. This provides support for
+    repeated URL parameters, like 'a=1&a=2'. omdict1D is a subclass of
+    omdict, an ordered multivalue dictionary. Documentation for omdict
+    can be found here
 
       https://github.com/gruns/orderedmultidict
 
-    The one dimensional aspect of omdict1D means that a list of values is
-    interpreted as multiple values, not a single value which is itself a list of
-    values. This is a reasonable distinction to make because URL query parameters
-    are one dimensional - query parameter values cannot themselves be composed of
-    sub-values.
+    The one dimensional aspect of omdict1D means that a list of values
+    is interpreted as multiple values, not a single value which is
+    itself a list of values. This is a reasonable distinction to make
+    because URL query parameters are one dimensional - query parameter
+    values cannot themselves be composed of sub-values.
 
     So what does this mean? This means we can safely interpret
 
       f = furl('http://www.google.com')
       f.query.params['arg'] = ['one', 'two', 'three']
 
-    as three different values for 'arg': 'one', 'two', and 'three', instead of a
-    single value which is itself some serialization of the python list ['one',
-    'two', 'three']. Thus, the result of the above will be
+    as three different values for 'arg': 'one', 'two', and 'three',
+    instead of a single value which is itself some serialization of the
+    python list ['one', 'two', 'three']. Thus, the result of the above
+    will be
 
-      f.query.allitems() == [('arg','one'), ('arg','two'), ('arg','three')]
+      f.query.allitems() == [
+        ('arg','one'), ('arg','two'), ('arg','three')]
 
     and not
 
       f.query.allitems() == [('arg', ['one', 'two', 'three'])]
 
-    The latter doesn't make sense because query parameter values cannot be
-    composed of sub-values. So finally
+    The latter doesn't make sense because query parameter values cannot
+    be composed of sub-values. So finally
 
       str(f.query) == 'arg=one&arg=two&arg=three'
 
     Attributes:
       params: Ordered multivalue dictionary of query parameter key:value
-        pairs. Parameters in self.params are maintained URL decoded - 'a b' not
-        'a+b'.
-      strict: Boolean whether or not UserWarnings should be raised if improperly
-        encoded query strings are provided to methods that take such strings, like
-        load(), add(), set(), remove(), etc.
+        pairs. Parameters in self.params are maintained URL decoded - 'a
+        b' not 'a+b'.
+      strict: Boolean whether or not UserWarnings should be raised if
+        improperly encoded query strings are provided to methods that
+        take such strings, like load(), add(), set(), remove(), etc.
     """
+
     SAFE_KEY_CHARS = "/?:@-._~!$'()*,"
     SAFE_VALUE_CHARS = "/?:@-._~!$'()*,="
 
@@ -387,11 +414,13 @@ class Query(object):
 
     def set(self, mapping):
         """
-        Adopt all mappings in <mapping>, replacing any existing mappings with the same
-        key. If a key has multiple values in <mapping>, they are all adopted.
+        Adopt all mappings in <mapping>, replacing any existing mappings
+        with the same key. If a key has multiple values in <mapping>,
+        they are all adopted.
 
         Examples:
-          Query({1:1}).set([(1,None),(2,2)]).params.allitems() == [(1,None),(2,2)]
+          Query({1:1}).set([(1,None),(2,2)]).params.allitems()
+            == [(1,None),(2,2)]
           Query({1:None,2:None}).set([(1,1),(2,2),(1,11)]).params.allitems()
             == [(1,1),(2,2),(1,11)]
           Query({1:None}).set([(1,[1,11,111])]).params.allitems()
@@ -431,9 +460,10 @@ class Query(object):
           Query('a=a&b=#').encode() == 'a=a&b=%23'
           Query('a=a&b=#').encode(';') == 'a=a;b=%23'
 
-        Returns: A URL encoded query string using <delimeter> as the delimeter
-        separating key:value pairs. The most common and default delimeter is '&',
-        but ';' can also be specified. ';' is W3C recommended.
+        Returns: A URL encoded query string using <delimeter> as the
+        delimeter separating key:value pairs. The most common and
+        default delimeter is '&', but ';' can also be specified. ';' is
+        W3C recommended.
         """
         pairs = []
         for key, value in self.params.iterallitems():
@@ -453,31 +483,33 @@ class Query(object):
 
     def _items(self, items):
         """
-        Extract and return the key:value items from various containers. Some
-        containers that could hold key:value items are
+        Extract and return the key:value items from various
+        containers. Some containers that could hold key:value items are
 
           - List of (key,value) tuples.
           - Dictionaries of key:value items.
-          - Multivalue dictionary of key:value items, with potentially repeated
-            keys.
+          - Multivalue dictionary of key:value items, with potentially
+            repeated keys.
           - Query string with encoded params and values.
 
-        Keys and values are passed through unmodified unless they were passed in
-        within an encoded query string, like 'a=a%20a&b=b'. Keys and values passed
-        in within an encoded query string are unquoted by urlparse.parse_qsl(),
-        which uses urllib.unquote_plus() internally.
+        Keys and values are passed through unmodified unless they were
+        passed in within an encoded query string, like
+        'a=a%20a&b=b'. Keys and values passed in within an encoded query
+        string are unquoted by urlparse.parse_qsl(), which uses
+        urllib.unquote_plus() internally.
 
-        Returns: List of items as (key, value) tuples. Keys and values are passed
-        through unmodified unless they were passed in as part of an encoded query
-        string, in which case the final keys and values that are returned will be
-        unquoted.
+        Returns: List of items as (key, value) tuples. Keys and values
+        are passed through unmodified unless they were passed in as part
+        of an encoded query string, in which case the final keys and
+        values that are returned will be unquoted.
 
-        Raises: UserWarning if <path> is an improperly encoded path string and self.strict
-        is True.
+        Raises: UserWarning if <path> is an improperly encoded path
+        string and self.strict is True.
         """
         if not items:
             items = []
-        # Multivalue Dictionary-like interface. i.e. {'a':1, 'a':2, 'b':2}
+        # Multivalue Dictionary-like interface. i.e. {'a':1, 'a':2,
+        # 'b':2}
         elif hasattr(items, 'allitems') and callable(items.allitems):
             items = list(items.allitems())
         elif hasattr(items, 'iterallitems') and callable(items.iterallitems):
@@ -489,20 +521,21 @@ class Query(object):
             items = list(items.items())
         # Encoded query string. i.e. 'a=1&b=2&c=3'
         elif isinstance(items, basestring):
-            # Raise a warning if self.strict is True and the user provided an
-            # improperly encoded query string.
+            # Raise a warning if self.strict is True and the user
+            # provided an improperly encoded query string.
             if self.strict:
                 pairstrs = [s2 for s1 in items.split('&')
                             for s2 in s1.split(';')]
                 pairs = map(lambda item: item.split('=', 1), pairstrs)
-                pairs = map(lambda p: (p[0], '') if len(
-                    p) == 1 else (p[0], p[1]), pairs)
+                pairs = map(lambda p: (p[0], '') if len(p) == 1
+                            else (p[0], p[1]), pairs)
                 for key, value in pairs:
                     if (not is_valid_encoded_query_key(key) or
-                            not is_valid_encoded_query_value(value)):
-                        warnstr = (("Improperly encoded query string received: '%s'. "
-                                    "Proceeding, but did you mean '%s'?") %
-                                   (items, urllib.urlencode(pairs)))
+                        not is_valid_encoded_query_value(value)):
+                        warnstr = (
+                            ("Improperly encoded query string received: '%s'. "
+                             "Proceeding, but did you mean '%s'?") %
+                            (items, urllib.urlencode(pairs)))
                         warnings.warn(warnstr, UserWarning)
                         break
 
@@ -521,6 +554,7 @@ class QueryCompositionInterface(object):
     """
     Abstract class interface for a parent class that contains a Query.
     """
+
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
@@ -559,19 +593,20 @@ class QueryCompositionInterface(object):
 class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
 
     """
-    Represents a URL fragment, comprised internally of a Path and Query optionally
-    separated by a '?' character.
+    Represents a URL fragment, comprised internally of a Path and Query
+    optionally separated by a '?' character.
 
       http://tools.ietf.org/html/rfc3986#section-3.5
 
     Attributes:
       path: Path object from FragmentPathCompositionInterface.
       query: Query object from QueryCompositionInterface.
-      separator: Boolean whether or not a '?' separator should be included in the
-        string representation of this fragment. When False, a '?' character will
-        not separate the fragment path from the fragment query in the fragment
-        string. This is useful to build fragments like '#!arg1=val1&arg2=val2',
-        where no separating '?' is desired.
+      separator: Boolean whether or not a '?' separator should be
+        included in the string representation of this fragment. When
+        False, a '?' character will not separate the fragment path from
+        the fragment query in the fragment string. This is useful to
+        build fragments like '#!arg1=val1&arg2=val2', where no
+        separating '?' is desired.
     """
 
     def __init__(self, fragment='', strict=False):
@@ -591,20 +626,22 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
             self._path.load('')
             self._query.load('')
         elif len(toks) == 1:
-            # Does this fragment look like a path or a query? Default to path.
-            if '=' in fragment:  # Query example: '#woofs=dogs'.
+            # Does this fragment look like a path or a query? Default to
+            # path.
+            if '=' in fragment: # Query example: '#woofs=dogs'.
                 self._query.load(fragment)
-            else:  # Path example: '#supinthisthread'.
+            else: # Path example: '#supinthisthread'.
                 self._path.load(fragment)
         else:
-            # Does toks[1] actually look like a query? Like 'a=a' or 'a=' or
-            # '=a'?
+            # Does toks[1] actually look like a query? Like 'a=a' or
+            # 'a=' or '=a'?
             if '=' in toks[1]:
                 self._path.load(toks[0])
                 self._query.load(toks[1])
-            # If toks[1] doesn't look like a query, the user probably provided a
-            # fragment string like 'a?b?' that was intended to be adopted as-is, not a
-            # two part fragment with path 'a' and query 'b?'.
+            # If toks[1] doesn't look like a query, the user probably
+            # provided a fragment string like 'a?b?' that was intended
+            # to be adopted as-is, not a two part fragment with path 'a'
+            # and query 'b?'.
             else:
                 self._path.load(fragment)
 
@@ -644,9 +681,10 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
     def __str__(self):
         path, query = str(self._path), str(self._query)
 
-        # If there is no query or self.separator is False, decode all '?' characters
-        # in the path from their percent encoded form '%3F' to '?'. This allows for
-        # fragment strings containg '?'s, like '#dog?machine?yes'.
+        # If there is no query or self.separator is False, decode all
+        # '?' characters in the path from their percent encoded form
+        # '%3F' to '?'. This allows for fragment strings containg '?'s,
+        # like '#dog?machine?yes'.
         if path and (not query or not self.separator):
             path = path.replace('%3F', '?')
 
@@ -661,8 +699,10 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
 class FragmentCompositionInterface(object):
 
     """
-    Abstract class interface for a parent class that contains a Fragment.
+    Abstract class interface for a parent class that contains a
+    Fragment.
     """
+
     __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
@@ -675,15 +715,16 @@ class FragmentCompositionInterface(object):
     @property
     def fragmentstr(self):
         """This method is deprecated. Use str(furl.fragment) instead."""
-        s = ('furl.fragmentstr is deprecated. Use str(furl.fragment) instead. There'
-             ' should be one, and preferably only one, obvious way to serialize '
-             'a Fragment object to a string.')
+        s = ('furl.fragmentstr is deprecated. Use str(furl.fragment) instead. '
+             'There should be one, and preferably only one, obvious way to '
+             'serialize a Fragment object to a string.')
         warnings.warn(s, DeprecationWarning)
         return str(self._fragment)
 
     def __setattr__(self, attr, value):
         """
-        Returns: True if this attribute is handled and set here, False otherwise.
+        Returns: True if this attribute is handled and set here, False
+        otherwise.
         """
         if attr == 'fragment':
             self.fragment.load(value)
@@ -695,29 +736,34 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
            FragmentCompositionInterface):
 
     """
-    Object for simple parsing and manipulation of a URL and its components.
+    Object for simple parsing and manipulation of a URL and its
+    components.
 
       scheme://username:password@host:port/path?query#fragment
 
     Attributes:
-      DEFAULT_PORTS: Map of various URL schemes to their default ports. Scheme
-        strings are lowercase.
-      strict: Boolean whether or not UserWarnings should be raised if improperly
-        encoded path, query, or fragment strings are provided to methods that take
-        such strings, like load(), add(), set(), remove(), etc.
+      DEFAULT_PORTS: Map of various URL schemes to their default
+        ports. Scheme strings are lowercase.
+      strict: Boolean whether or not UserWarnings should be raised if
+        improperly encoded path, query, or fragment strings are provided
+        to methods that take such strings, like load(), add(), set(),
+        remove(), etc.
       username: Username string for authentication. Initially None.
-      password: Password string for authentication with <username>. Initially
-        None.
-      scheme: URL scheme ('http', 'https', etc). All lowercase. Initially None.
-      host: URL host (domain, IPv4 address, or IPv6 address), not including
-        port. All lowercase. Initially None.
+      password: Password string for authentication with
+        <username>. Initially None.
+      scheme: URL scheme ('http', 'https', etc). All
+        lowercase. Initially None.
+      host: URL host (domain, IPv4 address, or IPv6 address), not
+        including port. All lowercase. Initially None.
       port: Port. Valid port values are 1-65535, or None meaning no port
         specified.
-      netloc: Network location. Combined host and port string. Initially None.
+      netloc: Network location. Combined host and port string. Initially
+      None.
       path: Path object from URLPathCompositionInterface.
       query: Query object from QueryCompositionInterface.
       fragment: Fragment object from FragmentCompositionInterface.
     """
+
     DEFAULT_PORTS = {
         'ftp': 21,
         'ssh': 22,
@@ -734,21 +780,24 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         FragmentCompositionInterface.__init__(self, strict=strict)
         self.strict = strict
 
-        self.load(str(url))  # Raises ValueError on invalid url.
+        self.load(str(url)) # Raises ValueError on invalid url.
 
     def load(self, url):
         """
         Parse and load a URL.
 
-        Raises: ValueError on invalid URL (for example malformed IPv6 address or
-        invalid port).
+        Raises: ValueError on invalid URL (for example malformed IPv6
+        address or invalid port).
         """
         self.username = self.password = self.scheme = self._host = None
         self._port = None
 
-        tokens = urlsplit(url)  # Raises ValueError on malformed IPv6 address.
+        # urlsplit() raises a ValueError on malformed IPv6 addresses in
+        # Python 2.7+. In Python <= 2.6, urlsplit() doesn't raise a
+        # ValueError on malformed IPv6 addresses.
+        tokens = urlsplit(url)
 
-        self.netloc = tokens.netloc  # Raises ValueError.
+        self.netloc = tokens.netloc # Raises ValueError in Python 2.7+.
         self.scheme = tokens.scheme.lower() or None
         if not self.port:
             self._port = self.DEFAULT_PORTS.get(self.scheme)
@@ -766,7 +815,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         """
         Raises: ValueError on malformed IPv6 address.
         """
-        urlparse.urlsplit('http://%s/' % host)  # Raises ValueError.
+        urlparse.urlsplit('http://%s/' % host) # Raises ValueError.
         self._host = host
 
     @property
@@ -776,9 +825,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     @port.setter
     def port(self, port):
         """
-        A port value can 1-65535 or None meaning no port specified. If <port> is
-        None and self.scheme is a known scheme in self.DEFAULT_PORTS, the default
-        port value from self.DEFAULT_PORTS will be used.
+        A port value can 1-65535 or None meaning no port specified. If
+        <port> is None and self.scheme is a known scheme in
+        self.DEFAULT_PORTS, the default port value from
+        self.DEFAULT_PORTS will be used.
 
         Raises: ValueError on invalid port.
         """
@@ -808,7 +858,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     def netloc(self, netloc):
         """
         Params:
-          netloc: Network location string, like 'google.com' or 'google.com:99'.
+          netloc: Network location string, like 'google.com' or
+            'google.com:99'.
         Raises: ValueError on invalid port or malformed IPv6 address.
         """
         # Raises ValueError on malformed IPv6 addresses.
@@ -839,10 +890,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         else:
             host = netloc.lower()
 
-        # Avoid side effects by assigning self.port before self.host so that if an
-        # exception is raised when assigning self.port, self.host isn't
-        # updated.
-        self.port = port  # Raises ValueError on invalid port.
+        # Avoid side effects by assigning self.port before self.host so
+        # that if an exception is raised when assigning self.port,
+        # self.host isn't updated.
+        self.port = port # Raises ValueError on invalid port.
         self.host = host or None
         self.username = username or None
         self.password = password or None
@@ -860,31 +911,33 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         """
         Add components to a URL and return this furl instance, <self>.
 
-        If both <args> and <query_params> are provided, a UserWarning is raised
-        because <args> is provided as a shortcut for <query_params>, not to be used
-        simultaneously with <query_params>. Nonetheless, providing both <args> and
-        <query_params> behaves as expected, with query keys and values from both
-        <args> and <query_params> added to the query - <args> first, then
-        <query_params>.
+        If both <args> and <query_params> are provided, a UserWarning is
+        raised because <args> is provided as a shortcut for
+        <query_params>, not to be used simultaneously with
+        <query_params>. Nonetheless, providing both <args> and
+        <query_params> behaves as expected, with query keys and values
+        from both <args> and <query_params> added to the query - <args>
+        first, then <query_params>.
 
         Parameters:
           args: Shortcut for <query_params>.
-          path: A list of path segments to add to the existing path segments, or a
-            path string to join with the existing path string.
-          query_params: A dictionary of query keys and values or list of key:value
-            items to add to the query.
-          fragment_path: A list of path segments to add to the existing fragment
-            path segments, or a path string to join with the existing fragment path
+          path: A list of path segments to add to the existing path
+            segments, or a path string to join with the existing path
             string.
-          fragment_args: A dictionary of query keys and values or list of key:value
-            items to add to the fragment's query.
+          query_params: A dictionary of query keys and values or list of
+            key:value items to add to the query.
+          fragment_path: A list of path segments to add to the existing
+            fragment path segments, or a path string to join with the
+            existing fragment path string.
+          fragment_args: A dictionary of query keys and values or list
+            of key:value items to add to the fragment's query.
         Returns: <self>.
         """
         if args is not _absent and query_params is not _absent:
-            warnstr = ('Both <args> and <query_params> provided to furl.add(). <args>'
-                       ' is a shortcut for <query_params>, not to be used with '
-                       '<query_params>. See furl.add() documentation for more '
-                       'details.')
+            warnstr = ('Both <args> and <query_params> provided to furl.add(). '
+                       '<args> is a shortcut for <query_params>, not to be used'
+                       ' with <query_params>. See furl.add() documentation for '
+                       'more details.')
             warnings.warn(warnstr, UserWarning)
 
         if path is not _absent:
@@ -899,24 +952,25 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     def set(self, args=_absent, path=_absent, fragment=_absent, scheme=_absent,
             netloc=_absent, fragment_path=_absent, fragment_args=_absent,
-            fragment_separator=_absent, host=_absent, port=_absent, query=_absent,
-            query_params=_absent, username=_absent, password=_absent):
+            fragment_separator=_absent, host=_absent, port=_absent,
+            query=_absent, query_params=_absent, username=_absent,
+            password=_absent):
         """
         Set components of a url and return this furl instance, <self>.
 
-        If any overlapping, and hence possibly conflicting, parameters are provided,
-        appropriate UserWarning's will be raised. The groups of parameters that
-        could potentially overlap are
+        If any overlapping, and hence possibly conflicting, parameters
+        are provided, appropriate UserWarning's will be raised. The
+        groups of parameters that could potentially overlap are
 
           <netloc> and (<host> or <port>)
           <fragment> and (<fragment_path> and/or <fragment_args>)
           any two or all of <query>, <args>, and/or <query_params>
 
-        In all of the above groups, the latter parameter(s) take precedence over the
-        earlier parameter(s). So, for example
+        In all of the above groups, the latter parameter(s) take
+        precedence over the earlier parameter(s). So, for example
 
-          furl('http://google.com/').set(netloc='yahoo.com:99', host='bing.com',
-                                         port=40)
+          furl('http://google.com/').set(
+            netloc='yahoo.com:99', host='bing.com', port=40)
 
         will result in a UserWarning being raised and the url becoming
 
@@ -933,24 +987,27 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
           scheme: Scheme string to adopt.
           netloc: Network location string to adopt.
           query: Query string to adopt.
-          query_params: A dictionary of query keys and values or list of key:value
-            items to adopt.
-          fragment_path: A list of path segments to adopt for the fragment's path or
-            a path string to adopt as the fragment's path.
-          fragment_args: A dictionary of query keys and values or list of key:value
-            items for the fragment's query to adopt.
-          fragment_separator: Boolean whether or not there should be a '?' separator
-            between the fragment path and fragment query.
+          query_params: A dictionary of query keys and values or list of
+            key:value items to adopt.
+          fragment_path: A list of path segments to adopt for the
+            fragment's path or a path string to adopt as the fragment's
+            path.
+          fragment_args: A dictionary of query keys and values or list
+            of key:value items for the fragment's query to adopt.
+          fragment_separator: Boolean whether or not there should be a
+            '?' separator between the fragment path and fragment query.
           host: Host string to adopt.
           port: Port number to adopt.
           username: Username string to adopt.
           password: Password string to adopt.
         Raises:
           ValueError on invalid port.
-          UserWarning if <netloc> and (<host> and/or <port>) are provided.
-          UserWarning if <query>, <args>, and/or <query_params> are provided.
-          UserWarning if <fragment> and (<fragment_path>, <fragment_args>, and/or
-            <fragment_separator>) are provided.
+          UserWarning if <netloc> and (<host> and/or <port>) are
+            provided.
+          UserWarning if <query>, <args>, and/or <query_params> are
+            provided.
+          UserWarning if <fragment> and (<fragment_path>,
+            <fragment_args>, and/or <fragment_separator>) are provided.
         Returns: <self>.
         """
         if netloc is not _absent and (host is not _absent or port is not _absent):
@@ -981,7 +1038,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 # Raises ValueError on invalid port or malformed IP.
                 self.netloc = netloc
             if port is not _absent:
-                self.port = port  # Raises ValueError on invalid port.
+                self.port = port # Raises ValueError on invalid port.
         except ValueError:
             self.netloc, self.port = oldnetloc, oldport
             raise
@@ -1018,25 +1075,27 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         query_params=_absent, port=False, fragment_path=_absent,
             fragment_args=_absent, username=False, password=False):
         """
-        Remove components of this furl's URL and return this furl instance,
-        <self>.
+        Remove components of this furl's URL and return this furl
+        instance, <self>.
 
         Parameters:
           args: Shortcut for query_params.
-          path: A list of path segments to remove from the end of the existing
-            path segments list, or a path string to remove from the end of the
-            existing path string, or True to remove the path entirely.
+          path: A list of path segments to remove from the end of the
+            existing path segments list, or a path string to remove from
+            the end of the existing path string, or True to remove the
+            path entirely.
           query: If True, remove the query portion of the URL entirely.
-          query_params: A list of query keys to remove from the query, if they
-            exist.
-          port: If True, remove the port from the network location string, if
-            it exists.
-          fragment: If True, remove the fragment portion of the URL entirely.
-          fragment_path: A list of path segments to remove from the end of the
-            fragment's path segments or a path string to remove from the end of
-            the fragment's path string.
-          fragment_args: A list of query keys to remove from the fragment's
-            query, if they exist.
+          query_params: A list of query keys to remove from the query,
+            if they exist.
+          port: If True, remove the port from the network location
+            string, if it exists.
+          fragment: If True, remove the fragment portion of the URL
+            entirely.
+          fragment_path: A list of path segments to remove from the end
+            of the fragment's path segments or a path string to remove
+            from the end of the fragment's path string.
+          fragment_args: A list of query keys to remove from the
+            fragment's query, if they exist.
           username: If True, remove the username, if it exists.
           password: If True, remove the password, if it exists.
         Returns: <self>.
@@ -1102,33 +1161,31 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
 
 """
-urlparse.urlsplit() and urlparse.urljoin() don't separate the query string from
-the path for schemes not in the list urlparse.uses_query, but furl should
-support proper parsing of query strings and paths for all schemes users may
-use.
+urlparse.urlsplit() and urlparse.urljoin() don't separate the query
+string from the path for schemes not in the list urlparse.uses_query,
+but furl should support proper parsing of query strings and paths for
+all schemes users may use.
 
-As a workaround, use 'http' (a scheme in urlparse.uses_query) for the purposes
-of urlparse.urlsplit() and urlparse.urljoin(), but then revert back to the
-original scheme provided once urlsplit() or urljoin() has completed.
+As a workaround, use 'http' (a scheme in urlparse.uses_query) for the
+purposes of urlparse.urlsplit() and urlparse.urljoin(), but then revert
+back to the original scheme provided once urlsplit() or urljoin() has
+completed.
 
-_get_scheme() and _change_scheme() are helper methods for getting and setting
-the scheme of URL strings. Used to change the scheme to 'http' and back again.
+_get_scheme() and _change_scheme() are helper methods for getting and
+setting the scheme of URL strings. Used to change the scheme to 'http'
+and back again.
 """
-
-
 def _get_scheme(url):
     i = url.find(':')
     if i > 0:
         return url[:i] or ''
     return ''
 
-
 def _set_scheme(url, newscheme):
     scheme = _get_scheme(url)
     if scheme:
         return newscheme + url[len(scheme):]
     return url
-
 
 def urljoin(base, url):
     """
@@ -1145,21 +1202,20 @@ def urljoin(base, url):
         joined = _set_scheme(joined, base_scheme)
     return joined
 
-
 def urlsplit(url):
     """
     Parameters:
       url: URL string to split.
 
-    Returns: urlparse.SplitResult tuple subclass, just like urlparse.urlsplit()
-    returns, with fields (scheme, netloc, path, query, fragment, username,
-    password, hostname, port). See the url below for more details on
-    urlsplit().
+    Returns: urlparse.SplitResult tuple subclass, just like
+    urlparse.urlsplit() returns, with fields (scheme, netloc, path,
+    query, fragment, username, password, hostname, port). See the url
+    below for more details on urlsplit().
 
       http://docs.python.org/library/urlparse.html#urlparse.urlsplit
     """
-    # If a scheme wasn't provided, we shouldn't add one by setting the scheme
-    # to 'http'. We can use urlparse.urlsplit(url) as-is.
+    # If a scheme wasn't provided, we shouldn't add one by setting the
+    # scheme to 'http'. We can use urlparse.urlsplit(url) as-is.
     if '://' not in url:
         return urlparse.urlsplit(url)
 
@@ -1172,15 +1228,14 @@ def urlsplit(url):
     toks = urlparse.urlsplit(_set_scheme(url, 'http'))
     return urlparse.SplitResult(*_change_urltoks_scheme(toks, original_scheme))
 
-
 def join_path_segments(*args):
     """
-    Join multiple lists of path segments together, intelligently handling path
-    segments borders to preserve intended slashes of the final constructed
-    path.
+    Join multiple lists of path segments together, intelligently
+    handling path segments borders to preserve intended slashes of the
+    final constructed path.
 
-    This function is not encoding aware - it does not test for or change the
-    encoding of path segments it is passed.
+    This function is not encoding aware - it does not test for or change
+    the encoding of path segments it is passed.
 
     Examples:
       join_path_segments(['a'], ['b']) == ['a','b']
@@ -1208,11 +1263,10 @@ def join_path_segments(*args):
             finals.extend(segments)
     return finals
 
-
 def remove_path_segments(segments, remove):
     """
-    Removes the path segments of <remove> from the end of the path segments
-    <segments>.
+    Removes the path segments of <remove> from the end of the path
+    segments <segments>.
 
     Examples:
       # '/a/b/c' - 'b/c' == '/a/'
@@ -1220,9 +1274,10 @@ def remove_path_segments(segments, remove):
       # '/a/b/c' - '/b/c' == '/a'
       remove_path_segments(['','a','b','c'], ['','b','c']) == ['','a']
 
-    Returns: The list of all remaining path segments after the segments in
-    <remove> have been removed from the end of <segments>. If no segments from
-    <remove> were removed from <segments>, <segments> is returned unmodified.
+    Returns: The list of all remaining path segments after the segments
+    in <remove> have been removed from the end of <segments>. If no
+    segments from <remove> were removed from <segments>, <segments> is
+    returned unmodified.
     """
     # [''] means a '/', which is properly represented by ['', ''].
     if segments == ['']:
@@ -1250,7 +1305,6 @@ def remove_path_segments(segments, remove):
 
     return ret
 
-
 def is_valid_port(port):
     port = str(port)
     if not port.isdigit() or int(port) == 0 or int(port) > 65535:
@@ -1258,20 +1312,21 @@ def is_valid_port(port):
     return True
 
 #
-# TODO(grun): These functions need to be expanded to reflect the fact that the
-# valid encoding for a URL Path segment is different from a Fragment Path
-# segment, and valid URL Query key and value encoding is different than valid
-# Fragment Query key and value encoding.
+
+# TODO(grun): These functions need to be expanded to reflect the fact
+# that the valid encoding for a URL Path segment is different from a
+# Fragment Path segment, and valid URL Query key and value encoding is
+# different than valid Fragment Query key and value encoding.
 #
-# For example, '?' and '#' don't need to be encoded in Fragment Path segments
-# but they must be encoded in URL Path segments.
+# For example, '?' and '#' don't need to be encoded in Fragment Path
+# segments but they must be encoded in URL Path segments.
 #
-# Similarly, '#' doesn't need to be encoded in Fragment Query keys and values,
-# but must be encoded in URL Query keys and values.
+# Similarly, '#' doesn't need to be encoded in Fragment Query keys and
+# values, but must be encoded in URL Query keys and values.
 #
-# Perhaps merge them with URLPath, FragmentPath, URLQuery, and FragmentQuery
-# when those new classes are created (see the TODO currently at the top of the
-# source, 02/03/2012).
+# Perhaps merge them with URLPath, FragmentPath, URLQuery, and
+# FragmentQuery when those new classes are created (see the TODO
+# currently at the top of the source, 02/03/2012).
 #
 
 # RFC 3986
@@ -1296,21 +1351,15 @@ def is_valid_port(port):
 #
 VALID_ENCODED_PATH_SEGMENT_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$')
-
-
 def is_valid_encoded_path_segment(segment):
     return bool(VALID_ENCODED_PATH_SEGMENT_REGEX.match(segment))
 
 VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$')
-
-
 def is_valid_encoded_query_key(key):
     return bool(VALID_ENCODED_QUERY_KEY_REGEX.match(key))
 
 VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$')
-
-
 def is_valid_encoded_query_value(value):
     return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))

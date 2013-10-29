@@ -1,5 +1,6 @@
 import os
 import sys
+from sys import version_info
 from setuptools import setup, find_packages
 
 if sys.argv[-1] == 'publish':
@@ -33,5 +34,6 @@ setup(name='furl',
                    ],
       install_requires=['orderedmultidict >= 0.7.1'],
       test_suite='tests',
-      tests_require=[],
+      tests_require=(
+        [] if version_info[0] >= 2 and version_info[1] >= 7 else ['unittest2']),
       )

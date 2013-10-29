@@ -130,8 +130,8 @@ class TestOmdict1D(unittest.TestCase):
             assert omd3.setlist(self.key, valuelist) == omd3
             assert omd1 == omd2 == omd3 and omd1.getlist(self.key) == valuelist
 
-        # Empty list of values deletes that key and all its values, equivalent to
-        # del omd[somekey].
+        # Empty list of values deletes that key and all its values,
+        # equivalent to del omd[somekey].
         omd = omdict1D()
         assert _unique not in omd
         omd.set(_unique, [])
@@ -157,8 +157,8 @@ class TestOmdict1D(unittest.TestCase):
             assert omd[self.key] == omd.get(self.key) == value
             assert omd.getlist(self.key) == [value]
 
-        # Empty list of values deletes that key and all its values, equivalent to
-        # del omd[somekey].
+        # Empty list of values deletes that key and all its values,
+        # equivalent to del omd[somekey].
         omd = omdict1D()
         assert _unique not in omd
         omd[_unique] = []
