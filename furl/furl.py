@@ -12,6 +12,7 @@ import abc
 import urllib
 import urlparse
 import warnings
+from posixpath import normpath
 
 from omdict1D import omdict1D
 
@@ -158,6 +159,19 @@ class Path(object):
                  "start with a '/' to separate itself from a netloc.")
             raise AttributeError(s)
         self._isabsolute = isabsolute
+
+    def normalize(self):
+        """
+        Normalize the path. Turn '//a/./b/../c//' into '/a/c/'.
+
+        Returns: <self>.
+        """
+        if str(self):
+            normalized = normpath(str(self)) + '/'*self.isdir
+            if normalized.startswith('//'): # http://bugs.python.org/issue636648
+                normalized = '/' + normalized.lstrip('/')
+            self.load(normalized)
+        return self
 
     @property
     def isdir(self):

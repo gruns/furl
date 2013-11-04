@@ -440,6 +440,23 @@ class TestPath(unittest.TestCase):
             assert str(
                 f) == 'sup:#dad@pumps.biz' and not f.fragment.path.isabsolute
 
+    def test_normalize(self):
+        # Path not modified.
+        for path in ['', 'a', '/a', '/a/', '/a/b%20b/c', '/a/b%20b/c/']:
+            p = furl.Path(path)
+            assert p.normalize() is p and str(p) == str(p.normalize()) == path
+
+        # Path modified.
+        tonormalize = [
+            ('//', '/'), ('//a', '/a'), ('//a/', '/a/'), ('//a///', '/a/'),
+            ('////a/..//b', '/b'), ('/a/..//b//./', '/b/')]
+        for path, normalized in tonormalize:
+            p = furl.Path(path)
+            print p
+            print path, normalized
+            print p.normalize()
+            assert p.normalize() is p and str(p.normalize()) == normalized
+
     def test_nonzero(self):
         p = furl.Path()
         assert not p

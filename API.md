@@ -162,6 +162,16 @@ False
 True
 ```
 
+A path can be normalized with __normalize()__. __normalize()__ returns the Path
+object for method chaining.
+
+```pycon
+>>> f = furl('http://www.google.com////a/./b/lolsup/../c/')
+>>> f.path.normalize()
+>>> f.url
+'http://www.google.com/a/b/c/'
+```
+
 
 ### Query
 
