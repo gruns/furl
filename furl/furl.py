@@ -1373,6 +1373,7 @@ VALID_ENCODED_PATH_SEGMENT_REGEX = re.compile(
 
 
 def is_valid_encoded_path_segment(segment):
+    """Simple REGEX chack for a valid path segment"""
     return bool(VALID_ENCODED_PATH_SEGMENT_REGEX.match(segment))
 
 VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
@@ -1380,6 +1381,7 @@ VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
 
 
 def is_valid_encoded_query_key(key):
+    """Simple REGEX check to validate query key"""
     return bool(VALID_ENCODED_QUERY_KEY_REGEX.match(key))
 
 VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
@@ -1387,4 +1389,5 @@ VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
 
 
 def is_valid_encoded_query_value(value):
+    """Simple REGEX check to validate the query value"""
     return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
