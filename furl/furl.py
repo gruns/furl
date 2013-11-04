@@ -558,7 +558,7 @@ class Query(object):
         # Default to list of key:value items interface. i.e. [('a','1'),
         # ('b','2')]
         else:
-            item = list(items)
+            items = list(items)
 
         return items
 
