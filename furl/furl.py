@@ -142,6 +142,19 @@ class Path(object):
             self.load(remove_path_segments(base, segments))
         return self
 
+    def normalize(self):
+        """
+        Normalize the path. Turn '//a/./b/../c//' into '/a/c/'.
+
+        Returns: <self>.
+        """
+        if str(self):
+            normalized = normpath(str(self)) + '/'*self.isdir
+            if normalized.startswith('//'): # http://bugs.python.org/issue636648
+                normalized = '/' + normalized.lstrip('/')
+            self.load(normalized)
+        return self
+
     @property
     def isabsolute(self):
         if self._force_absolute(self):
@@ -159,19 +172,6 @@ class Path(object):
                  "start with a '/' to separate itself from a netloc.")
             raise AttributeError(s)
         self._isabsolute = isabsolute
-
-    def normalize(self):
-        """
-        Normalize the path. Turn '//a/./b/../c//' into '/a/c/'.
-
-        Returns: <self>.
-        """
-        if str(self):
-            normalized = normpath(str(self)) + '/'*self.isdir
-            if normalized.startswith('//'): # http://bugs.python.org/issue636648
-                normalized = '/' + normalized.lstrip('/')
-            self.load(normalized)
-        return self
 
     @property
     def isdir(self):
