@@ -13,3 +13,5 @@ __author__ = 'Arthur Grunseid'
 __contact__ = 'grunseid@gmail.com'
 __license__ = 'Unlicense'
 __url__ = 'https://github.com/gruns/furl'
+
+from furl import *
