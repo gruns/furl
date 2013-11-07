@@ -213,8 +213,6 @@ class Path(object):
         Raises: UserWarning if <path> is an improperly encoded path
         string and self.strict is True.
         """
-        # Raise a warning if self.strict is True and the user provided
-        # an improperly encoded path string.
         segments = path.split('/')
         if self.strict:
             for segment in segments:
@@ -535,8 +533,6 @@ class Query(object):
             items = list(items.items())
         # Encoded query string. i.e. 'a=1&b=2&c=3'
         elif isinstance(items, basestring):
-            # Raise a warning if self.strict is True and the user
-            # provided an improperly encoded query string.
             if self.strict:
                 pairstrs = [s2 for s1 in items.split('&')
                             for s2 in s1.split(';')]
@@ -945,7 +941,11 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             existing fragment path string.
           fragment_args: A dictionary of query keys and values or list
             of key:value items to add to the fragment's query.
+        
         Returns: <self>.
+
+        Raises: UserWarning if redundant and possibly conflicting <args> and
+        <query_params> were provided.
         """
         if args is not _absent and query_params is not _absent:
             warnstr = ('Both <args> and <query_params> provided to furl.add(). '
