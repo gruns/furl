@@ -205,7 +205,7 @@ omdict1D([('one', '1'), ('two', '2')])
 True
 ```
 
-Manipulation
+#### Manipulation
 
 __params__ is a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that
@@ -221,8 +221,8 @@ omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus
 omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 ```
 
-__params__ can also store multiple values for the same key because it is an
-[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict).
+__params__ can also store multiple values for the same key because it's a
+multivalue dictionary.
 
 ```pycon
 >>> f = furl('http://www.google.com/?space=jams&space=slams')
@@ -260,6 +260,26 @@ more information on interacting with the ordered multivalue dictionary
 __params__.
 
 
+To produce empty an query argument like `http://sprop.su/?param=`, use an empty
+string as the parameter value.
+
+```pycon
+>>> f = furl('http://sprop.su')
+>>> f.args['param'] = ''
+>>> f.url
+'http://sprop.su/?param='
+```
+
+To produce an empty query argument without a trailing `=`, use `None` as the
+parameter value.
+
+```pycon
+>>> f = furl('http://sprop.su')
+>>> f.args['param'] = None
+>>> f.url
+'http://sprop.su/?param'
+```
+
 __encode(delimeter='&')__ can be used to encode query strings with delimeters
 like `;`.
 
@@ -270,6 +290,7 @@ like `;`.
 >>> f.query.encode(';')
 'space=jams;woofs=squeeze+dog'
 ```
+
 
 
 ### Fragment

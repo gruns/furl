@@ -12,6 +12,7 @@ import abc
 import urllib
 import urlparse
 import warnings
+from itertools import izip
 from posixpath import normpath
 
 from omdict1D import omdict1D
@@ -482,6 +483,8 @@ class Query(object):
             quoted_key = urllib.quote_plus(str(key), self.SAFE_KEY_CHARS)
             quoted_value = urllib.quote_plus(str(value), self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
+            if value is None:  # Example: http://sprop.su/?param
+                pair = quoted_key
             pairs.append(pair)
         return delimeter.join(pairs)
 
@@ -534,28 +537,39 @@ class Query(object):
             items = list(items.items())
         # Encoded query string. i.e. 'a=1&b=2&c=3'
         elif isinstance(items, basestring):
-            if self.strict:
-                pairstrs = [s2 for s1 in items.split('&')
-                            for s2 in s1.split(';')]
-                pairs = map(lambda item: item.split('=', 1), pairstrs)
-                pairs = map(lambda p: (p[0], '') if len(p) == 1
-                            else (p[0], p[1]), pairs)
-                for key, value in pairs:
-                    if (not is_valid_encoded_query_key(key) or
-                        not is_valid_encoded_query_value(value)):
-                        s = ("Improperly encoded query string received: '%s'. "
-                             "Proceeding, but did you mean '%s'?" %
-                             (items, urllib.urlencode(pairs)))
-                        warnings.warn(s, UserWarning)
-                        break
-
-            # Keys and values will be unquoted from the query string.
-            items = urlparse.parse_qsl(items, keep_blank_values=True)
+            items = self._extract_items_from_querystr(items)
         # Default to list of key:value items interface. i.e. [('a','1'),
         # ('b','2')]
         else:
             items = list(items)
 
+        return items
+
+    def _extract_items_from_querystr(self, querystr):
+        pairstrs = [s2 for s1 in querystr.split('&') for s2 in s1.split(';')]
+        
+        if self.strict:
+            pairs = map(lambda item: item.split('=', 1), pairstrs)
+            pairs = map(lambda p: (p[0], '') if len(p) == 1
+                        else (p[0], p[1]), pairs)
+            for key, value in pairs:
+                if (not is_valid_encoded_query_key(key) or
+                    not is_valid_encoded_query_value(value)):
+                    s = ("Improperly encoded query string received: '%s'. "
+                         "Proceeding, but did you mean '%s'?" %
+                         (querystr, urllib.urlencode(pairs)))
+                    warnings.warn(s, UserWarning)
+                    break
+
+        items = []
+        parsed_items = urlparse.parse_qsl(querystr, keep_blank_values=True)
+        for (key, value), pairstr in izip(parsed_items, pairstrs):
+            #print 'key, value', repr(key), repr(value)
+            #print 'pairstr', repr(urllib.quote_plus(pairstr))
+            #print
+            if key == urllib.quote_plus(pairstr):  # Empty value without '=', like '?sup'.
+                value = None
+            items.append((key, value))
         return items
 
 

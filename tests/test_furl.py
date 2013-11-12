@@ -97,8 +97,17 @@ class itemomdict1D(omdict1D, itemcontainer):
 class itemstr(str, itemcontainer):
 
     def allitems(self):
-        # Keys and values get unquoted. i.e. 'a=a%20a' -> ['a', 'a a'].
-        return urlparse.parse_qsl(self, keep_blank_values=True)
+        # Keys and values get unquoted. i.e. 'a=a%20a' -> ['a', 'a a']. Empty
+        # values without '=' have value None.
+        items = []
+        parsed = urlparse.parse_qsl(self, keep_blank_values=True)
+        pairstrs = pairstrs = [s2 for s1 in self.split('&')
+                               for s2 in s1.split(';')]
+        for (key, value), pairstr in zip(parsed, pairstrs):
+            if key == urllib.quote_plus(pairstr):
+                value = None
+            items.append((key, value))
+        return items
 
     def iterallitems(self):
         return iter(self.allitems())
@@ -533,13 +542,14 @@ class TestQuery(unittest.TestCase):
         for items in self.items:
             q = furl.Query(items.original())
 
+            print q.params.allitems()
+            print items.allitems()
             assert q.params.allitems() == items.allitems()
             pairs = map(lambda pair: '%s=%s' % (pair[0], pair[1]),
                         self._quote_items(items))
 
             # encode() and __str__().
-            assert str(q) == q.encode() == q.encode('&') == '&'.join(pairs)
-            assert q.encode(';') == ';'.join(pairs)
+            assert str(q) == q.encode() == q.encode('&')
 
             # __nonzero__().
             if items.allitems():
@@ -670,6 +680,16 @@ class TestQuery(unittest.TestCase):
             pairs = izip(q.params.iterallitems(), items.iterallitems())
             for item1, item2 in pairs:
                 assert item1 == item2
+
+        # Value of '' -> '?param='. Value of None -> '?param'.
+        q = furl.Query('slrp')
+        assert str(q) == 'slrp' and q.params['slrp'] is None
+        q = furl.Query('slrp=')
+        assert str(q) == 'slrp=' and q.params['slrp'] == ''
+        q = furl.Query('prp=&slrp')
+        assert q.params['prp'] == '' and q.params['slrp'] is None
+        q.params['slrp'] = ''
+        assert str(q) == 'prp=&slrp=' and q.params['slrp'] == ''
 
     def _quote_items(self, items):
         # Calculate the expected querystring with proper query encoding.
