@@ -564,9 +564,6 @@ class Query(object):
         items = []
         parsed_items = urlparse.parse_qsl(querystr, keep_blank_values=True)
         for (key, value), pairstr in izip(parsed_items, pairstrs):
-            #print 'key, value', repr(key), repr(value)
-            #print 'pairstr', repr(urllib.quote_plus(pairstr))
-            #print
             if key == urllib.quote_plus(pairstr):  # Empty value without '=', like '?sup'.
                 value = None
             items.append((key, value))
