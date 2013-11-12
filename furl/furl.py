@@ -762,8 +762,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       username: Username string for authentication. Initially None.
       password: Password string for authentication with
         <username>. Initially None.
-      scheme: URL scheme ('http', 'https', etc). All
-        lowercase. Initially None.
+      scheme: URL scheme. A string ('http', 'https', '', etc) or None.
+        All lowercase. Initially None.
       host: URL host (domain, IPv4 address, or IPv6 address), not
         including port. All lowercase. Initially None.
       port: Port. Valid port values are 1-65535, or None meaning no port
@@ -802,6 +802,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         """
         self.username = self.password = self.scheme = self._host = None
         self._port = None
+        self._scheme = None
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
         # Python 2.7+. In Python <= 2.6, urlsplit() doesn't raise a
@@ -809,13 +810,23 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         tokens = urlsplit(url)
 
         self.netloc = tokens.netloc  # Raises ValueError in Python 2.7+.
-        self.scheme = tokens.scheme.lower() or None
+        self.scheme = tokens.scheme
         if not self.port:
             self._port = self.DEFAULT_PORTS.get(self.scheme)
         self.path.load(tokens.path)
         self.query.load(tokens.query)
         self.fragment.load(tokens.fragment)
         return self
+
+    @property
+    def scheme(self):
+        return self._scheme
+
+    @scheme.setter
+    def scheme(self, scheme):
+        if isinstance(scheme, basestring):
+            scheme = scheme.lower()
+        self._scheme = scheme
 
     @property
     def host(self):
@@ -1161,33 +1172,19 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             (self.scheme, self.netloc, path, query, fragment))
 
         # Special cases.
-        if all([not self.scheme,
-                url.startswith('//'),
-                not path.startswith('//')]):
-            url = url[2:]
-        elif self.scheme is not None and url == '':
-            url += '://'
-        elif self.scheme is not None and url == '%s:' % self.scheme:
+        if self.scheme is None:
+            if url.startswith('//'):
+                url = url[2:]
+            elif url.startswith('://'):
+                url = url[3:]
+        elif (self.scheme is not None and 
+              (url == '' or  # Protocol relative URL.
+               (url == '%s:' % self.scheme and not str(self.path)))):
             url += '//'
-
         return url
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
-
-
-def _get_scheme(url):
-    i = url.find(':')
-    if i > 0:
-        return url[:i] or ''
-    return ''
-
-
-def _set_scheme(url, newscheme):
-    scheme = _get_scheme(url)
-    if scheme:
-        return newscheme + url[len(scheme):]
-    return url
 
 
 """
@@ -1205,6 +1202,23 @@ _get_scheme() and _change_scheme() are helper methods for getting and
 setting the scheme of URL strings. Used to change the scheme to 'http'
 and back again.
 """
+
+def _get_scheme(url):
+    if url.lstrip().startswith('//'):
+        return ''  # Protocol relative URL.
+    return url[:max(0,url.find('://'))] or None
+
+
+def _set_scheme(url, newscheme):
+    newscheme = newscheme or ''
+    scheme = _get_scheme(url)
+    if scheme == '':  # Protocol relative URL.
+        url = '%s:%s' % (newscheme, url)
+    elif scheme is None and url:  # No scheme.
+        url = '%s://%s' % (newscheme, url)
+    elif scheme:  # Existing scheme.
+        url = newscheme + url[len(scheme):]
+    return url
 
 
 def urljoin(base, url):
@@ -1235,18 +1249,18 @@ def urlsplit(url):
 
       http://docs.python.org/library/urlparse.html#urlparse.urlsplit
     """
-    # If a scheme wasn't provided, we shouldn't add one by setting the
-    # scheme to 'http'. We can use urlparse.urlsplit(url) as-is.
-    if '://' not in url:
-        return urlparse.urlsplit(url)
+    original_scheme = _get_scheme(url)
 
     def _change_urltoks_scheme(tup, scheme):
         l = list(tup)
         l[0] = scheme
         return tuple(l)
 
-    original_scheme = _get_scheme(url)
-    toks = urlparse.urlsplit(_set_scheme(url, 'http'))
+    # If a scheme wasn't provided, we shouldn't add one by setting the
+    # scheme to 'http'. We can use urlparse.urlsplit(url) as-is.
+    if original_scheme is not None:
+        url = _set_scheme(url, 'http')
+    toks = urlparse.urlsplit(url)
     return urlparse.SplitResult(*_change_urltoks_scheme(toks, original_scheme))
 
 

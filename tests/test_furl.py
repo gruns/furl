@@ -453,9 +453,6 @@ class TestPath(unittest.TestCase):
             ('////a/..//b', '/b'), ('/a/..//b//./', '/b/')]
         for path, normalized in tonormalize:
             p = furl.Path(path)
-            print p
-            print path, normalized
-            print p.normalize()
             assert p.normalize() is p and str(p.normalize()) == normalized
 
     def test_nonzero(self):
@@ -904,6 +901,30 @@ class TestFurl(unittest.TestCase):
         items = urlparse.parse_qsl(urlparse.urlsplit(url).query, True)
         return (key, val) in items
 
+    def test_scheme(self):
+        assert furl.furl().scheme is None
+        assert furl.furl('').scheme is None
+
+        # Lowercase.
+        assert furl.furl('/sup/').set(scheme='PrOtO').scheme == 'proto'
+
+        # No scheme.
+        for url in ['sup.txt', '/d/sup', '#flarg']:
+            f = furl.furl(url)
+            assert f.scheme is None and f.url == url
+
+        # Protocol relative URLs.
+        for url in ['//', '//sup.txt', '//arc.io/d/sup']:
+            f = furl.furl(url)
+            assert f.scheme == '' and f.url == url
+
+        f = furl.furl('//sup.txt')
+        assert f.scheme == ''
+        f.scheme = None
+        assert f.scheme is None and f.url == 'sup.txt'
+        f.scheme = ''
+        assert f.scheme == '' and f.url == '//sup.txt'
+
     def test_username_and_password(self):
         # Empty usernames and passwords.
         for url in ['', 'http://www.pumps.com/']:
@@ -992,7 +1013,6 @@ class TestFurl(unittest.TestCase):
         f.netloc = 'user:pass@domain.com'
         assert f.username == 'user' and f.password == 'pass'
         assert f.netloc == 'user:pass@domain.com'
-
         f = furl.furl()
         assert f.username is f.password is None
         f.username = 'uu'
@@ -1160,7 +1180,7 @@ class TestFurl(unittest.TestCase):
         f.scheme = None
         assert f.scheme is None and f.netloc is None and f.url == ''
         f.scheme = ''
-        assert f.scheme == '' and f.netloc is None and f.url == '://'
+        assert f.scheme == '' and f.netloc is None and f.url == '//'
 
         # Host only.
         f = furl.furl().set(host='pumps.meat')
@@ -1521,7 +1541,7 @@ class TestFurl(unittest.TestCase):
         urls = ['sup', '127.0.0.1', 'www.google.com', '192.168.1.1:8000']
         for url in urls:
             assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
-            assert furl.urlsplit(url) == urlparse.urlsplit(url)
+            assert furl.urlsplit(url).path == urlparse.urlsplit(url).path
 
         # No changes to existing urlsplit() behavior for known schemes.
         url = 'http://www.pumps.com/'
