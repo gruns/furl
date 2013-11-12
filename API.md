@@ -9,7 +9,7 @@ scheme://username:password@host:port/path?query#fragment
 ```
 
  * __scheme__ is the scheme string (all lowercase) or None. None means no
-   scheme. An empty string means a protocol relative URL.
+   scheme. An empty string means a protocol relative URL ('//google.com').
  * __username__ is the username string for authentication.
  * __password__ is the password string for authentication with __username__.
  * __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names
@@ -24,8 +24,8 @@ scheme://username:password@host:port/path?query#fragment
 
 ### Scheme, Username, Password, Host, Port, and Network Location
 
-__scheme__, __username__, __password__, and __host__ are strings. __port__ is an
-integer or None.
+__scheme__, __username__, __password__, and __host__ are strings or
+None. __port__ is an integer or None.
 
 ```pycon
 >>> f = furl('http://user:pass@www.google.com:99/')
@@ -101,11 +101,11 @@ Path('/a/larg ish/path')
 
 A path that starts with '/' is considered absolute, and a Path can be absolute
 or not as specified (or set) by the boolean attribute __isabsolute__. URL Paths
-have a special restriction: they must be absolute if there's a __netloc__
-(username, password, host, and/or port) present. This restriction exists because
-a URL path must start with '/' to separate itself from a __netloc__. Fragment
-Paths have no such limitation and __isabsolute__ and can be be True or False
-without restriction.
+have a special restriction: they must be absolute if a __netloc__ (username,
+password, host, and/or port) is present. This restriction exists because a URL
+path must start with '/' to separate itself from a __netloc__. Fragment Paths
+have no such limitation and __isabsolute__ and can be be True or False without
+restriction.
 
 Here's a URL Path example that illustrates how __isabsolute__ becomes True and
 read-only in the presence of a __netloc__.
@@ -259,6 +259,7 @@ See the [omdict](https://github.com/gruns/orderedmultidict) documentation for
 more information on interacting with the ordered multivalue dictionary
 __params__.
 
+##### Parameters
 
 To produce an empty query argument like `http://sprop.su/?param=`, use an empty
 string as the parameter value.
