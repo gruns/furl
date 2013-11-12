@@ -8,8 +8,8 @@ furl objects let you access and modify the components of a URL
 scheme://username:password@host:port/path?query#fragment
 ```
 
- * __scheme__ is the scheme string (all lowercase) or None. A value of None
-   means no scheme. An empty string means a protocol relative URL.
+ * __scheme__ is the scheme string (all lowercase) or None. None means no
+   scheme. An empty string means a protocol relative URL.
  * __username__ is the username string for authentication.
  * __password__ is the password string for authentication with __username__.
  * __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names
