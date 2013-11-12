@@ -541,9 +541,6 @@ class TestQuery(unittest.TestCase):
     def test_various(self):
         for items in self.items:
             q = furl.Query(items.original())
-
-            print q.params.allitems()
-            print items.allitems()
             assert q.params.allitems() == items.allitems()
             pairs = map(lambda pair: '%s=%s' % (pair[0], pair[1]),
                         self._quote_items(items))
@@ -666,8 +663,8 @@ class TestQuery(unittest.TestCase):
 
         # Params is an omdict (ordered multivalue dictionary).
         q.params.clear()
-        q.params.add('1', '1').set('2', '4').add(
-            '1', '11').addlist(3, [3, 3, '3'])
+        q.params.add('1', '1').set('2', '4').add('1', '11').addlist(
+            3, [3, 3, '3'])
         assert q.params.getlist('1') == ['1', '11'] and q.params['1'] == '1'
         assert q.params.getlist(3) == [3, 3, '3']
 
