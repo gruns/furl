@@ -71,7 +71,7 @@ class omdict1D(omdict):
         for key, values in items:
             # <values> is not a list or an empty list.
             if (not self._quacks_like_a_list_but_not_str(values) or
-                    self._quacks_like_a_list_but_not_str(values) and not values):
+                self._quacks_like_a_list_but_not_str(values) and not values):
                 values = [values]
 
             for value in values:
@@ -111,7 +111,5 @@ class omdict1D(omdict):
         return self
 
     def _quacks_like_a_list_but_not_str(self, duck):
-        if (hasattr(duck, '__iter__') and callable(duck.__iter__) and
-                not isinstance(duck, basestring)):
-            return True
-        return False
+        return (hasattr(duck, '__iter__') and callable(duck.__iter__) and
+                not isinstance(duck, basestring))
