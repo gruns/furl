@@ -802,6 +802,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         FragmentCompositionInterface.__init__(self, strict=strict)
         self.strict = strict
 
+        if isinstance(url, unicode):
+            url = url.encode('utf-8')
+
         self.load(str(url))  # Raises ValueError on invalid url.
 
     def load(self, url):
