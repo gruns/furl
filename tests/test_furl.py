@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # furl - URL manipulation made simple.
 #
@@ -1785,3 +1786,11 @@ class TestFurl(unittest.TestCase):
             assert furl.is_valid_encoded_query_value(valid)
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_value(invalid)
+
+    def test_unicode(self):
+        url = u'http://ru.wikipedia.org/wiki/Достоевский,_Фёдор_Михайлович'
+
+        # Unicode url shouldn't raise an exception
+        f = furl.furl(url)
+
+        assert f.url == url.encode('utf-8')
