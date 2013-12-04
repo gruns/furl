@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # furl - URL manipulation made simple.
 #
@@ -917,6 +918,12 @@ class TestFurl(unittest.TestCase):
         # urlparse.uses_query.
         items = urlparse.parse_qsl(urlparse.urlsplit(url).query, True)
         return (key, val) in items
+
+
+    def test_unicode(self):
+        url = u'http://ru.wikipedia.org/wiki/Восход_(ракета-носитель)'
+        f = furl.furl(url)  # Accept a unicode URL without raising an exception.
+        assert not isinstance(f.url, unicode)  # URLs cannot contain unicode.
 
     def test_scheme(self):
         assert furl.furl().scheme is None

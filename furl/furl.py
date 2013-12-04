@@ -802,7 +802,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         FragmentCompositionInterface.__init__(self, strict=strict)
         self.strict = strict
 
-        self.load(str(url))  # Raises ValueError on invalid url.
+        self.load(url)  # Raises ValueError on invalid url.
 
     def load(self, url):
         """
@@ -814,6 +814,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self.username = self.password = self.scheme = self._host = None
         self._port = None
         self._scheme = None
+
+        if isinstance(url, unicode):
+            url = url.encode('utf-8')
+        url = str(url)
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
         # Python 2.7+. In Python <= 2.6, urlsplit() doesn't raise a
