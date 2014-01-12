@@ -928,26 +928,40 @@ class TestFurl(unittest.TestCase):
     def test_scheme(self):
         assert furl.furl().scheme is None
         assert furl.furl('').scheme is None
-
+        
         # Lowercase.
         assert furl.furl('/sup/').set(scheme='PrOtO').scheme == 'proto'
-
+        
         # No scheme.
         for url in ['sup.txt', '/d/sup', '#flarg']:
             f = furl.furl(url)
             assert f.scheme is None and f.url == url
-
+        
         # Protocol relative URLs.
         for url in ['//', '//sup.txt', '//arc.io/d/sup']:
             f = furl.furl(url)
             assert f.scheme == '' and f.url == url
-
+        
         f = furl.furl('//sup.txt')
         assert f.scheme == ''
         f.scheme = None
         assert f.scheme is None and f.url == 'sup.txt'
         f.scheme = ''
         assert f.scheme == '' and f.url == '//sup.txt'
+
+        # Schemes without slashes , like 'mailto:'.
+        f = furl.furl('mailto:sup@sprp.ru')
+        assert f.url == 'mailto:sup@sprp.ru'
+        f = furl.furl('mailto://sup@sprp.ru')
+        assert f.url == 'mailto:sup@sprp.ru'
+
+        f = furl.furl('mailto:sproop:spraps@sprp.ru')
+        assert f.scheme == 'mailto'
+        assert f.username == 'sproop' and f.password == 'spraps'
+        assert f.host == 'sprp.ru'
+
+        f = furl.furl('mailto:')
+        assert f.url == 'mailto:' and f.scheme == 'mailto'
 
     def test_username_and_password(self):
         # Empty usernames and passwords.

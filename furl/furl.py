@@ -35,6 +35,22 @@ _absent = object()
 # values, but must be encoded in URL Query keys and values.
 #
 
+# Map of various URL schemes to their default ports. Scheme strings are
+# lowercase.
+DEFAULT_PORTS = {
+    'ftp': 21,
+    'ssh': 22,
+    'http': 80,
+    'https': 443,
+    }
+
+# List of schemes that don't require two slashes after the colon. For example,
+# 'mailto:user@google.com' instead of 'mailto://user@google.com'. Scheme
+# strings are lowercase.
+COLON_SEPARATED_SCHEMES = [
+    'mailto',
+    ]
+
 
 class Path(object):
 
@@ -547,7 +563,7 @@ class Query(object):
 
     def _extract_items_from_querystr(self, querystr):
         pairstrs = [s2 for s1 in querystr.split('&') for s2 in s1.split(';')]
-        
+
         if self.strict:
             pairs = map(lambda item: item.split('=', 1), pairstrs)
             pairs = map(lambda p: (p[0], '') if len(p) == 1
@@ -564,7 +580,8 @@ class Query(object):
         items = []
         parsed_items = urlparse.parse_qsl(querystr, keep_blank_values=True)
         for (key, value), pairstr in izip(parsed_items, pairstrs):
-            if key == urllib.quote_plus(pairstr):  # Empty value without '=', like '?sup'.
+            # Empty value without '=', like '?sup'.
+            if key == urllib.quote_plus(pairstr):
                 value = None
             items.append((key, value))
         return items
@@ -764,8 +781,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       scheme://username:password@host:port/path?query#fragment
 
     Attributes:
-      DEFAULT_PORTS: Map of various URL schemes to their default
-        ports. Scheme strings are lowercase.
+      DEFAULT_PORTS: 
       strict: Boolean whether or not UserWarnings should be raised if
         improperly encoded path, query, or fragment strings are provided
         to methods that take such strings, like load(), add(), set(),
@@ -785,13 +801,6 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       query: Query object from QueryCompositionInterface.
       fragment: Fragment object from FragmentCompositionInterface.
     """
-
-    DEFAULT_PORTS = {
-        'ftp': 21,
-        'ssh': 22,
-        'http': 80,
-        'https': 443,
-    }
 
     def __init__(self, url='', strict=False):
         """
@@ -827,7 +836,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self.netloc = tokens.netloc  # Raises ValueError in Python 2.7+.
         self.scheme = tokens.scheme
         if not self.port:
-            self._port = self.DEFAULT_PORTS.get(self.scheme)
+            self._port = DEFAULT_PORTS.get(self.scheme)
         self.path.load(tokens.path)
         self.query.load(tokens.query)
         self.fragment.load(tokens.fragment)
@@ -862,15 +871,14 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     @port.setter
     def port(self, port):
         """
-        A port value can 1-65535 or None meaning no port specified. If
-        <port> is None and self.scheme is a known scheme in
-        self.DEFAULT_PORTS, the default port value from
-        self.DEFAULT_PORTS will be used.
+        A port value can 1-65535 or None meaning no port specified. If <port>
+        is None and self.scheme is a known scheme in DEFAULT_PORTS, the default
+        port value from DEFAULT_PORTS will be used.
 
         Raises: ValueError on invalid port.
         """
         if port is None:
-            self._port = self.DEFAULT_PORTS.get(self.scheme)
+            self._port = DEFAULT_PORTS.get(self.scheme)
         elif is_valid_port(port):
             self._port = int(str(port))
         else:
@@ -885,7 +893,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             userpass += '@'
 
         netloc = self.host or ''
-        if self.port and self.port != self.DEFAULT_PORTS.get(self.scheme):
+        if self.port and self.port != DEFAULT_PORTS.get(self.scheme):
             netloc += ':' + str(self.port)
 
         netloc = ((userpass or '') + (netloc or ''))
@@ -1188,10 +1196,14 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         # Special cases.
         if self.scheme is None:
-            for start in ['//', '://']:
-                if url.startswith(start):
-                    url = url[len(start):]
-        elif (self.scheme is not None and 
+            if url.startswith('//'):
+                url = url[2:]
+            elif url.startswith('://'):
+                url = url[3:]
+        elif self.scheme in COLON_SEPARATED_SCHEMES:
+            # Change a '://' separator to ':'. Leave a ':' separator as-is.
+            url = _set_scheme(url, self.scheme)
+        elif (self.scheme is not None and
               (url == '' or  # Protocol relative URL.
                (url == '%s:' % self.scheme and not str(self.path)))):
             url += '//'
@@ -1216,22 +1228,32 @@ _get_scheme() and _change_scheme() are helper methods for getting and
 setting the scheme of URL strings. Used to change the scheme to 'http'
 and back again.
 """
-
 def _get_scheme(url):
-    if url.lstrip().startswith('//'):
-        return ''  # Protocol relative URL.
-    return url[:max(0,url.find('://'))] or None
+    scheme = None
+    if url.lstrip().startswith('//'):  # Protocol relative URL.
+        return ''
+    beforeColon = url[:max(0, url.find(':'))]
+    if beforeColon in COLON_SEPARATED_SCHEMES:
+        return beforeColon
+    return url[:max(0, url.find('://'))] or None
 
 
 def _set_scheme(url, newscheme):
-    newscheme = newscheme or ''
     scheme = _get_scheme(url)
+    newscheme = newscheme or ''
+    separator = ':' if scheme in COLON_SEPARATED_SCHEMES else '://'
+    newseparator = ':' if newscheme in COLON_SEPARATED_SCHEMES else '://'
     if scheme == '':  # Protocol relative URL.
         url = '%s:%s' % (newscheme, url)
     elif scheme is None and url:  # No scheme.
-        url = '%s://%s' % (newscheme, url)
+        url = ''.join([newscheme, newseparator, url])
     elif scheme:  # Existing scheme.
-        url = newscheme + url[len(scheme):]
+        remainder = url[len(scheme):]
+        if remainder.startswith('://'):
+            remainder = remainder[3:]
+        elif remainder.startswith(':'):
+            remainder = remainder[1:]
+        url = ''.join([newscheme, newseparator, remainder])
     return url
 
 
