@@ -1188,10 +1188,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         # Special cases.
         if self.scheme is None:
-            if url.startswith('//'):
-                url = url[2:]
-            elif url.startswith('://'):
-                url = url[3:]
+            for start in ['//', '://']:
+                if url.startswith(start):
+                    url = url[len(start):]
         elif (self.scheme is not None and 
               (url == '' or  # Protocol relative URL.
                (url == '%s:' % self.scheme and not str(self.path)))):
