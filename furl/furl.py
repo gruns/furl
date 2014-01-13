@@ -47,6 +47,9 @@ DEFAULT_PORTS = {
 # List of schemes that don't require two slashes after the colon. For example,
 # 'mailto:user@google.com' instead of 'mailto://user@google.com'. Scheme
 # strings are lowercase.
+#
+# TODO(grun): Support schemes separated by just ':', not '://' without having an
+# explicit list. There are many such schemes in various URIs.
 COLON_SEPARATED_SCHEMES = [
     'mailto',
     ]
@@ -1213,21 +1216,6 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return "%s('%s')" % (self.__class__.__name__, str(self))
 
 
-"""
-urlparse.urlsplit() and urlparse.urljoin() don't separate the query
-string from the path for schemes not in the list urlparse.uses_query.
-furl will support proper parsing of query strings and paths for all
-schemes.
-
-As a workaround, use 'http' (a scheme in urlparse.uses_query) for the
-purposes of urlparse.urlsplit() and urlparse.urljoin(), but then revert
-back to the original scheme provided once urlsplit() or urljoin() has
-completed.
-
-_get_scheme() and _change_scheme() are helper methods for getting and
-setting the scheme of URL strings. Used to change the scheme to 'http'
-and back again.
-"""
 def _get_scheme(url):
     scheme = None
     if url.lstrip().startswith('//'):  # Protocol relative URL.
@@ -1257,22 +1245,6 @@ def _set_scheme(url, newscheme):
     return url
 
 
-def urljoin(base, url):
-    """
-    Parameters:
-      base: Base URL to join with <url>.
-      url: Relative or absolute URL to join with <base>.
-
-    Returns: The resultant URL from joining <base> and <url>.
-    """
-    base_scheme, url_scheme = _get_scheme(base), _get_scheme(url)
-    httpbase = _set_scheme(base, 'http')
-    joined = urlparse.urljoin(httpbase, url)
-    if not url_scheme:
-        joined = _set_scheme(joined, base_scheme)
-    return joined
-
-
 def urlsplit(url):
     """
     Parameters:
@@ -1292,12 +1264,29 @@ def urlsplit(url):
         l[0] = scheme
         return tuple(l)
 
-    # If a scheme wasn't provided, we shouldn't add one by setting the
-    # scheme to 'http'. We can use urlparse.urlsplit(url) as-is.
+    # urlsplit() only parses the query for schemes in urlparse.uses_query,
+    # so switch to 'http' (a scheme in urlparse.uses_query) for
+    # urlparse.urlsplit() and switch back afterwards.
     if original_scheme is not None:
         url = _set_scheme(url, 'http')
     toks = urlparse.urlsplit(url)
     return urlparse.SplitResult(*_change_urltoks_scheme(toks, original_scheme))
+
+
+def urljoin(base, url):
+    """
+    Parameters:
+      base: Base URL to join with <url>.
+      url: Relative or absolute URL to join with <base>.
+
+    Returns: The resultant URL from joining <base> and <url>.
+    """
+    base_scheme, url_scheme = urlsplit(base).scheme, urlsplit(url).scheme
+    httpbase = _set_scheme(base, 'http')
+    joined = urlparse.urljoin(httpbase, url)
+    if not url_scheme:
+        joined = _set_scheme(joined, base_scheme)
+    return joined
 
 
 def join_path_segments(*args):
