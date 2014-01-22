@@ -466,11 +466,23 @@ class Query(object):
     def remove(self, query):
         if query is True:
             self.load('')
-        else:
-            keys = [query]
-            if callable_attr(query, '__iter__'):
-                keys = query
-            for key in keys:
+            return self
+
+        # Single key to remove.
+        items = [query]
+        # Dictionary or multivalue dictionary of items to remove.
+        if callable_attr(query, 'iteritems'):
+            items = self._items(query)
+        # List of keys or items to remove.
+        elif callable_attr(query, '__iter__'):
+            items = query
+
+        for item in items:
+            if callable_attr(item, '__iter__') and len(item) == 2:
+                key, value = item
+                self.params.popvalue(key, value, None)
+            else:
+                key = item
                 self.params.pop(key, None)
         return self
 
@@ -1123,10 +1135,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             self.fragment.separator = fragment_separator
         return self
 
-    def remove(
-        self, args=_absent, path=_absent, fragment=_absent, query=_absent,
-        query_params=_absent, port=False, fragment_path=_absent,
-            fragment_args=_absent, username=False, password=False):
+    def remove(self, args=_absent, path=_absent, fragment=_absent,
+               query=_absent, query_params=_absent, port=False,
+               fragment_path=_absent, fragment_args=_absent, username=False,
+               password=False):
         """
         Remove components of this furl's URL and return this furl
         instance, <self>.

@@ -621,6 +621,27 @@ class TestQuery(unittest.TestCase):
             assert q.remove(True) == q
             assert len(q.params) == 0
 
+        # List of keys to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q.remove(['a', 'b'])
+        assert not q.params.items()
+
+        # List of items to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q.remove([('a', '1'), ('b', '3')])
+        assert q.params.allitems() == [('b', '2'), ('a', '4')]
+
+        # Dictionary of items to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q.remove({'b':'3', 'a':'1'})
+        assert q.params.allitems() == [('b', '2'), ('a', '4')]
+
+        # Multivalue dictionary of items to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        omd = omdict1D([('a', '4'), ('b', '3'), ('b', '2')])
+        q.remove(omd)
+        assert q.params.allitems() == [('a', '1')]
+
     def test_params(self):
         # Basics.
         q = furl.Query('a=a&b=b')
