@@ -10,7 +10,7 @@ scheme://username:password@host:port/path?query#fragment
 
  * __scheme__ is the scheme string (all lowercase) or None. None means no
    scheme. An empty string means a protocol relative URL, like
-   '//www.google.com'.
+   `//www.google.com`.
  * __username__ is the username string for authentication.
  * __password__ is the password string for authentication with __username__.
  * __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names
