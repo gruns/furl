@@ -1230,7 +1230,6 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
 
 def _get_scheme(url):
-    scheme = None
     if url.lstrip().startswith('//'):  # Protocol relative URL.
         return ''
     beforeColon = url[:max(0, url.find(':'))]
@@ -1242,7 +1241,6 @@ def _get_scheme(url):
 def _set_scheme(url, newscheme):
     scheme = _get_scheme(url)
     newscheme = newscheme or ''
-    separator = ':' if scheme in COLON_SEPARATED_SCHEMES else '://'
     newseparator = ':' if newscheme in COLON_SEPARATED_SCHEMES else '://'
     if scheme == '':  # Protocol relative URL.
         url = '%s:%s' % (newscheme, url)
