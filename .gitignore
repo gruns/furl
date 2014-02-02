@@ -1,0 +1,12 @@
+*~
+.#*
+\#*
+.tox
+dist/
+build/
+*.pyc
+*.pyo
+*.egg
+*.egg-info
+
+

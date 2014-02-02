@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # furl - URL manipulation made simple.
 #
@@ -18,9 +19,9 @@ import warnings
 from itertools import izip
 from abc import ABCMeta, abstractmethod
 try:
-    from collections import OrderedDict as odict # Python 2.7+.
+    from collections import OrderedDict as odict  # Python 2.7+.
 except ImportError:
-    from ordereddict import OrderedDict as odict # Python 2.4-2.6.
+    from ordereddict import OrderedDict as odict  # Python 2.4-2.6.
 
 import furl
 from furl.omdict1D import omdict1D
@@ -32,6 +33,7 @@ PYTHON_27PLUS = sys.version_info[0] >= 2 and sys.version_info[1] >= 7
 # UserWarnings are raised when improperly encoded path, query, and
 # fragment strings are provided.
 #
+
 
 class itemcontainer(object):
 
@@ -96,8 +98,17 @@ class itemomdict1D(omdict1D, itemcontainer):
 class itemstr(str, itemcontainer):
 
     def allitems(self):
-        # Keys and values get unquoted. i.e. 'a=a%20a' -> ['a', 'a a'].
-        return urlparse.parse_qsl(self, keep_blank_values=True)
+        # Keys and values get unquoted. i.e. 'a=a%20a' -> ['a', 'a a']. Empty
+        # values without '=' have value None.
+        items = []
+        parsed = urlparse.parse_qsl(self, keep_blank_values=True)
+        pairstrs = pairstrs = [s2 for s1 in self.split('&')
+                               for s2 in s1.split(';')]
+        for (key, value), pairstr in zip(parsed, pairstrs):
+            if key == urllib.quote_plus(pairstr):
+                value = None
+            items.append((key, value))
+        return items
 
     def iterallitems(self):
         return iter(self.allitems())
@@ -196,7 +207,7 @@ class TestPath(unittest.TestCase):
             assert f.path.segments == [char]
 
         # Encode '/' within a path segment.
-        segment = 'a/b' # One path segment that includes the '/' character.
+        segment = 'a/b'  # One path segment that includes the '/' character.
         f = furl.furl().set(path=[segment])
         assert str(f.path) == 'a%2Fb'
         assert f.path.segments == [segment]
@@ -329,7 +340,7 @@ class TestPath(unittest.TestCase):
 
         # Remove a path string.
         p = furl.Path('a/b/s%20s/')
-        assert p.remove('b/s s/') == p # Encoding Warning.
+        assert p.remove('b/s s/') == p  # Encoding Warning.
         assert str(p) == 'a/'
 
         p = furl.Path('a/b/s%20s/')
@@ -343,7 +354,7 @@ class TestPath(unittest.TestCase):
         assert str(p) == ''
 
         p = furl.Path('a/b/s%20s/')
-        assert p.remove('b/s s') == p # Encoding Warning.
+        assert p.remove('b/s s') == p  # Encoding Warning.
         assert str(p) == 'a/b/s%20s/'
 
         p = furl.Path('a/b/s%20s/')
@@ -351,7 +362,7 @@ class TestPath(unittest.TestCase):
         assert str(p) == 'a/b/s%20s/'
         assert p.remove('s%20s') == p
         assert str(p) == 'a/b/s%20s/'
-        assert p.remove('s s') == p # Encoding Warning.
+        assert p.remove('s s') == p  # Encoding Warning.
         assert str(p) == 'a/b/s%20s/'
         assert p.remove('b/s%20s/') == p
         assert str(p) == 'a/'
@@ -363,7 +374,7 @@ class TestPath(unittest.TestCase):
         assert str(p) == ''
 
         p = furl.Path('a/b/s%20s/')
-        assert p.remove('a/b/s s/') == p # Encoding Warning.
+        assert p.remove('a/b/s s/') == p  # Encoding Warning.
         assert str(p) == ''
 
         # Remove True.
@@ -377,18 +388,18 @@ class TestPath(unittest.TestCase):
             # A URL path's isabsolute attribute is mutable if there's no
             # netloc.
             mutable = [
-                {}, # No scheme or netloc -> isabsolute is mutable.
-                {'scheme': 'nonempty'}] # Scheme, no netloc -> isabs mutable.
+                {},  # No scheme or netloc -> isabsolute is mutable.
+                {'scheme': 'nonempty'}]  # Scheme, no netloc -> isabs mutable.
             for kwargs in mutable:
                 f = furl.furl().set(path=path, **kwargs)
                 if path and path.startswith('/'):
                     assert f.path.isabsolute
                 else:
                     assert not f.path.isabsolute
-                f.path.isabsolute = False # No exception.
+                f.path.isabsolute = False  # No exception.
                 assert not f.path.isabsolute and not str(
                     f.path).startswith('/')
-                f.path.isabsolute = True # No exception.
+                f.path.isabsolute = True  # No exception.
                 assert f.path.isabsolute and str(f.path).startswith('/')
 
             # A URL path's isabsolute attribute is read-only if there's
@@ -402,12 +413,12 @@ class TestPath(unittest.TestCase):
                 {'scheme': 'nonempty', 'netloc': 'nonempty'}]
             for kwargs in readonly:
                 f = furl.furl().set(path=path, **kwargs)
-                if path: # Exception raised.
+                if path:  # Exception raised.
                     with self.assertRaises(AttributeError):
                         f.path.isabsolute = False
                     with self.assertRaises(AttributeError):
                         f.path.isabsolute = True
-                else: # No exception raised.
+                else:  # No exception raised.
                     f.path.isabsolute = False
                     assert not f.path.isabsolute and not str(
                         f.path).startswith('/')
@@ -420,25 +431,39 @@ class TestPath(unittest.TestCase):
                 assert f.fragment.path.isabsolute
             else:
                 assert not f.fragment.path.isabsolute
-            f.fragment.path.isabsolute = False # No exception.
+            f.fragment.path.isabsolute = False  # No exception.
             assert (not f.fragment.path.isabsolute and
                     not str(f.fragment.path).startswith('/'))
-            f.fragment.path.isabsolute = True # No exception.
+            f.fragment.path.isabsolute = True  # No exception.
             assert f.fragment.path.isabsolute and str(
                 f.fragment.path).startswith('/')
 
             # Sanity checks.
             f = furl.furl().set(scheme='mailto', path='dad@pumps.biz')
             assert str(f) == 'mailto:dad@pumps.biz' and not f.path.isabsolute
-            f.path.isabsolute = True # No exception.
+            f.path.isabsolute = True  # No exception.
             assert str(f) == 'mailto:/dad@pumps.biz' and f.path.isabsolute
 
             f = furl.furl().set(scheme='sup', fragment_path='/dad@pumps.biz')
             assert str(
                 f) == 'sup:#/dad@pumps.biz' and f.fragment.path.isabsolute
-            f.fragment.path.isabsolute = False # No exception.
+            f.fragment.path.isabsolute = False  # No exception.
             assert str(
                 f) == 'sup:#dad@pumps.biz' and not f.fragment.path.isabsolute
+
+    def test_normalize(self):
+        # Path not modified.
+        for path in ['', 'a', '/a', '/a/', '/a/b%20b/c', '/a/b%20b/c/']:
+            p = furl.Path(path)
+            assert p.normalize() is p and str(p) == str(p.normalize()) == path
+
+        # Path modified.
+        tonormalize = [
+            ('//', '/'), ('//a', '/a'), ('//a/', '/a/'), ('//a///', '/a/'),
+            ('////a/..//b', '/b'), ('/a/..//b//./', '/b/')]
+        for path, normalized in tonormalize:
+            p = furl.Path(path)
+            assert p.normalize() is p and str(p.normalize()) == normalized
 
     def test_nonzero(self):
         p = furl.Path()
@@ -517,14 +542,12 @@ class TestQuery(unittest.TestCase):
     def test_various(self):
         for items in self.items:
             q = furl.Query(items.original())
-
             assert q.params.allitems() == items.allitems()
             pairs = map(lambda pair: '%s=%s' % (pair[0], pair[1]),
                         self._quote_items(items))
 
             # encode() and __str__().
-            assert str(q) == q.encode() == q.encode('&') == '&'.join(pairs)
-            assert q.encode(';') == ';'.join(pairs)
+            assert str(q) == q.encode() == q.encode('&')
 
             # __nonzero__().
             if items.allitems():
@@ -598,6 +621,27 @@ class TestQuery(unittest.TestCase):
             assert q.remove(True) == q
             assert len(q.params) == 0
 
+        # List of keys to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q.remove(['a', 'b'])
+        assert not q.params.items()
+
+        # List of items to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q.remove([('a', '1'), ('b', '3')])
+        assert q.params.allitems() == [('b', '2'), ('a', '4')]
+
+        # Dictionary of items to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q.remove({'b':'3', 'a':'1'})
+        assert q.params.allitems() == [('b', '2'), ('a', '4')]
+
+        # Multivalue dictionary of items to remove.
+        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        omd = omdict1D([('a', '4'), ('b', '3'), ('b', '2')])
+        q.remove(omd)
+        assert q.params.allitems() == [('a', '1')]
+
     def test_params(self):
         # Basics.
         q = furl.Query('a=a&b=b')
@@ -641,8 +685,8 @@ class TestQuery(unittest.TestCase):
 
         # Params is an omdict (ordered multivalue dictionary).
         q.params.clear()
-        q.params.add('1', '1').set('2', '4').add(
-            '1', '11').addlist(3, [3, 3, '3'])
+        q.params.add('1', '1').set('2', '4').add('1', '11').addlist(
+            3, [3, 3, '3'])
         assert q.params.getlist('1') == ['1', '11'] and q.params['1'] == '1'
         assert q.params.getlist(3) == [3, 3, '3']
 
@@ -652,8 +696,19 @@ class TestQuery(unittest.TestCase):
             q.params = items.original()
             assert isinstance(q.params, omdict1D)
 
-            for item1, item2 in izip(q.params.iterallitems(), items.iterallitems()):
+            pairs = izip(q.params.iterallitems(), items.iterallitems())
+            for item1, item2 in pairs:
                 assert item1 == item2
+
+        # Value of '' -> '?param='. Value of None -> '?param'.
+        q = furl.Query('slrp')
+        assert str(q) == 'slrp' and q.params['slrp'] is None
+        q = furl.Query('slrp=')
+        assert str(q) == 'slrp=' and q.params['slrp'] == ''
+        q = furl.Query('prp=&slrp')
+        assert q.params['prp'] == '' and q.params['slrp'] is None
+        q.params['slrp'] = ''
+        assert str(q) == 'prp=&slrp=' and q.params['slrp'] == ''
 
     def _quote_items(self, items):
         # Calculate the expected querystring with proper query encoding.
@@ -759,7 +814,7 @@ class TestFragment(unittest.TestCase):
         assert str(f) == 'one%20two%20three?a=a&s=s+s'
 
         assert f is f.set(path='!', separator=False)
-        assert f.separator == False
+        assert f.separator is False
         assert str(f) == '!a=a&s=s+s'
 
     def test_remove(self):
@@ -885,6 +940,50 @@ class TestFurl(unittest.TestCase):
         items = urlparse.parse_qsl(urlparse.urlsplit(url).query, True)
         return (key, val) in items
 
+
+    def test_unicode(self):
+        url = u'http://ru.wikipedia.org/wiki/Восход_(ракета-носитель)'
+        f = furl.furl(url)  # Accept a unicode URL without raising an exception.
+        assert not isinstance(f.url, unicode)  # URLs cannot contain unicode.
+
+    def test_scheme(self):
+        assert furl.furl().scheme is None
+        assert furl.furl('').scheme is None
+        
+        # Lowercase.
+        assert furl.furl('/sup/').set(scheme='PrOtO').scheme == 'proto'
+        
+        # No scheme.
+        for url in ['sup.txt', '/d/sup', '#flarg']:
+            f = furl.furl(url)
+            assert f.scheme is None and f.url == url
+        
+        # Protocol relative URLs.
+        for url in ['//', '//sup.txt', '//arc.io/d/sup']:
+            f = furl.furl(url)
+            assert f.scheme == '' and f.url == url
+        
+        f = furl.furl('//sup.txt')
+        assert f.scheme == ''
+        f.scheme = None
+        assert f.scheme is None and f.url == 'sup.txt'
+        f.scheme = ''
+        assert f.scheme == '' and f.url == '//sup.txt'
+
+        # Schemes without slashes , like 'mailto:'.
+        f = furl.furl('mailto:sup@sprp.ru')
+        assert f.url == 'mailto:sup@sprp.ru'
+        f = furl.furl('mailto://sup@sprp.ru')
+        assert f.url == 'mailto:sup@sprp.ru'
+
+        f = furl.furl('mailto:sproop:spraps@sprp.ru')
+        assert f.scheme == 'mailto'
+        assert f.username == 'sproop' and f.password == 'spraps'
+        assert f.host == 'sprp.ru'
+
+        f = furl.furl('mailto:')
+        assert f.url == 'mailto:' and f.scheme == 'mailto'
+
     def test_username_and_password(self):
         # Empty usernames and passwords.
         for url in ['', 'http://www.pumps.com/']:
@@ -973,7 +1072,6 @@ class TestFurl(unittest.TestCase):
         f.netloc = 'user:pass@domain.com'
         assert f.username == 'user' and f.password == 'pass'
         assert f.netloc == 'user:pass@domain.com'
-
         f = furl.furl()
         assert f.username is f.password is None
         f.username = 'uu'
@@ -1115,15 +1213,15 @@ class TestFurl(unittest.TestCase):
         # query and the fragment query, resulting in the str(path),
         # str(query), and str(fragment) values below.
         url = (
-            "sup://example.com/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,"
-            "==?/?:@-._~!$'()*+,;=/?:@-._~!$'()*+,;==#/?:@-._~!$&'()*+,;=")
+            "sup://example.com/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+"
+            ",==?/?:@-._~!$'()*+,;=/?:@-._~!$'()*+,;==#/?:@-._~!$&'()*+,;=")
         pathstr = "/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,=="
         querystr = "/?:@-._~!$'()*+,=&=/?:@-._~!$'()*+,&=="
         fragmentstr = "/?:@-._~!$=&'()*+,=&="
         f = furl.furl(url)
         assert f.scheme == 'sup'
         assert f.host == 'example.com'
-        assert f.port == None
+        assert f.port is None
         assert f.netloc == 'example.com'
         assert str(f.path) == pathstr
         assert str(f.query) == querystr
@@ -1141,7 +1239,7 @@ class TestFurl(unittest.TestCase):
         f.scheme = None
         assert f.scheme is None and f.netloc is None and f.url == ''
         f.scheme = ''
-        assert f.scheme == '' and f.netloc is None and f.url == '://'
+        assert f.scheme == '' and f.netloc is None and f.url == '//'
 
         # Host only.
         f = furl.furl().set(host='pumps.meat')
@@ -1231,7 +1329,7 @@ class TestFurl(unittest.TestCase):
         # Default port values.
         assert furl.furl('http://www.pumps.com/').port == 80
         assert furl.furl('https://www.pumps.com/').port == 443
-        assert furl.furl('undefined://www.pumps.com/').port == None
+        assert furl.furl('undefined://www.pumps.com/').port is None
 
         # Override default port values.
         assert furl.furl('http://www.pumps.com:9000/').port == 9000
@@ -1247,7 +1345,7 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('undefined://www.pumps.com:9000/')
         f.port = None
         assert f.url == 'undefined://www.pumps.com/'
-        assert f.port == None
+        assert f.port is None
 
         # Invalid port raises ValueError with no side effects.
         with self.assertRaises(ValueError):
@@ -1502,7 +1600,7 @@ class TestFurl(unittest.TestCase):
         urls = ['sup', '127.0.0.1', 'www.google.com', '192.168.1.1:8000']
         for url in urls:
             assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
-            assert furl.urlsplit(url) == urlparse.urlsplit(url)
+            assert furl.urlsplit(url).path == urlparse.urlsplit(url).path
 
         # No changes to existing urlsplit() behavior for known schemes.
         url = 'http://www.pumps.com/'
@@ -1525,9 +1623,9 @@ class TestFurl(unittest.TestCase):
         assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
         assert furl.urlsplit(url) == correct
 
-        url = 'crazyyy://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#fragment'
+        url = 'crazyyy://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#frag'
         correct = ('crazyyy', 'www.yahoo.co.uk', '/one/two/three',
-                   'a=a&b=b&m=m%26m', 'fragment')
+                   'a=a&b=b&m=m%26m', 'frag')
         assert isinstance(furl.urlsplit(url), urlparse.SplitResult)
         assert furl.urlsplit(url) == correct
 

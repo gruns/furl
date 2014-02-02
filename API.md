@@ -8,7 +8,9 @@ furl objects let you access and modify the components of a URL
 scheme://username:password@host:port/path?query#fragment
 ```
 
- * __scheme__ is the scheme string, all lowercase.
+ * __scheme__ is the scheme string (all lowercase) or None. None means no
+   scheme. An empty string means a protocol relative URL, like
+   `//www.google.com`.
  * __username__ is the username string for authentication.
  * __password__ is the password string for authentication with __username__.
  * __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names
@@ -23,8 +25,8 @@ scheme://username:password@host:port/path?query#fragment
 
 ### Scheme, Username, Password, Host, Port, and Network Location
 
-__scheme__, __username__, __password__, and __host__ are strings. __port__ is an
-integer or None.
+__scheme__, __username__, __password__, and __host__ are strings or
+None. __port__ is an integer or None.
 
 ```pycon
 >>> f = furl('http://user:pass@www.google.com:99/')
@@ -77,7 +79,7 @@ Path('/a/larg ish/path')
 '/a/larg%20ish/path'
 ```
 
-Manipulation
+##### Manipulation
 
 ```pycon
 >>> f.path.segments = ['a', 'new', 'path', '']
@@ -100,11 +102,11 @@ Manipulation
 
 A path that starts with '/' is considered absolute, and a Path can be absolute
 or not as specified (or set) by the boolean attribute __isabsolute__. URL Paths
-have a special restriction: they must be absolute if there's a __netloc__
-(username, password, host, and/or port) present. This restriction exists because
-a URL path must start with '/' to separate itself from a __netloc__. Fragment
-Paths have no such limitation and __isabsolute__ and can be be True or False
-without restriction.
+have a special restriction: they must be absolute if a __netloc__ (username,
+password, host, and/or port) is present. This restriction exists because a URL
+path must start with '/' to separate itself from a __netloc__. Fragment Paths
+have no such limitation and __isabsolute__ and can be be True or False without
+restriction.
 
 Here's a URL Path example that illustrates how __isabsolute__ becomes True and
 read-only in the presence of a __netloc__.
@@ -162,6 +164,16 @@ False
 True
 ```
 
+A path can be normalized with __normalize()__. __normalize()__ returns the Path
+object for method chaining.
+
+```pycon
+>>> f = furl('http://www.google.com////a/./b/lolsup/../c/')
+>>> f.path.normalize()
+>>> f.url
+'http://www.google.com/a/b/c/'
+```
+
 
 ### Query
 
@@ -194,7 +206,7 @@ omdict1D([('one', '1'), ('two', '2')])
 True
 ```
 
-Manipulation
+##### Manipulation
 
 __params__ is a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that
@@ -210,8 +222,8 @@ omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus
 omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 ```
 
-__params__ can also store multiple values for the same key because it is an
-[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict).
+__params__ can also store multiple values for the same key because it's a
+multivalue dictionary.
 
 ```pycon
 >>> f = furl('http://www.google.com/?space=jams&space=slams')
@@ -248,6 +260,27 @@ See the [omdict](https://github.com/gruns/orderedmultidict) documentation for
 more information on interacting with the ordered multivalue dictionary
 __params__.
 
+##### Parameters
+
+To produce an empty query argument like `http://sprop.su/?param=`, use an empty
+string as the parameter value.
+
+```pycon
+>>> f = furl('http://sprop.su')
+>>> f.args['param'] = ''
+>>> f.url
+'http://sprop.su/?param='
+```
+
+To produce an empty query argument without a trailing `=`, use `None` as the
+parameter value.
+
+```pycon
+>>> f = furl('http://sprop.su')
+>>> f.args['param'] = None
+>>> f.url
+'http://sprop.su/?param'
+```
 
 __encode(delimeter='&')__ can be used to encode query strings with delimeters
 like `;`.
@@ -259,6 +292,7 @@ like `;`.
 >>> f.query.encode(';')
 'space=jams;woofs=squeeze+dog'
 ```
+
 
 
 ### Fragment
