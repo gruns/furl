@@ -7,8 +7,6 @@
 #
 # License: Build Amazing Things (Unlicense)
 
-from itertools import chain
-
 from orderedmultidict import omdict
 
 
