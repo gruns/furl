@@ -42,17 +42,17 @@ DEFAULT_PORTS = {
     'ssh': 22,
     'http': 80,
     'https': 443,
-    }
+}
 
 # List of schemes that don't require two slashes after the colon. For example,
 # 'mailto:user@google.com' instead of 'mailto://user@google.com'. Scheme
 # strings are lowercase.
 #
-# TODO(grun): Support schemes separated by just ':', not '://' without having an
-# explicit list. There are many such schemes in various URIs.
+# TODO(grun): Support schemes separated by just ':', not '://' without having
+# an explicit list. There are many such schemes in various URIs.
 COLON_SEPARATED_SCHEMES = [
     'mailto',
-    ]
+]
 
 
 class Path(object):
@@ -169,7 +169,7 @@ class Path(object):
         Returns: <self>.
         """
         if str(self):
-            normalized = normpath(str(self)) + '/'*self.isdir
+            normalized = normpath(str(self)) + '/' * self.isdir
             if normalized.startswith('//'):  # http://bugs.python.org/636648
                 normalized = '/' + normalized.lstrip('/')
             self.load(normalized)
@@ -585,7 +585,7 @@ class Query(object):
                         else (p[0], p[1]), pairs)
             for key, value in pairs:
                 if (not is_valid_encoded_query_key(key) or
-                    not is_valid_encoded_query_value(value)):
+                        not is_valid_encoded_query_value(value)):
                     s = ("Improperly encoded query string received: '%s'. "
                          "Proceeding, but did you mean '%s'?" %
                          (querystr, urllib.urlencode(pairs)))
@@ -796,7 +796,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       scheme://username:password@host:port/path?query#fragment
 
     Attributes:
-      DEFAULT_PORTS: 
+      DEFAULT_PORTS:
       strict: Boolean whether or not UserWarnings should be raised if
         improperly encoded path, query, or fragment strings are provided
         to methods that take such strings, like load(), add(), set(),
@@ -1075,7 +1075,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         Returns: <self>.
         """
         if (netloc is not _absent and
-            (host is not _absent or port is not _absent)):
+                (host is not _absent or port is not _absent)):
             s = ('Possible parameter overlap: <netloc> and <host> and/or '
                  '<port> provided. See furl.set() documentation for more '
                  'details.')
@@ -1198,9 +1198,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return self.url == other.url
 
     def __setattr__(self, attr, value):
-        if (not PathCompositionInterface.__setattr__(self, attr, value) and
-            not QueryCompositionInterface.__setattr__(self, attr, value) and
-            not FragmentCompositionInterface.__setattr__(self, attr, value)):
+        if all([not PathCompositionInterface.__setattr__(self, attr, value),
+                not QueryCompositionInterface.__setattr__(self, attr, value),
+                not FragmentCompositionInterface.__setattr__(self, attr, value)
+                ]):
             object.__setattr__(self, attr, value)
 
     def __str__(self):
@@ -1429,15 +1430,21 @@ def callable_attr(obj, attr):
 #
 VALID_ENCODED_PATH_SEGMENT_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$')
+
+
 def is_valid_encoded_path_segment(segment):
     return bool(VALID_ENCODED_PATH_SEGMENT_REGEX.match(segment))
 
 VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$')
+
+
 def is_valid_encoded_query_key(key):
     return bool(VALID_ENCODED_QUERY_KEY_REGEX.match(key))
 
 VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$')
+
+
 def is_valid_encoded_query_value(value):
     return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
