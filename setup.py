@@ -34,5 +34,5 @@ setup(name='furl',
                    ],
       install_requires=['orderedmultidict >= 0.7.1'],
       test_suite='tests',
-      tests_require=[] if version_info[0:2] >= [2,7] else ['unittest2'],
+      tests_require=[] if version_info[0:2] >= [2, 7] else ['unittest2'],
       )

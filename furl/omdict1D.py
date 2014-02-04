@@ -7,8 +7,6 @@
 #
 # License: Build Amazing Things (Unlicense)
 
-from itertools import chain
-
 from orderedmultidict import omdict
 
 
@@ -70,8 +68,8 @@ class omdict1D(omdict):
         """
         for key, values in items:
             # <values> is not a list or an empty list.
-            if (not self._quacks_like_a_list_but_not_str(values) or
-                self._quacks_like_a_list_but_not_str(values) and not values):
+            like_list_not_str = self._quacks_like_a_list_but_not_str(values)
+            if not like_list_not_str or (like_list_not_str and not values):
                 values = [values]
 
             for value in values:

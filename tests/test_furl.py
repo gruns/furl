@@ -622,22 +622,22 @@ class TestQuery(unittest.TestCase):
             assert len(q.params) == 0
 
         # List of keys to remove.
-        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q = furl.Query([('a', '1'), ('b', '2'), ('b', '3'), ('a', '4')])
         q.remove(['a', 'b'])
         assert not q.params.items()
 
         # List of items to remove.
-        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q = furl.Query([('a', '1'), ('b', '2'), ('b', '3'), ('a', '4')])
         q.remove([('a', '1'), ('b', '3')])
         assert q.params.allitems() == [('b', '2'), ('a', '4')]
 
         # Dictionary of items to remove.
-        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
-        q.remove({'b':'3', 'a':'1'})
+        q = furl.Query([('a', '1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q.remove({'b': '3', 'a': '1'})
         assert q.params.allitems() == [('b', '2'), ('a', '4')]
 
         # Multivalue dictionary of items to remove.
-        q = furl.Query([('a','1'), ('b', '2'), ('b', '3'), ('a', '4')])
+        q = furl.Query([('a', '1'), ('b', '2'), ('b', '3'), ('a', '4')])
         omd = omdict1D([('a', '4'), ('b', '3'), ('b', '2')])
         q.remove(omd)
         assert q.params.allitems() == [('a', '1')]
@@ -940,29 +940,28 @@ class TestFurl(unittest.TestCase):
         items = urlparse.parse_qsl(urlparse.urlsplit(url).query, True)
         return (key, val) in items
 
-
     def test_unicode(self):
         url = u'http://ru.wikipedia.org/wiki/Восход_(ракета-носитель)'
-        f = furl.furl(url)  # Accept a unicode URL without raising an exception.
+        f = furl.furl(url)  # Accept unicode without raising an exception.
         assert not isinstance(f.url, unicode)  # URLs cannot contain unicode.
 
     def test_scheme(self):
         assert furl.furl().scheme is None
         assert furl.furl('').scheme is None
-        
+
         # Lowercase.
         assert furl.furl('/sup/').set(scheme='PrOtO').scheme == 'proto'
-        
+
         # No scheme.
         for url in ['sup.txt', '/d/sup', '#flarg']:
             f = furl.furl(url)
             assert f.scheme is None and f.url == url
-        
+
         # Protocol relative URLs.
         for url in ['//', '//sup.txt', '//arc.io/d/sup']:
             f = furl.furl(url)
             assert f.scheme == '' and f.url == url
-        
+
         f = furl.furl('//sup.txt')
         assert f.scheme == ''
         f.scheme = None

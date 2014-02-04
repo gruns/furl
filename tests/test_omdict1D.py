@@ -8,7 +8,7 @@
 # License: Build Amazing Things (Unlicense)
 
 import unittest
-from itertools import izip, chain, product, repeat, permutations
+from itertools import izip, chain, product, permutations
 
 from furl.omdict1D import omdict1D
 from orderedmultidict import omdict
