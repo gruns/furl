@@ -1,7 +1,13 @@
 import os
+import re
 import sys
+from os.path import dirname, join as pjoin
 from sys import version_info
 from setuptools import setup, find_packages
+
+with open(pjoin(dirname(__file__), 'furl', '__init__.py')) as fd:
+    VERSION = re.compile(
+        r".*__version__ = '(.*?)'", re.S).match(fd.read()).group(1)
 
 if sys.argv[-1] == 'publish':
     '''
@@ -14,7 +20,7 @@ long_description = (
     'Information and documentation at https://github.com/gruns/furl.')
 
 setup(name='furl',
-      version='0.3.7',  # Keep synchronized with furl/__init__.py.
+      version=VERSION,
       author='Arthur Grunseid',
       author_email='grunseid@gmail.com',
       url='https://github.com/gruns/furl',
