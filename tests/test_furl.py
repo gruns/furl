@@ -483,6 +483,12 @@ class TestPath(unittest.TestCase):
         p = furl.Path('/asdf')
         assert p
 
+    def test_unicode(self):
+        path = u'/wiki/Восход'
+        path_encoded = '/wiki/%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
+        p = furl.Path(path)
+        assert str(p) == path_encoded
+
 
 class TestQuery(unittest.TestCase):
 
@@ -955,15 +961,27 @@ class TestFurl(unittest.TestCase):
         return (key, val) in items
 
     def test_unicode(self):
-        url = u'http://ru.wikipedia.org/wiki/Восход_(ракета-носитель)'
-        f = furl.furl(url)  # Accept unicode without raising an exception.
-        assert not isinstance(f.url, unicode)  # URLs cannot contain unicode.
+        path = u'Восход'
+        path_encoded = '%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
 
         key, value = u'testö', u'testä'
-        f = furl.furl(url)
+        key_encoded = urllib.quote_plus(key.encode('utf8'))
+        value_encoded = urllib.quote_plus(value.encode('utf8'))
+
+        base_url = u'http://pumps.ru/'
+        url = base_url + path
+        url_encoded = base_url + path_encoded
+
+        f = furl.furl(url)  # Accept unicode without raising an exception.
+        assert f.url == url_encoded
+
+        f = furl.furl(base_url)
         f.args[key] = value
-        assert f.args[key] == value  # Unicode keys and values are unmodified.
+        assert f.args[key] == value  # Unicode keys and values aren't modified.
         assert not isinstance(f.url, unicode)  # URLs cannot contain unicode.
+        f.path.segments = [path]
+        assert f.path.segments == [path]  # Unicode segments aren't modified.
+        assert f.url == url_encoded + '?%s=%s' % (key_encoded, value_encoded)
 
     def test_scheme(self):
         assert furl.furl().scheme is None

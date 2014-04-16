@@ -222,7 +222,7 @@ class Path(object):
                 segments = ['', '']
             else:
                 segments.insert(0, '')
-        return self._path_from_segments(segments, quoted=True)
+        return self._path_from_segments(segments)
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
@@ -240,27 +240,21 @@ class Path(object):
                 if not is_valid_encoded_path_segment(segment):
                     s = ("Improperly encoded path string received: '%s'. "
                          "Proceeding, but did you mean '%s'?" %
-                         (path, self._path_from_segments(segments, True)))
+                         (path, self._path_from_segments(segments)))
                     warnings.warn(s, UserWarning)
                     break
         return map(urllib.unquote, segments)
 
-    def _path_from_segments(self, segments, quoted=True):
+    def _path_from_segments(self, segments):
         """
-        Combine the provided path segments <segments> into a path
-        string. If <quoted> is True, each path segment will be
-        quoted. If <quoted> is False, each path segment will be
-        unquoted.
+        Combine the provided path segments <segments> into a path string. Path
+        segments in <segments> will be quoted.
 
-        Returns: A path string, with either quoted or unquoted path
-        segments.
+        Returns: A path string with quoted path segments.
         """
-        segments_str = ''.join(segments)
-        if quoted and '%' not in segments_str:
-            segments = map(lambda s: urllib.quote(s, self.SAFE_SEGMENT_CHARS),
-                           segments)
-        elif not quoted and '%' in segments_str:
-            segments = map(urllib.unquote, segments)
+        if '%' not in ''.join(segments):  # Don't double-encode the path.
+            segments = [urllib.quote(u2utf8(segment), self.SAFE_SEGMENT_CHARS)
+                        for segment in segments]
         return '/'.join(segments)
 
 
@@ -511,10 +505,7 @@ class Query(object):
         """
         pairs = []
         for key, value in self.params.iterallitems():
-            if isinstance(key, unicode):
-                key = key.encode('utf8')
-            if isinstance(value, unicode):
-                value = value.encode('utf8')
+            key, value = u2utf8(key), u2utf8(value)
             quoted_key = urllib.quote_plus(str(key), self.SAFE_KEY_CHARS)
             quoted_value = urllib.quote_plus(str(value), self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
@@ -845,9 +836,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self._port = None
         self._scheme = None
 
-        if isinstance(url, unicode):
-            url = url.encode('utf-8')
-        url = str(url)
+        url = str(u2utf8(url))
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
         # Python 2.7+. In Python <= 2.6, urlsplit() doesn't raise a
@@ -1393,6 +1382,12 @@ def is_valid_port(port):
 
 def callable_attr(obj, attr):
     return hasattr(obj, attr) and callable(getattr(obj, attr))
+
+
+def u2utf8(s):
+    if isinstance(s, unicode):
+        return s.encode('utf8')
+    return s
 
 
 #
