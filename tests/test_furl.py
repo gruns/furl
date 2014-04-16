@@ -710,6 +710,20 @@ class TestQuery(unittest.TestCase):
         q.params['slrp'] = ''
         assert str(q) == 'prp=&slrp=' and q.params['slrp'] == ''
 
+    def test_unicode(self):
+        key, value = u'Восход_', u'testä'
+        key_encoded = urllib.quote_plus(key.encode('utf8'))
+        value_encoded = urllib.quote_plus(value.encode('utf8'))
+
+        q = furl.Query(u'%s=%s' % (key, value))
+        assert q.params[key] == value
+        assert str(q) == '%s=%s' % (key_encoded, value_encoded)
+
+        q = furl.Query()
+        q.params[key] = value
+        assert q.params[key] == value
+        assert str(q) == '%s=%s' % (key_encoded, value_encoded)
+
     def _quote_items(self, items):
         # Calculate the expected querystring with proper query encoding.
         #   Valid query key characters: "/?:@-._~!$'()*,;"
@@ -943,6 +957,12 @@ class TestFurl(unittest.TestCase):
     def test_unicode(self):
         url = u'http://ru.wikipedia.org/wiki/Восход_(ракета-носитель)'
         f = furl.furl(url)  # Accept unicode without raising an exception.
+        assert not isinstance(f.url, unicode)  # URLs cannot contain unicode.
+
+        key, value = u'testö', u'testä'
+        f = furl.furl(url)
+        f.args[key] = value
+        assert f.args[key] == value  # Unicode keys and values are unmodified.
         assert not isinstance(f.url, unicode)  # URLs cannot contain unicode.
 
     def test_scheme(self):

@@ -511,6 +511,10 @@ class Query(object):
         """
         pairs = []
         for key, value in self.params.iterallitems():
+            if isinstance(key, unicode):
+                key = key.encode('utf8')
+            if isinstance(value, unicode):
+                value = value.encode('utf8')
             quoted_key = urllib.quote_plus(str(key), self.SAFE_KEY_CHARS)
             quoted_value = urllib.quote_plus(str(value), self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
@@ -596,8 +600,9 @@ class Query(object):
         items = []
         parsed_items = urlparse.parse_qsl(querystr, keep_blank_values=True)
         for (key, value), pairstr in izip(parsed_items, pairstrs):
-            # Empty value without '=', like '?sup'.
-            if key == urllib.quote_plus(pairstr):
+            # Empty value without '=', like '?sup'. Encode to utf8 to handle
+            # unicode strings.
+            if key.encode('utf8') == urllib.quote_plus(pairstr.encode('utf8')):
                 value = None
             items.append((key, value))
         return items
