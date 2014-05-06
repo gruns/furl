@@ -234,15 +234,16 @@ class Path(object):
         Raises: UserWarning if <path> is an improperly encoded path
         string and self.strict is True.
         """
-        segments = path.split('/')
-        if self.strict:
-            for segment in segments:
-                if not is_valid_encoded_path_segment(segment):
+        segments = []
+        for segment in u2utf8(path).split('/'):
+            if not is_valid_encoded_path_segment(segment):
+                segment = urllib.quote(segment)
+                if self.strict:
                     s = ("Improperly encoded path string received: '%s'. "
                          "Proceeding, but did you mean '%s'?" %
                          (path, self._path_from_segments(segments)))
                     warnings.warn(s, UserWarning)
-                    break
+            segments.append(segment)
         return map(urllib.unquote, segments)
 
     def _path_from_segments(self, segments):
@@ -586,7 +587,6 @@ class Query(object):
                          "Proceeding, but did you mean '%s'?" %
                          (querystr, urllib.urlencode(pairs)))
                     warnings.warn(s, UserWarning)
-                    break
 
         items = []
         parsed_items = urlparse.parse_qsl(querystr, keep_blank_values=True)
@@ -832,11 +832,11 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         Raises: ValueError on invalid URL (for example malformed IPv6
         address or invalid port).
         """
-        self.username = self.password = self.scheme = self._host = None
-        self._port = None
-        self._scheme = None
+        self._host = self._port = self._scheme = None
+        self.username = self.password = self.scheme = None
 
-        url = str(u2utf8(url))
+        if not isinstance(url, basestring):
+            url = str(url)
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
         # Python 2.7+. In Python <= 2.6, urlsplit() doesn't raise a
