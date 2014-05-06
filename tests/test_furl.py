@@ -965,8 +965,7 @@ class TestFurl(unittest.TestCase):
         path_encoded = '%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
 
         key, value = u'testö', u'testä'
-        key_encoded = urllib.quote_plus(key.encode('utf8'))
-        value_encoded = urllib.quote_plus(value.encode('utf8'))
+        key_encoded, value_encoded = 'test%C3%B6', 'test%C3%A4'
 
         base_url = u'http://pumps.ru'
         full_url = '%s/%s?%s=%s' % (base_url, path, key, value)
