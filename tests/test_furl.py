@@ -465,6 +465,16 @@ class TestPath(unittest.TestCase):
             p = furl.Path(path)
             assert p.normalize() is p and str(p.normalize()) == normalized
 
+    def test_equality(self):
+        assert furl.Path() == furl.Path()
+
+        p1 = furl.furl('http://sprop.ru/a/b/c/').path
+        p11 = furl.furl('http://spep.ru/a/b/c/').path
+        p2 = furl.furl('http://sprop.ru/a/b/c/d/').path
+
+        assert p1 == p11 and str(p1) == str(p11)
+        assert p1 != p2 and str(p1) != str(p2)
+
     def test_nonzero(self):
         p = furl.Path()
         assert not p
@@ -730,6 +740,16 @@ class TestQuery(unittest.TestCase):
         assert q.params[key] == value
         assert str(q) == '%s=%s' % (key_encoded, value_encoded)
 
+    def test_equality(self):
+        assert furl.Query() == furl.Query()
+
+        q1 = furl.furl('http://sprop.ru/?a=1&b=2').query
+        q11 = furl.furl('http://spep.ru/path/?a=1&b=2').query
+        q2 = furl.furl('http://sprop.ru/?b=2&a=1').query
+
+        assert q1 == q11 and str(q1) == str(q11)
+        assert q1 != q2 and str(q1) != str(q2)
+
     def _quote_items(self, items):
         # Calculate the expected querystring with proper query encoding.
         #   Valid query key characters: "/?:@-._~!$'()*,;"
@@ -877,6 +897,16 @@ class TestFragment(unittest.TestCase):
         #  assert str(f.fragment) == str(f.path) == 'a?b?c?d?'
         #
         assert str(f.fragment) == 'a?b?c?d?'
+
+    def test_equality(self):
+        assert furl.Fragment() == furl.Fragment()
+
+        f1 = furl.furl('http://sprop.ru/#ja').fragment
+        f11 = furl.furl('http://spep.ru/#ja').fragment
+        f2 = furl.furl('http://sprop.ru/#nein').fragment
+
+        assert f1 == f11 and str(f1) == str(f11)
+        assert f1 != f2 and str(f1) != str(f2)
 
     def test_nonzero(self):
         f = furl.Fragment()

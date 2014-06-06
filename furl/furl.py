@@ -212,6 +212,12 @@ class Path(object):
         """
         return not self.isdir
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __ne__(self, other):
+        return not self == other
+
     def __nonzero__(self):
         return len(self.segments) > 0
 
@@ -515,6 +521,12 @@ class Query(object):
             pairs.append(pair)
         return delimeter.join(pairs)
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __ne__(self, other):
+        return not self == other
+
     def __nonzero__(self):
         return len(self.params) > 0
 
@@ -720,6 +732,12 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         if args is not _absent:
             self.query.remove(args)
         return self
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def __ne__(self, other):
+        return not self == other
 
     def __setattr__(self, attr, value):
         if (not PathCompositionInterface.__setattr__(self, attr, value) and
@@ -1191,6 +1209,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     def __eq__(self, other):
         return self.url == other.url
+
+    def __ne__(self, other):
+        return not self == other
 
     def __setattr__(self, attr, value):
         if (not PathCompositionInterface.__setattr__(self, attr, value) and
