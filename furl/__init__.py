@@ -8,7 +8,7 @@
 # License: Build Amazing Things (Unlicense)
 
 __title__ = 'furl'
-__version__ = '0.3.91'
+__version__ = '0.3.92'
 __license__ = 'Unlicense'
 __author__ = 'Arthur Grunseid'
 __contact__ = 'grunseid@gmail.com'
