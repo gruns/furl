@@ -1,8 +1,8 @@
 import os
 import re
 import sys
-from os.path import dirname, join as pjoin
 from sys import version_info
+from os.path import dirname, join as pjoin
 from setuptools import setup, find_packages
 
 with open(pjoin(dirname(__file__), 'furl', '__init__.py')) as fd:
@@ -10,9 +10,9 @@ with open(pjoin(dirname(__file__), 'furl', '__init__.py')) as fd:
         r".*__version__ = '(.*?)'", re.S).match(fd.read()).group(1)
 
 if sys.argv[-1] == 'publish':
-    '''
+    """
     Publish to PyPi.
-    '''
+    """
     os.system('python setup.py sdist upload')
     sys.exit()
 
@@ -38,7 +38,7 @@ setup(name='furl',
                    'Programming Language :: Python :: 2.6',
                    'Programming Language :: Python :: 2.7',
                    ],
-      install_requires=['orderedmultidict >= 0.7.1'],
+      install_requires=['orderedmultidict >= 0.7.2'],
       test_suite='tests',
       tests_require=[] if version_info[0:2] >= [2, 7] else ['unittest2'],
       )
