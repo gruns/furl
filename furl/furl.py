@@ -42,7 +42,7 @@ DEFAULT_PORTS = {
     'ssh': 22,
     'http': 80,
     'https': 443,
-}
+    }
 
 # List of schemes that don't require two slashes after the colon. For example,
 # 'mailto:user@google.com' instead of 'mailto://user@google.com'. Scheme
@@ -54,7 +54,7 @@ COLON_SEPARATED_SCHEMES = [
     'mailto',
     'tel',
     'sms'
-]
+    ]
 
 
 class Path(object):
