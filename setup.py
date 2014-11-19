@@ -10,9 +10,7 @@ with open(pjoin(dirname(__file__), 'furl', '__init__.py')) as fd:
         r".*__version__ = '(.*?)'", re.S).match(fd.read()).group(1)
 
 if sys.argv[-1] == 'publish':
-    """
-    Publish to PyPi.
-    """
+    """Publish to PyPi."""
     os.system('python setup.py sdist upload')
     sys.exit()
 
@@ -39,13 +37,15 @@ setup(
         'License :: Freely Distributable',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     install_requires=[
-        'orderedmultidict>=0.7.3',
         'six==1.8.0',
+        'orderedmultidict>=0.7.3',
     ],
     test_suite='tests',
     tests_require=[] if list(version_info[:2]) >= [2, 7] else ['unittest2'],

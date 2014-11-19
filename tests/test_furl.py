@@ -9,17 +9,16 @@
 # License: Build Amazing Things (Unlicense)
 
 import sys
-import six
-from six.moves import urllib
 import warnings
-
 from abc import ABCMeta, abstractmethod
 
-from furl.compat import unittest
-from furl.compat import OrderedDict as odict
+import six
+from six.moves import urllib
 
 import furl
+from furl.compat import unittest
 from furl.omdict1D import omdict1D
+from furl.compat import OrderedDict as odict
 
 PYTHON_27PLUS = sys.version_info[0] >= 2 and sys.version_info[1] >= 7
 
@@ -28,8 +27,6 @@ PYTHON_27PLUS = sys.version_info[0] >= 2 and sys.version_info[1] >= 7
 # UserWarnings are raised when improperly encoded path, query, and
 # fragment strings are provided.
 #
-
-import six
 
 
 @six.add_metaclass(ABCMeta)

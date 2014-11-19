@@ -59,7 +59,9 @@ COLON_SEPARATED_SCHEMES = [
 
 
 def non_text_iterable(value):
-    return callable_attr(value, '__iter__') and not isinstance(value, basestring)
+    b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
+    return b
+        
 
 
 class Path(object):
@@ -879,10 +881,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     @scheme.setter
     def scheme(self, scheme):
-        try:
+        if callable_attr(scheme, 'lower'):
             scheme = scheme.lower()
-        except AttributeError:
-            pass
         self._scheme = scheme
 
     @property
@@ -1226,7 +1226,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     def __unicode__(self):
         url = urllib.parse.urlunsplit((
-            self.scheme or '',  # Must be text type in python 3
+            self.scheme or '',  # Must be text type in Python 3.
             self.netloc,
             str(self.path),
             str(self.query),
