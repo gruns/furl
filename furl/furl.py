@@ -9,13 +9,14 @@
 
 import re
 import abc
-import urllib
-import urlparse
 import warnings
-from itertools import izip
 from posixpath import normpath
 
-from omdict1D import omdict1D
+import six
+from six.moves import urllib
+
+from .omdict1D import omdict1D
+from .compat import basestring, UnicodeMixin
 
 _absent = object()
 
@@ -42,7 +43,7 @@ DEFAULT_PORTS = {
     'ssh': 22,
     'http': 80,
     'https': 443,
-    }
+}
 
 # List of schemes that don't require two slashes after the colon. For example,
 # 'mailto:user@google.com' instead of 'mailto://user@google.com'. Scheme
@@ -53,8 +54,12 @@ DEFAULT_PORTS = {
 COLON_SEPARATED_SCHEMES = [
     'mailto',
     'tel',
-    'sms'
-    ]
+    'sms',
+]
+
+
+def non_text_iterable(value):
+    return callable_attr(value, '__iter__') and not isinstance(value, basestring)
 
 
 class Path(object):
@@ -122,7 +127,7 @@ class Path(object):
 
         if self.isabsolute and len(segments) > 1 and segments[0] == '':
             segments.pop(0)
-        self.segments = [urllib.unquote(segment) for segment in segments]
+        self.segments = [urllib.parse.unquote(segment) for segment in segments]
 
         return self
 
@@ -158,7 +163,7 @@ class Path(object):
             self.load('')
         else:
             segments = path  # List interface.
-            if isinstance(path, basestring):  # String interface.
+            if isinstance(path, six.string_types):  # String interface.
                 segments = self._segments_from_path(path)
             base = ([''] if self.isabsolute else []) + self.segments
             self.load(remove_path_segments(base, segments))
@@ -220,8 +225,9 @@ class Path(object):
     def __ne__(self, other):
         return not self == other
 
-    def __nonzero__(self):
+    def __bool__(self):
         return len(self.segments) > 0
+    __nonzero__ = __bool__
 
     def __str__(self):
         segments = list(self.segments)
@@ -243,16 +249,16 @@ class Path(object):
         string and self.strict is True.
         """
         segments = []
-        for segment in u2utf8(path).split('/'):
+        for segment in path.split('/'):
             if not is_valid_encoded_path_segment(segment):
-                segment = urllib.quote(segment)
+                segment = urllib.parse.quote(segment)
                 if self.strict:
                     s = ("Improperly encoded path string received: '%s'. "
                          "Proceeding, but did you mean '%s'?" %
                          (path, self._path_from_segments(segments)))
                     warnings.warn(s, UserWarning)
             segments.append(segment)
-        return map(urllib.unquote, segments)
+        return list(map(urllib.parse.unquote, segments))
 
     def _path_from_segments(self, segments):
         """
@@ -262,18 +268,17 @@ class Path(object):
         Returns: A path string with quoted path segments.
         """
         if '%' not in ''.join(segments):  # Don't double-encode the path.
-            segments = [urllib.quote(u2utf8(segment), self.SAFE_SEGMENT_CHARS)
+            segments = [urllib.parse.quote(segment, self.SAFE_SEGMENT_CHARS)
                         for segment in segments]
         return '/'.join(segments)
 
 
+@six.add_metaclass(abc.ABCMeta)
 class PathCompositionInterface(object):
 
     """
     Abstract class interface for a parent class that contains a Path.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
         """
@@ -319,6 +324,7 @@ class PathCompositionInterface(object):
         return False
 
 
+@six.add_metaclass(abc.ABCMeta)
 class URLPathCompositionInterface(PathCompositionInterface):
 
     """
@@ -339,8 +345,6 @@ class URLPathCompositionInterface(PathCompositionInterface):
       http://en.wikipedia.org/wiki/URI_scheme#Examples
     """
 
-    __metaclass__ = abc.ABCMeta
-
     def __init__(self, strict=False):
         PathCompositionInterface.__init__(self, strict=strict)
 
@@ -348,6 +352,7 @@ class URLPathCompositionInterface(PathCompositionInterface):
         return bool(path) and self.netloc
 
 
+@six.add_metaclass(abc.ABCMeta)
 class FragmentPathCompositionInterface(PathCompositionInterface):
 
     """
@@ -357,8 +362,6 @@ class FragmentPathCompositionInterface(PathCompositionInterface):
     Fragment Paths they be set to absolute (self.isabsolute = True) or
     not absolute (self.isabsolute = False).
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
         PathCompositionInterface.__init__(self, strict=strict)
@@ -474,14 +477,14 @@ class Query(object):
         # Single key to remove.
         items = [query]
         # Dictionary or multivalue dictionary of items to remove.
-        if callable_attr(query, 'iteritems'):
+        if callable_attr(query, 'items'):
             items = self._items(query)
         # List of keys or items to remove.
-        elif callable_attr(query, '__iter__'):
+        elif non_text_iterable(query):
             items = query
 
         for item in items:
-            if callable_attr(item, '__iter__') and len(item) == 2:
+            if non_text_iterable(item) and len(item) == 2:
                 key, value = item
                 self.params.popvalue(key, value, None)
             else:
@@ -514,9 +517,8 @@ class Query(object):
         """
         pairs = []
         for key, value in self.params.iterallitems():
-            key, value = u2utf8(key), u2utf8(value)
-            quoted_key = urllib.quote_plus(str(key), self.SAFE_KEY_CHARS)
-            quoted_value = urllib.quote_plus(str(value), self.SAFE_VALUE_CHARS)
+            quoted_key = urllib.parse.quote_plus(str(key), self.SAFE_KEY_CHARS)
+            quoted_value = urllib.parse.quote_plus(str(value), self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
             if value is None:  # Example: http://sprop.su/?param
                 pair = quoted_key
@@ -529,8 +531,9 @@ class Query(object):
     def __ne__(self, other):
         return not self == other
 
-    def __nonzero__(self):
+    def __bool__(self):
         return len(self.params) > 0
+    __nonzero__ = __bool__
 
     def __str__(self):
         return self.encode()
@@ -572,12 +575,12 @@ class Query(object):
         elif callable_attr(items, 'iterallitems'):
             items = list(items.iterallitems())
         # Dictionary-like interface. i.e. {'a':1, 'b':2, 'c':3}
-        elif callable_attr(items, 'iteritems'):
-            items = list(items.iteritems())
+        elif callable_attr(items, 'items'):
+            items = list(six.iteritems(items))
         elif callable_attr(items, 'items'):
             items = list(items.items())
         # Encoded query string. i.e. 'a=1&b=2&c=3'
-        elif isinstance(items, basestring):
+        elif isinstance(items, six.string_types):
             items = self._extract_items_from_querystr(items)
         # Default to list of key:value items interface. i.e. [('a','1'),
         # ('b','2')]
@@ -590,36 +593,34 @@ class Query(object):
         pairstrs = [s2 for s1 in querystr.split('&') for s2 in s1.split(';')]
 
         if self.strict:
-            pairs = map(lambda item: item.split('=', 1), pairstrs)
-            pairs = map(lambda p: (p[0], '') if len(p) == 1
-                        else (p[0], p[1]), pairs)
+            pairs = [item.split('=', 1) for item in pairstrs]
+            pairs = [(p[0], '') if len(p) == 1 else (p[0], p[1]) for p in pairs]
             for key, value in pairs:
                 valid_key = is_valid_encoded_query_key(key)
                 valid_value = is_valid_encoded_query_value(value)
                 if not valid_key or not valid_value:
                     s = ("Improperly encoded query string received: '%s'. "
                          "Proceeding, but did you mean '%s'?" %
-                         (querystr, urllib.urlencode(pairs)))
+                         (querystr, urllib.parse.urlencode(pairs)))
                     warnings.warn(s, UserWarning)
 
         items = []
-        parsed_items = urlparse.parse_qsl(querystr, keep_blank_values=True)
-        for (key, value), pairstr in izip(parsed_items, pairstrs):
+        parsed_items = urllib.parse.parse_qsl(querystr, keep_blank_values=True)
+        for (key, value), pairstr in six.moves.zip(parsed_items, pairstrs):
             # Empty value without '=', like '?sup'. Encode to utf8 to handle
             # unicode strings.
-            if key.encode('utf8') == urllib.quote_plus(pairstr.encode('utf8')):
+            if key == urllib.parse.quote_plus(pairstr):
                 value = None
             items.append((key, value))
         return items
 
 
+@six.add_metaclass(abc.ABCMeta)
 class QueryCompositionInterface(object):
 
     """
     Abstract class interface for a parent class that contains a Query.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
         self._query = Query(strict=strict)
@@ -746,8 +747,9 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
                 not QueryCompositionInterface.__setattr__(self, attr, value)):
             object.__setattr__(self, attr, value)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.path) or bool(self.query)
+    __nonzero__ = __bool__
 
     def __str__(self):
         path, query = str(self._path), str(self._query)
@@ -767,14 +769,13 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         return "%s('%s')" % (self.__class__.__name__, str(self))
 
 
+@six.add_metaclass(abc.ABCMeta)
 class FragmentCompositionInterface(object):
 
     """
     Abstract class interface for a parent class that contains a
     Fragment.
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, strict=False):
         self._fragment = Fragment(strict=strict)
@@ -804,7 +805,7 @@ class FragmentCompositionInterface(object):
 
 
 class furl(URLPathCompositionInterface, QueryCompositionInterface,
-           FragmentCompositionInterface):
+           FragmentCompositionInterface, UnicodeMixin):
 
     """
     Object for simple parsing and manipulation of a URL and its
@@ -855,7 +856,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self._host = self._port = self._scheme = None
         self.username = self.password = self.scheme = None
 
-        if not isinstance(url, basestring):
+        if not isinstance(url, str):
             url = str(url)
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
@@ -878,8 +879,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     @scheme.setter
     def scheme(self, scheme):
-        if isinstance(scheme, basestring):
+        try:
             scheme = scheme.lower()
+        except AttributeError:
+            pass
         self._scheme = scheme
 
     @property
@@ -891,7 +894,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         """
         Raises: ValueError on malformed IPv6 address.
         """
-        urlparse.urlsplit('http://%s/' % host)  # Raises ValueError.
+        urllib.parse.urlsplit('http://%s/' % host)  # Raises ValueError.
         self._host = host
 
     @property
@@ -938,7 +941,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         Raises: ValueError on invalid port or malformed IPv6 address.
         """
         # Raises ValueError on malformed IPv6 addresses.
-        urlparse.urlsplit('http://%s/' % netloc)
+        urllib.parse.urlsplit('http://%s/' % netloc)
 
         username = password = host = port = None
 
@@ -1221,11 +1224,14 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             not FragmentCompositionInterface.__setattr__(self, attr, value)):
             object.__setattr__(self, attr, value)
 
-    def __str__(self):
-        path, query, fragment = str(self.path), str(
-            self.query), str(self.fragment)
-        url = urlparse.urlunsplit(
-            (self.scheme, self.netloc, path, query, fragment))
+    def __unicode__(self):
+        url = urllib.parse.urlunsplit((
+            self.scheme or '',  # Must be text type in python 3
+            self.netloc,
+            str(self.path),
+            str(self.query),
+            str(self.fragment),
+        ))
 
         # Special cases.
         if self.scheme is None:
@@ -1297,8 +1303,8 @@ def urlsplit(url):
     # urlparse.urlsplit() and switch back afterwards.
     if original_scheme is not None:
         url = _set_scheme(url, 'http')
-    toks = urlparse.urlsplit(url)
-    return urlparse.SplitResult(*_change_urltoks_scheme(toks, original_scheme))
+    toks = urllib.parse.urlsplit(url)
+    return urllib.parse.SplitResult(*_change_urltoks_scheme(toks, original_scheme))
 
 
 def urljoin(base, url):
@@ -1311,7 +1317,7 @@ def urljoin(base, url):
     """
     base_scheme, url_scheme = urlsplit(base).scheme, urlsplit(url).scheme
     httpbase = _set_scheme(base, 'http')
-    joined = urlparse.urljoin(httpbase, url)
+    joined = urllib.parse.urljoin(httpbase, url)
     if not url_scheme:
         joined = _set_scheme(joined, base_scheme)
     return joined
@@ -1405,12 +1411,6 @@ def is_valid_port(port):
 
 def callable_attr(obj, attr):
     return hasattr(obj, attr) and callable(getattr(obj, attr))
-
-
-def u2utf8(s):
-    if isinstance(s, unicode):
-        return s.encode('utf8')
-    return s
 
 
 #
