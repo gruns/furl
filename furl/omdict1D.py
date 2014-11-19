@@ -80,8 +80,7 @@ class omdict1D(omdict):
                 # omdict._update_updateall().
                 if value == []:
                     replacements[key] = []
-                    leftovers[:] = filter(
-                        lambda item: key != item[0], leftovers)
+                    leftovers[:] = [item for item in leftovers if key != item[0]]
                     continue
 
                 # If there are existing items with key <key> that have
@@ -110,4 +109,4 @@ class omdict1D(omdict):
 
     def _quacks_like_a_list_but_not_str(self, duck):
         return (hasattr(duck, '__iter__') and callable(duck.__iter__) and
-                not isinstance(duck, basestring))
+                not isinstance(duck, str))
