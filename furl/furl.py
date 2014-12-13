@@ -1213,7 +1213,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return self.__class__(self)
 
     def __eq__(self, other):
-        return self.url == other.url
+        try:
+            return self.url == other.url
+        except AttributeError:
+            return None
 
     def __ne__(self, other):
         return not self == other
