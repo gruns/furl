@@ -61,7 +61,7 @@ COLON_SEPARATED_SCHEMES = [
 def non_text_iterable(value):
     b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
     return b
-        
+
 
 
 class Path(object):
@@ -1213,7 +1213,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return self.__class__(self)
 
     def __eq__(self, other):
-        return self.url == other.url
+        try:
+            return self.url == other.url
+        except AttributeError:
+            return False
 
     def __ne__(self, other):
         return not self == other
