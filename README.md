@@ -11,7 +11,7 @@ so you can build amazing things.
 
 Query arguments are easy. Really easy.
 
-```pycon
+```python
 >>> from furl import furl
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f.args['three'] = '3'
@@ -22,7 +22,7 @@ Query arguments are easy. Really easy.
 
 Or use furl's inline modification methods.
 
-```pycon
+```python
 >>> furl('http://www.google.com/?one=1').add({'two':'2'}).url
 'http://www.google.com/?one=1&two=2'
 
@@ -35,7 +35,7 @@ Or use furl's inline modification methods.
 
 Encoding is handled for you.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/')
 >>> f.path = 'some encoding here'
 >>> f.args['and some encoding'] = 'here, too'
@@ -45,7 +45,7 @@ Encoding is handled for you.
 
 Fragments have a path and a query, too.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/')
 >>> f.fragment.path.segments = ['two', 'directories']
 >>> f.fragment.args = {'one':'argument'}
