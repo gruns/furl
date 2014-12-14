@@ -1,3 +1,16 @@
-script: tox
 language: python
-before_install: pip install tox --use-mirrors
+
+sudo: false
+env:
+    - TOXENV=py26
+    - TOXENV=py27
+    - TOXENV=py32
+    - TOXENV=py33
+    - TOXENV=py34
+    - TOXENV=pypy
+
+install:
+    - pip install tox
+
+script:
+    - tox
