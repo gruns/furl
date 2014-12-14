@@ -44,7 +44,7 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
     ],
     install_requires=[
-        'six==1.8.0',
+        'six>=1.8.0',
         'orderedmultidict>=0.7.4',
     ],
     test_suite='tests',
