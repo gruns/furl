@@ -1,4 +1,6 @@
-# furl [![Build status](https://api.travis-ci.org/gruns/furl.svg)](https://travis-ci.org/gruns/furl)
+# furl
+[![Build status](https://api.travis-ci.org/gruns/furl.svg)](https://travis-ci.org/gruns/furl)
+[![Badge fury](https://badge.fury.io/py/furl.png)](https://badge.fury.io/py/furl.png)
 
 ### furl is a small Python library that makes manipulating URLs simple.
 
