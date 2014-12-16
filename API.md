@@ -28,7 +28,7 @@ scheme://username:password@host:port/path?query#fragment
 __scheme__, __username__, __password__, and __host__ are strings or
 None. __port__ is an integer or None.
 
-```pycon
+```python
 >>> f = furl('http://user:pass@www.google.com:99/')
 >>> f.scheme, f.username, f.password, f.host, f.port
 ('http', 'user', 'pass', 'www.google.com', 99)
@@ -36,7 +36,7 @@ None. __port__ is an integer or None.
 
 furl infers the default port for common schemes.
 
-```pycon
+```python
 >>> f = furl('https://secure.google.com/')
 >>> f.port
 443
@@ -50,7 +50,7 @@ __netloc__ is the string combination of __username__, __password__, __host__,
 and __port__, not including __port__ if it is None or the default port for the
 provided __scheme__.
 
-```pycon
+```python
 >>> furl('http://www.google.com/').netloc
 'www.google.com'
 
@@ -69,7 +69,7 @@ more path segments that can be manipulated directly. Path segments in
 __segments__ are maintaned decoded and all interaction with __segments__ should
 take place with decoded segment strings.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/a/larg%20ish/path')
 >>> f.path
 Path('/a/larg ish/path')
@@ -81,7 +81,7 @@ Path('/a/larg ish/path')
 
 ##### Manipulation
 
-```pycon
+```python
 >>> f.path.segments = ['a', 'new', 'path', '']
 >>> str(f.path)
 '/a/new/path/'
@@ -111,7 +111,7 @@ restriction.
 Here's a URL Path example that illustrates how __isabsolute__ becomes True and
 read-only in the presence of a __netloc__.
 
-```pycon
+```python
 >>> f = furl('/url/path')
 >>> f.path.isabsolute
 True
@@ -133,7 +133,7 @@ AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a 
 
 Here's a fragment Path example.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/#/absolute/fragment/path/')
 >>> f.fragment.path.isabsolute
 True
@@ -150,7 +150,7 @@ file. The Path attribute __isdir__ returns True if the path is a directory,
 False otherwise. Conversely, the attribute __isfile__ returns True if the path
 is a file, False otherwise.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/a/directory/')
 >>> f.path.isdir
 True
@@ -167,7 +167,7 @@ True
 A path can be normalized with __normalize()__. __normalize()__ returns the Path
 object for method chaining.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com////a/./b/lolsup/../c/')
 >>> f.path.normalize()
 >>> f.url
@@ -183,7 +183,7 @@ query keys and values. Query keys and values in __params__ are maintained
 decoded and all interaction with __params__ should take place with decoded
 strings.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f.query
 Query('one=1&two=2')
@@ -196,7 +196,7 @@ omdict1D([('one', '1'), ('two', '2')])
 furl objects and Fragment objects (covered below) contain a Query object, and
 __args__ is provided as a shortcut on these objects to access __query.params__.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f.query.params
 omdict1D([('one', '1'), ('two', '2')])
@@ -212,7 +212,7 @@ __params__ is a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that
 maintains method parity with Python's standard dictionary.
 
-```pycon
+```python
 >>> f.query = 'silicon=14&iron=26&inexorable%20progress=vae%20victus'
 >>> f.query.params
 omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus')])
@@ -225,7 +225,7 @@ omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 __params__ can also store multiple values for the same key because it's a
 multivalue dictionary.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/?space=jams&space=slams')
 >>> f.args['space']
 'jams'
@@ -245,7 +245,7 @@ multivalue dictionary.
 __params__ is one dimensional. If a list of values is provided as a query value,
 that list is interpretted as multiple values.
 
-```pycon
+```python
 >>> f = furl()
 >>> f.args['repeated'] = ['1', '2', '3']
 >>> f.add(args={'space':['jams', 'slams']})
@@ -265,7 +265,7 @@ __params__.
 To produce an empty query argument like `http://sprop.su/?param=`, use an empty
 string as the parameter value.
 
-```pycon
+```python
 >>> f = furl('http://sprop.su')
 >>> f.args['param'] = ''
 >>> f.url
@@ -275,7 +275,7 @@ string as the parameter value.
 To produce an empty query argument without a trailing `=`, use `None` as the
 parameter value.
 
-```pycon
+```python
 >>> f = furl('http://sprop.su')
 >>> f.args['param'] = None
 >>> f.url
@@ -285,7 +285,7 @@ parameter value.
 __encode(delimeter='&')__ can be used to encode query strings with delimeters
 like `;`.
 
-```pycon
+```python
 >>> f.query = 'space=jams&woofs=squeeze+dog'
 >>> f.query.encode()
 'space=jams&woofs=squeeze+dog'
@@ -300,7 +300,7 @@ like `;`.
 URL fragments in furl are Fragment objects that have a Path __path__ and Query
 __query__ separated by an optional '?' __separator__.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
 >>> f.fragment
 Fragment('/fragment/path?with=params')
@@ -315,7 +315,7 @@ True
 Manipulation of Fragments is done through the Fragment's Path and Query
 instances, __path__ and __query__.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
 >>> str(f.fragment)
 '/fragment/path?with=params'
@@ -335,7 +335,7 @@ Creating hash-bang fragments with furl illustrates the use of Fragment's
 __separator__. When __separator__ is False, the '?' separating __path__ and
 __query__ isn't included.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com/')
 >>> f.fragment.path = '!'
 >>> f.fragment.args = {'a':'dict', 'of':'args'}
@@ -356,7 +356,7 @@ True
 Furl handles encoding for you, and furl's philosophy on encoding is simple:
 whole path, query, and fragment strings should always be encoded.
 
-```pycon
+```python
 >>> f = furl()
 >>> f.path = 'supply%20encoded/whole%20path%20strings'
 >>> f.path.segments
@@ -375,7 +375,7 @@ omdict1D([('and encoded', 'query string too')])
 
 Path, Query, and Fragment strings should always be decoded.
 
-```pycon
+```python
 >>> f = furl()
 >>> f.set(path=['path segments are', 'decoded', '<>[]"#'])
 >>> str(f.path)
@@ -407,7 +407,7 @@ For quick, single-line URL manipulation, the __add()__, __set()__, and
 __remove()__ methods of furl objects manipulate various components of the URL
 and return the furl object for method chaining.
 
-```pycon
+```python
 >>> url = 'http://www.google.com/#fragment' 
 >>> furl(url).add(args={'example':'arg'}).set(port=99).remove(fragment=True).url
 'http://www.google.com:99/?example=arg'
@@ -425,7 +425,7 @@ __add()__ adds items to a furl object with the optional arguments
  * __fragment_args__: A dictionary of query keys and values to add to the
    fragment's query.
 
-```pycon
+```python
 >>> url = 'http://www.google.com/' 
 >>> furl(url).add(path='/index.html', fragment_path='frag/path',
                   fragment_args={'frag':'args'}).url
@@ -453,7 +453,7 @@ __set()__ sets items of a furl object with the optional arguments
  * __password__: password string to adopt.
 
 
-```pycon
+```python
 >>> furl().set(scheme='https', host='secure.google.com', port=99,
                path='index.html', args={'some':'args'}, fragment='great job').url
 'https://secure.google.com:99/index.html?some=args#great%20job'
@@ -480,7 +480,7 @@ __remove()__ removes items from a furl object with the optional arguments
  * __password__: If True, remove the password, if it exists.
 
 
-```pycon
+```python
 >>> url = 'https://secure.google.com:99/a/path/?some=args#great job'
 >>> furl(url).remove(args=['some'], path='path/', fragment=True, port=True).url
 'https://secure.google.com/a/'
@@ -491,7 +491,7 @@ __remove()__ removes items from a furl object with the optional arguments
 
 __copy()__ creates and returns a new furl object with an identical URL.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com')
 >>> f.copy().set(path='/new/path').url
 'http://www.google.com/new/path'
@@ -503,7 +503,7 @@ __join()__ joins the furl object's URL with the provided relative or absolute
 URL and returns the furl object for method chaining. __join()__'s action is the
 same as clicking on the provided relative or absolute URL in a browser.
 
-```pycon
+```python
 >>> f = furl('http://www.google.com')
 >>> f.join('new/path').url
 'http://www.google.com/new/path'
