@@ -1,5 +1,7 @@
 # furl
 
+<img style="float: right" src="https://api.travis-ci.org/gruns/furl.svg">
+
 ### furl is a small Python library that makes manipulating URLs simple.
 
 Python's standard __urllib__ and __urlparse__ modules provide a number of URL
