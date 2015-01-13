@@ -1903,4 +1903,4 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('http://site4dads.ru/')
         f.args[six.u('testö')] = six.u('testä')
 
-        assert f.url == 'http://site4dads.ru/?test%C3%B6=test%C3%A4'
+        self.assertEqual(f.url, 'http://site4dads.ru/?test%C3%B6=test%C3%A4')
