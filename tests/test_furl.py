@@ -1901,6 +1901,6 @@ class TestFurl(unittest.TestCase):
 
     def test_unicode_query_keys_and_values(self):
         f = furl.furl('http://site4dads.ru/')
-        f.args[u'testö'] = u'testä'
+        f.args[six.u('testö')] = six.u('testä')
 
         assert f.url == 'http://site4dads.ru/?test%C3%B6=test%C3%A4'
