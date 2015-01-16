@@ -554,7 +554,7 @@ class TestQuery(unittest.TestCase):
         for items in self.items:
             q = furl.Query(items.original())
             assert q.params.allitems() == items.allitems()
-            pairs = ['%s=%s' % (pair[0], pair[1]) for pair in self._quote_items(items)]
+            pairs = ['%s=%s' % (i[0], i[1]) for i in self._quote_items(items)]
 
             # encode() and __str__().
             assert str(q) == q.encode() == q.encode('&')

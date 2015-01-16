@@ -80,7 +80,7 @@ class omdict1D(omdict):
                 # omdict._update_updateall().
                 if value == []:
                     replacements[key] = []
-                    leftovers[:] = [item for item in leftovers if key != item[0]]
+                    leftovers[:] = [l for l in leftovers if key != l[0]]
                     continue
 
                 # If there are existing items with key <key> that have

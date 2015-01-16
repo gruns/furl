@@ -14,6 +14,7 @@ from posixpath import normpath
 
 import six
 from six.moves import urllib
+from six.moves.urllib.parse import quote, unquote, quote_plus
 
 from .omdict1D import omdict1D
 from .compat import basestring, UnicodeMixin
@@ -129,7 +130,7 @@ class Path(object):
 
         if self.isabsolute and len(segments) > 1 and segments[0] == '':
             segments.pop(0)
-        self.segments = [urllib.parse.unquote(segment) for segment in segments]
+        self.segments = [unquote(segment) for segment in segments]
 
         return self
 
@@ -253,7 +254,7 @@ class Path(object):
         segments = []
         for segment in path.split('/'):
             if not is_valid_encoded_path_segment(segment):
-                segment = urllib.parse.quote(utf8(segment))
+                segment = quote(utf8(segment))
                 if self.strict:
                     s = ("Improperly encoded path string received: '%s'. "
                          "Proceeding, but did you mean '%s'?" %
@@ -262,15 +263,15 @@ class Path(object):
             segments.append(utf8(segment))
         
         # In Python 3, utf8() returns Bytes objects that must be decoded
-        # into strings before they can be passed to
-        # urllib.parse.unquote(). In Python 2, utf8() returns strings
-        # that can be passed directly to urllib.parse.unquote().
+        # into strings before they can be passed to urllib.unquote(). In
+        # Python 2, utf8() returns strings that can be passed directly
+        # to urllib.unquote().
         segments = [
             segment.decode('utf8')
             if isinstance(segment, bytes) and not isinstance(segment, str)
             else segment for segment in segments]
 
-        return [urllib.parse.unquote(segment) for segment in segments]
+        return [unquote(segment) for segment in segments]
 
     def _path_from_segments(self, segments):
         """
@@ -281,8 +282,7 @@ class Path(object):
         """
         if '%' not in ''.join(segments):  # Don't double-encode the path.
             segments = [
-                urllib.parse.quote(
-                    utf8(attemptstr(segment)), self.SAFE_SEGMENT_CHARS)
+                quote(utf8(attemptstr(segment)), self.SAFE_SEGMENT_CHARS)
                 for segment in segments]
         return '/'.join(segments)
 
@@ -533,9 +533,8 @@ class Query(object):
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
-            quoted_key = urllib.parse.quote_plus(utf8key, self.SAFE_KEY_CHARS)
-            quoted_value = urllib.parse.quote_plus(
-                utf8value, self.SAFE_VALUE_CHARS)
+            quoted_key = quote_plus(utf8key, self.SAFE_KEY_CHARS)
+            quoted_value = quote_plus(utf8value, self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
             if value is None:  # Example: http://sprop.su/?param
                 pair = quoted_key
@@ -611,7 +610,7 @@ class Query(object):
 
         if self.strict:
             pairs = [item.split('=', 1) for item in pairstrs]
-            pairs = [(p[0], '') if len(p) == 1 else (p[0], p[1]) for p in pairs]
+            pairs = [(p[0], '' if len(p) == 1 else p[1]) for p in pairs]
             for key, value in pairs:
                 valid_key = is_valid_encoded_query_key(key)
                 valid_value = is_valid_encoded_query_value(value)
@@ -625,7 +624,7 @@ class Query(object):
         parsed_items = urllib.parse.parse_qsl(querystr, keep_blank_values=True)
         for (key, value), pairstr in six.moves.zip(parsed_items, pairstrs):
             # Empty value without '=', like '?sup'.
-            if key == urllib.parse.quote_plus(utf8(pairstr)):
+            if key == quote_plus(utf8(pairstr)):
                 value = None
             items.append((key, value))
         return items
