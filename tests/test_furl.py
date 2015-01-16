@@ -20,7 +20,7 @@ from furl.compat import unittest
 from furl.omdict1D import omdict1D
 from furl.compat import OrderedDict as odict
 
-PYTHON_27PLUS = sys.version_info[0] >= 2 and sys.version_info[1] >= 7
+PYTHON_27PLUS = sys.version_info >= (2, 7)
 
 
 #
