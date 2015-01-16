@@ -6,7 +6,7 @@
 
 Python's standard __urllib__ and __urlparse__ modules provide a number of URL
 manipulation functions, but using these functions to perform common URL
-manipulations proves tedious. Furl makes manipulating URLs simple.
+manipulations proves tedious. Furl makes manipulating URLs easy.
 
 Furl is well tested and [Unlicensed](http://unlicense.org/) in the public domain
 so you can build amazing things.
