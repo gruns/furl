@@ -22,6 +22,7 @@ from furl.compat import OrderedDict as odict
 
 PYTHON_27PLUS = sys.version_info[0] >= 2 and sys.version_info[1] >= 7
 
+
 #
 # TODO(grun): Add tests for furl objects with strict=True. Make sure
 # UserWarnings are raised when improperly encoded path, query, and
@@ -487,10 +488,11 @@ class TestPath(unittest.TestCase):
         assert p
 
     def test_unicode(self):
-        path = '/wiki/Восход'
+        paths = ['/wiki/Восход', u'/wiki/Восход']
         path_encoded = '/wiki/%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
-        p = furl.Path(path)
-        assert str(p) == path_encoded
+        for path in paths:
+            p = furl.Path(path)
+            assert str(p) == path_encoded
 
 
 class TestQuery(unittest.TestCase):
@@ -498,7 +500,7 @@ class TestQuery(unittest.TestCase):
     def setUp(self):
         # All interaction with parameters is unquoted unless that
         # interaction is through an already encoded query string. In the
-        # case of an already encoded query string like 'a=a%20a&b=b',
+        # case of an already encoded query string, like 'a=a%20a&b=b',
         # its keys and values will be unquoted.
         self.itemlists = list(map(itemlist, [
             [], [(1, 1)], [(1, 1), (2, 2)], [
@@ -719,18 +721,19 @@ class TestQuery(unittest.TestCase):
         assert str(q) == 'prp=&slrp=' and q.params['slrp'] == ''
 
     def test_unicode(self):
-        key, value = 'Восход', 'testä'
-        key_encoded = urllib.parse.quote_plus(key)
-        value_encoded = urllib.parse.quote_plus(value)
+        pairs = [('Восход', 'testä'), (u'Восход', u'testä')]
+        key_encoded = '%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
+        value_encoded = 'test%C3%A4'
 
-        q = furl.Query('%s=%s' % (key, value))
-        assert q.params[key] == value
-        assert str(q) == '%s=%s' % (key_encoded, value_encoded)
-
-        q = furl.Query()
-        q.params[key] = value
-        assert q.params[key] == value
-        assert str(q) == '%s=%s' % (key_encoded, value_encoded)
+        for key, value in pairs:
+            q = furl.Query('%s=%s' % (key, value))
+            assert q.params[key] == value
+            assert str(q) == '%s=%s' % (key_encoded, value_encoded)
+            
+            q = furl.Query()
+            q.params[key] = value
+            assert q.params[key] == value
+            assert str(q) == '%s=%s' % (key_encoded, value_encoded)
 
     def test_equality(self):
         assert furl.Query() == furl.Query()
@@ -969,7 +972,7 @@ class TestFragmentCompositionInterface(unittest.TestCase):
 class TestFurl(unittest.TestCase):
 
     def setUp(self):
-        # Don't hide duplicate Warnings - test for all of them.
+        # Don't hide duplicate Warnings. Test for all of them.
         warnings.simplefilter("always")
 
     def _param(self, url, key, val):
@@ -977,20 +980,20 @@ class TestFurl(unittest.TestCase):
         # path for all schemes, only those schemes in the list
         # urlparse.uses_query. So, as a result of using
         # urlparse.urlsplit(), this little helper function only works
-        # when provided urls whos schemes are also in
+        # when provided URLs whos schemes are also in
         # urlparse.uses_query.
         items = urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query, True)
         return (key, val) in items
 
     def test_unicode(self):
-        path = 'Восход'
-        path_encoded = '%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
-
-        key, value = 'testö', 'testä'
-        key_encoded, value_encoded = 'test%C3%B6', 'test%C3%A4'
+        paths = ['Восход', u'Восход']
+        pairs = [('testö', 'testä'), (u'testö', u'testä')]
+        path_encoded = u'%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
+        key_encoded, value_encoded = u'test%C3%B6', u'test%C3%A4'
 
         base_url = 'http://pumps.ru'
-        full_url = '%s/%s?%s=%s' % (base_url, path, key, value)
+        full_url = '%s/%s?%s=%s' % (
+            base_url, paths[0], pairs[0][0], pairs[0][1])
         full_url_encoded = '%s/%s?%s=%s' % (
             base_url, path_encoded, key_encoded, value_encoded)
 
@@ -999,20 +1002,23 @@ class TestFurl(unittest.TestCase):
         assert f.url == full_url_encoded
 
         # Accept unicode paths.
-        f = furl.furl(base_url)
-        f.path = path
-        assert f.url == '%s/%s' % (base_url, path_encoded)
+        for path in paths:
+            f = furl.furl(base_url)
+            f.path = path
+            assert f.url == '%s/%s' % (base_url, path_encoded)
 
         # Accept unicode queries.
-        f.args[key] = value
-        assert f.args[key] == value  # Unicode keys and values aren't modified.
-        assert not key in f.url
-        assert not value in f.url
-        assert urllib.parse.quote_plus(key) in f.url
-        assert urllib.parse.quote_plus(value) in f.url
-        f.path.segments = [path]
-        assert f.path.segments == [path]  # Unicode segments aren't modified.
-        assert f.url == full_url_encoded
+        for key, value in pairs:
+            f = furl.furl(base_url).set(path=path)
+            f.args[key] = value
+            assert f.args[key] == value  # Unicode values aren't modified.
+            assert not key in f.url
+            assert not value in f.url
+            assert urllib.parse.quote_plus(furl.utf8(key)) in f.url
+            assert urllib.parse.quote_plus(furl.utf8(value)) in f.url
+            f.path.segments = [path]
+            assert f.path.segments == [path]  # Unicode values aren't modified.
+            assert f.url == full_url_encoded
 
     def test_scheme(self):
         assert furl.furl().scheme is None
@@ -1329,7 +1335,7 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('////path')
         assert f.url == '//path' and str(f.path) == '//path'
 
-        # TODO(grun): Test more odd urls.
+        # TODO(grun): Test more odd URLs.
 
     def test_hosts(self):
         # No host.
@@ -1611,7 +1617,7 @@ class TestFurl(unittest.TestCase):
         empty_tests = ['', '/meat', '/meat/pump?a=a&b=b#fragsup',
                        'sup://www.pumps.org/brg/pap/mrf?a=b&c=d#frag?sup', ]
         run_tests = [
-            # Join full urls.
+            # Join full URLs.
             ('unknown://www.yahoo.com', 'unknown://www.yahoo.com'),
             ('unknown://www.yahoo.com?one=two&three=four',
              'unknown://www.yahoo.com?one=two&three=four'),

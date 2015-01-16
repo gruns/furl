@@ -253,14 +253,24 @@ class Path(object):
         segments = []
         for segment in path.split('/'):
             if not is_valid_encoded_path_segment(segment):
-                segment = urllib.parse.quote(segment)
+                segment = urllib.parse.quote(utf8(segment))
                 if self.strict:
                     s = ("Improperly encoded path string received: '%s'. "
                          "Proceeding, but did you mean '%s'?" %
                          (path, self._path_from_segments(segments)))
                     warnings.warn(s, UserWarning)
-            segments.append(segment)
-        return list(map(urllib.parse.unquote, segments))
+            segments.append(utf8(segment))
+        
+        # In Python 3, utf8() returns Bytes objects that must be decoded
+        # into strings before they can be passed to
+        # urllib.parse.unquote(). In Python 2, utf8() returns strings
+        # that can be passed directly to urllib.parse.unquote().
+        segments = [
+            segment.decode('utf8')
+            if isinstance(segment, bytes) and not isinstance(segment, str)
+            else segment for segment in segments]
+
+        return [urllib.parse.unquote(segment) for segment in segments]
 
     def _path_from_segments(self, segments):
         """
@@ -270,8 +280,10 @@ class Path(object):
         Returns: A path string with quoted path segments.
         """
         if '%' not in ''.join(segments):  # Don't double-encode the path.
-            segments = [urllib.parse.quote(segment, self.SAFE_SEGMENT_CHARS)
-                        for segment in segments]
+            segments = [
+                urllib.parse.quote(
+                    utf8(attemptstr(segment)), self.SAFE_SEGMENT_CHARS)
+                for segment in segments]
         return '/'.join(segments)
 
 
@@ -519,8 +531,11 @@ class Query(object):
         """
         pairs = []
         for key, value in self.params.iterallitems():
-            quoted_key = urllib.parse.quote_plus(str(key), self.SAFE_KEY_CHARS)
-            quoted_value = urllib.parse.quote_plus(str(value), self.SAFE_VALUE_CHARS)
+            utf8key = utf8(key, utf8(attemptstr(key)))
+            utf8value = utf8(value, utf8(attemptstr(value)))
+            quoted_key = urllib.parse.quote_plus(utf8key, self.SAFE_KEY_CHARS)
+            quoted_value = urllib.parse.quote_plus(
+                utf8value, self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
             if value is None:  # Example: http://sprop.su/?param
                 pair = quoted_key
@@ -570,21 +585,21 @@ class Query(object):
         """
         if not items:
             items = []
-        # Multivalue Dictionary-like interface. i.e. {'a':1, 'a':2,
+        # Multivalue Dictionary-like interface. e.g. {'a':1, 'a':2,
         # 'b':2}
         elif callable_attr(items, 'allitems'):
             items = list(items.allitems())
         elif callable_attr(items, 'iterallitems'):
             items = list(items.iterallitems())
-        # Dictionary-like interface. i.e. {'a':1, 'b':2, 'c':3}
+        # Dictionary-like interface. e.g. {'a':1, 'b':2, 'c':3}
         elif callable_attr(items, 'items'):
             items = list(six.iteritems(items))
         elif callable_attr(items, 'items'):
             items = list(items.items())
-        # Encoded query string. i.e. 'a=1&b=2&c=3'
+        # Encoded query string. e.g. 'a=1&b=2&c=3'
         elif isinstance(items, six.string_types):
             items = self._extract_items_from_querystr(items)
-        # Default to list of key:value items interface. i.e. [('a','1'),
+        # Default to list of key:value items interface. e.g. [('a','1'),
         # ('b','2')]
         else:
             items = list(items)
@@ -609,9 +624,8 @@ class Query(object):
         items = []
         parsed_items = urllib.parse.parse_qsl(querystr, keep_blank_values=True)
         for (key, value), pairstr in six.moves.zip(parsed_items, pairstrs):
-            # Empty value without '=', like '?sup'. Encode to utf8 to handle
-            # unicode strings.
-            if key == urllib.parse.quote_plus(pairstr):
+            # Empty value without '=', like '?sup'.
+            if key == urllib.parse.quote_plus(utf8(pairstr)):
                 value = None
             items.append((key, value))
         return items
@@ -1307,7 +1321,8 @@ def urlsplit(url):
     if original_scheme is not None:
         url = _set_scheme(url, 'http')
     toks = urllib.parse.urlsplit(url)
-    return urllib.parse.SplitResult(*_change_urltoks_scheme(toks, original_scheme))
+    toks_orig_scheme = _change_urltoks_scheme(toks, original_scheme)
+    return urllib.parse.SplitResult(*toks_orig_scheme)
 
 
 def urljoin(base, url):
@@ -1403,6 +1418,20 @@ def remove_path_segments(segments, remove):
             ret = segments
 
     return ret
+
+
+def attemptstr(o):
+    try:
+        return str(o)
+    except:
+        return o
+
+
+def utf8(o, default=_absent):
+    try:
+        return o.encode('utf8')
+    except:
+        return o if default is _absent else default
 
 
 def is_valid_port(port):
