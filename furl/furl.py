@@ -53,9 +53,9 @@ DEFAULT_PORTS = {
 # TODO(grun): Support schemes separated by just ':', not '://' without having
 # an explicit list. There are many such schemes in various URIs.
 COLON_SEPARATED_SCHEMES = [
-    'mailto',
-    'tel',
     'sms',
+    'tel',
+    'mailto',
 ]
 
 
