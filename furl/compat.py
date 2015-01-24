@@ -1,17 +1,14 @@
 import sys
 
-
-if list(sys.version_info[:2]) >= [2, 7]:
-    import unittest
-    from collections import OrderedDict
-else:
-    import unittest2 as unittest
-    from ordereddict import OrderedDict
-
 if sys.version_info[0] == 2:
     basestring = basestring
 else:
     basestring = (str, bytes)
+
+if list(sys.version_info[:2]) >= [2, 7]:
+    from collections import OrderedDict
+else:
+    from ordereddict import OrderedDict
 
 class UnicodeMixin(object):
     """

@@ -16,11 +16,15 @@ import six
 from six.moves import urllib
 
 import furl
-from furl.compat import unittest
 from furl.omdict1D import omdict1D
 from furl.compat import OrderedDict as odict
 
 PYTHON_27PLUS = sys.version_info >= (2, 7)
+
+if PYTHON_27PLUS:
+    import unittest
+else:
+    import unittest2 as unittest
 
 
 #
