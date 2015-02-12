@@ -865,8 +865,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         """
         Parse and load a URL.
 
-        Raises: ValueError on invalid URL (for example malformed IPv6
-        address or invalid port).
+        Raises: ValueError on invalid URL, like a malformed IPv6 address
+        or invalid port.
         """
         self._host = self._port = self._scheme = None
         self.username = self.password = self.scheme = None
