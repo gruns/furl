@@ -44,7 +44,7 @@ setup(
     ],
     install_requires=[
         'six>=1.8.0',
-        'orderedmultidict>=0.7.4',
+        'orderedmultidict>=0.7.5',
     ],
     test_suite='tests',
     tests_require=[] if list(version_info[:2]) >= [2, 7] else ['unittest2'],
