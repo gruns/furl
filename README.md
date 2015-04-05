@@ -2,7 +2,7 @@
 [![Badge fury](https://badge.fury.io/py/furl.svg)](https://pypi.python.org/pypi/furl)
 [![Build status](https://api.travis-ci.org/gruns/furl.svg)](https://travis-ci.org/gruns/furl)
 
-### furl is a small Python library that makes manipulating URLs simple.
+### A small Python library that makes manipulating URLs simple.
 
 Python's standard __urllib__ and __urlparse__ modules provide a number of URL
 manipulation functions, but using these functions to perform common URL
