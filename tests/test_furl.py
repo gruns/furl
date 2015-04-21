@@ -548,7 +548,7 @@ class TestQuery(unittest.TestCase):
             'a=a&a=a', 'space=a+a&space=b+b',
             # Empty keys and/or values.
             '=', 'a=', 'a=a&a=', '=a&=b',
-            # Semicolon delimeter, like 'a=a;b=b'.
+            # Semicolon delimiter, like 'a=a;b=b'.
             'a=a;a=a', 'space=a+a;space=b+b',
         ]))
         self.items = (self.itemlists + self.itemdicts + self.itemomdicts +
@@ -675,7 +675,7 @@ class TestQuery(unittest.TestCase):
         q = furl.Query('a=&=b')
         assert q.params == {'a': '', '': 'b'} and str(q) == 'a=&=b'
 
-        # ';' is a valid query delimeter.
+        # ';' is a valid query delimiter.
         q = furl.Query('=;=')
         assert q.params.allitems() == [('', ''), ('', '')] and str(q) == '=&='
         q = furl.Query('a=a;b=b;c=')
@@ -1287,7 +1287,7 @@ class TestFurl(unittest.TestCase):
         assert str(f.fragment) == ''
         assert f.url == ''
 
-        # Keep in mind that ';' is a query delimeter for both the URL
+        # Keep in mind that ';' is a query delimiter for both the URL
         # query and the fragment query, resulting in the str(path),
         # str(query), and str(fragment) values below.
         url = (
@@ -1676,7 +1676,7 @@ class TestFurl(unittest.TestCase):
         assert furl.furl(url).remove(path=True) != furl.furl(url)
 
     def test_urlsplit(self):
-        # Without any delimeters like '://' or '/', the input should be
+        # Without any delimiters like '://' or '/', the input should be
         # treated as a path.
         urls = ['sup', '127.0.0.1', 'www.google.com', '192.168.1.1:8000']
         for url in urls:

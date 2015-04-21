@@ -282,7 +282,7 @@ parameter value.
 'http://sprop.su/?param'
 ```
 
-__encode(delimiter='&')__ can be used to encode query strings with delimeters
+__encode(delimiter='&')__ can be used to encode query strings with delimiters
 like `;`.
 
 ```python
