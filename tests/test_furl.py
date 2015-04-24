@@ -563,6 +563,11 @@ class TestQuery(unittest.TestCase):
             # encode() and __str__().
             assert str(q) == q.encode() == q.encode('&')
 
+            # encode() accepts both 'delimiter' and 'delimeter'. The
+            # latter was incorrectly used until 2015-04-24.
+            e = q.encode
+            assert e(';') == e(delimiter=';') == e(delimeter=';')
+
             # __nonzero__().
             if items.allitems():
                 assert q
