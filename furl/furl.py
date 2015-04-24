@@ -524,7 +524,7 @@ class Query(object):
           Query('a=a&b=#').encode() == 'a=a&b=%23'
           Query('a=a&b=#').encode(';') == 'a=a;b=%23'
 
-        Until 2015-04-24, the 'delimiter' argument was incorrectly
+        Until furl v0.4.6, the 'delimiter' argument was incorrectly
         spelled 'delimeter'. For backwards compatibility, accept both
         the correct 'delimiter' and the old, mispelled 'delimeter'.
 

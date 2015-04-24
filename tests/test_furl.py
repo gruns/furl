@@ -564,7 +564,7 @@ class TestQuery(unittest.TestCase):
             assert str(q) == q.encode() == q.encode('&')
 
             # encode() accepts both 'delimiter' and 'delimeter'. The
-            # latter was incorrectly used until 2015-04-24.
+            # latter was incorrectly used until furl v0.4.6.
             e = q.encode
             assert e(';') == e(delimiter=';') == e(delimeter=';')
 
