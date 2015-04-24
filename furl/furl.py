@@ -518,23 +518,22 @@ class Query(object):
         for key, value in items:
             self._params.add(key, value)
 
-    def encode(self, delimiter='&', delimeter=None):
+    def encode(self, delimiter='&', delimeter=_absent):
         """
         Examples:
           Query('a=a&b=#').encode() == 'a=a&b=%23'
           Query('a=a&b=#').encode(';') == 'a=a;b=%23'
+
+        Until 2015-04-24, the 'delimiter' argument was incorrectly
+        spelled 'delimeter'. For backwards compatibility, accept both
+        the correct 'delimiter' and the old, mispelled 'delimeter'.
 
         Returns: A URL encoded query string using <delimiter> as the
         delimiter separating key:value pairs. The most common and
         default delimiter is '&', but ';' can also be specified. ';' is
         W3C recommended.
         """
-
-        if delimeter is not None:
-            # Backwards compatibility: for a long time, the 'delimiter'
-            # arg was spelled incorrectly as 'delimeter'. Existing code
-            # using a keyword arg with the wrong spelling should keep
-            # working.
+        if delimeter is not _absent:
             delimiter = delimeter
 
         pairs = []
