@@ -1353,7 +1353,7 @@ def join_path_segments(*args):
     handling path segments borders to preserve intended slashes of the
     final constructed path.
 
-    This function is not encoding aware - it does not test for or change
+    This function is not encoding aware. It doesn't test for, or change,
     the encoding of path segments it is passed.
 
     Examples:
