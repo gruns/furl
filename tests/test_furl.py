@@ -1918,10 +1918,3 @@ class TestFurl(unittest.TestCase):
             assert furl.is_valid_encoded_query_value(valid)
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_value(invalid)
-
-    def test_py2_unicode_regression_issue_52(self):
-        """
-        Test that `furl.furl()` handles python 2 `unicode` objects without
-        raising `UnicodeEncodeError`.
-        """
-        assert furl.furl(u'ę').url == '%C4%99'
