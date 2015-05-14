@@ -1001,14 +1001,14 @@ class TestFurl(unittest.TestCase):
         key_encoded, value_encoded = u'test%C3%B6', u'test%C3%A4'
 
         base_url = 'http://pumps.ru'
-        full_url_utf8_encoded_str = '%s/%s?%s=%s' % (
+        full_url_utf8_str = '%s/%s?%s=%s' % (
             base_url, paths[0], pairs[0][0], pairs[0][1])
         full_url_unicode = u'%s/%s?%s=%s' % (
             base_url, paths[1], pairs[1][0], pairs[1][1])
         full_url_encoded = '%s/%s?%s=%s' % (
             base_url, path_encoded, key_encoded, value_encoded)
 
-        f = furl.furl(full_url_utf8_encoded_str)
+        f = furl.furl(full_url_utf8_str)
         assert f.url == full_url_encoded
 
         # Accept unicode without raising an exception.
