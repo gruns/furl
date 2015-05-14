@@ -1001,13 +1001,18 @@ class TestFurl(unittest.TestCase):
         key_encoded, value_encoded = u'test%C3%B6', u'test%C3%A4'
 
         base_url = 'http://pumps.ru'
-        full_url = '%s/%s?%s=%s' % (
+        full_url_utf8_encoded_str = '%s/%s?%s=%s' % (
             base_url, paths[0], pairs[0][0], pairs[0][1])
+        full_url_unicode = u'%s/%s?%s=%s' % (
+            base_url, paths[1], pairs[1][0], pairs[1][1])
         full_url_encoded = '%s/%s?%s=%s' % (
             base_url, path_encoded, key_encoded, value_encoded)
 
+        f = furl.furl(full_url_utf8_encoded_str)
+        assert f.url == full_url_encoded
+
         # Accept unicode without raising an exception.
-        f = furl.furl(full_url)
+        f = furl.furl(full_url_unicode)
         assert f.url == full_url_encoded
 
         # Accept unicode paths.
@@ -1913,3 +1918,10 @@ class TestFurl(unittest.TestCase):
             assert furl.is_valid_encoded_query_value(valid)
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_value(invalid)
+
+    def test_py2_unicode_regression_issue_52(self):
+        """
+        Test that `furl.furl()` handles python 2 `unicode` objects without
+        raising `UnicodeEncodeError`.
+        """
+        assert furl.furl(u'ę').url == '%C4%99'

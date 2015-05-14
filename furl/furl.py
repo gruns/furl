@@ -878,7 +878,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self._host = self._port = self._scheme = None
         self.username = self.password = self.scheme = None
 
-        if not isinstance(url, str):
+        if not isinstance(url, six.string_types):
             url = str(url)
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
