@@ -702,6 +702,10 @@ class TestQuery(unittest.TestCase):
         q.params['p+p'] = 'p+p'
         assert str(q) == 's+s=s+s&p%2Bp=p%2Bp'
 
+        # Quote Plus to set False
+        q = furl.Query('s s=s s', use_quote_plus=False)
+        assert str(q) == "s%20s=s%20s" 
+
         # Params is an omdict (ordered multivalue dictionary).
         q.params.clear()
         q.params.add('1', '1').set('2', '4').add('1', '11').addlist(
@@ -1285,6 +1289,13 @@ class TestFurl(unittest.TestCase):
 
         f.host = 'ohay.com'
         assert str(f) == 'sup://ohay.com/hay%20supppp?space=1+2#sup'
+
+    def test_use_quote_plus_as_false(self):
+        f = furl.furl('http://www.pumps.com/', use_quote_plus=False)
+
+        f.args['space'] = '1 2'
+
+        assert str(f) == 'http://www.pumps.com/?space=1%202'
 
     def test_odd_urls(self):
         # Empty.

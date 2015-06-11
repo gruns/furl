@@ -448,8 +448,9 @@ class Query(object):
     SAFE_KEY_CHARS = "/?:@-._~!$'()*,"
     SAFE_VALUE_CHARS = "/?:@-._~!$'()*,="
 
-    def __init__(self, query='', strict=False):
+    def __init__(self, query='', strict=False, use_quote_plus=True):
         self.strict = strict
+        self.use_quote_plus = use_quote_plus
 
         self._params = omdict1D()
 
@@ -507,6 +508,13 @@ class Query(object):
         return self
 
     @property
+    def quote_method(self):
+        if self.use_quote_plus:
+            return quote_plus
+        else:
+            return quote
+
+    @property
     def params(self):
         return self._params
 
@@ -540,8 +548,8 @@ class Query(object):
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
-            quoted_key = quote_plus(utf8key, self.SAFE_KEY_CHARS)
-            quoted_value = quote_plus(utf8value, self.SAFE_VALUE_CHARS)
+            quoted_key = self.quote_method(utf8key, self.SAFE_KEY_CHARS)
+            quoted_value = self.quote_method(utf8value, self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
             if value is None:  # Example: http://sprop.su/?param
                 pair = quoted_key
@@ -644,8 +652,8 @@ class QueryCompositionInterface(object):
     Abstract class interface for a parent class that contains a Query.
     """
 
-    def __init__(self, strict=False):
-        self._query = Query(strict=strict)
+    def __init__(self, strict=False, use_quote_plus=True):
+        self._query = Query(strict=strict, use_quote_plus=use_quote_plus)
 
     @property
     def query(self):
@@ -857,12 +865,12 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       fragment: Fragment object from FragmentCompositionInterface.
     """
 
-    def __init__(self, url='', strict=False):
+    def __init__(self, url='', strict=False, use_quote_plus=True):
         """
         Raises: ValueError on invalid url.
         """
         URLPathCompositionInterface.__init__(self, strict=strict)
-        QueryCompositionInterface.__init__(self, strict=strict)
+        QueryCompositionInterface.__init__(self, strict=strict, use_quote_plus=use_quote_plus)
         FragmentCompositionInterface.__init__(self, strict=strict)
         self.strict = strict
 
