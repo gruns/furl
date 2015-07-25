@@ -66,17 +66,17 @@ provided __scheme__.
 
 URL paths in furl are Path objects that have __segments__, a list of zero or
 more path segments that can be manipulated directly. Path segments in
-__segments__ are maintaned decoded and all interaction with __segments__ should
+__segments__ are decoded strings and all interaction with __segments__ should
 take place with decoded segment strings.
 
 ```python
->>> f = furl('http://www.google.com/a/larg%20ish/path')
+>>> f = furl('http://www.google.com/a/large%20ish/path')
 >>> f.path
-Path('/a/larg ish/path')
+Path('/a/large ish/path')
 >>> f.path.segments
-['a', 'larg ish', 'path']
+['a', 'large ish', 'path']
 >>> str(f.path)
-'/a/larg%20ish/path'
+'/a/large%20ish/path'
 ```
 
 ##### Manipulation
@@ -164,8 +164,8 @@ False
 True
 ```
 
-A path can be normalized with __normalize()__. __normalize()__ returns the Path
-object for method chaining.
+A path can be normalized with __normalize()__, and __normalize()__ returns the
+Path object for method chaining.
 
 ```python
 >>> f = furl('http://www.google.com////a/./b/lolsup/../c/')
@@ -179,9 +179,8 @@ object for method chaining.
 
 URL queries in furl are Query objects that have __params__, a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of
-query keys and values. Query keys and values in __params__ are maintained
-decoded and all interaction with __params__ should take place with decoded
-strings.
+query keys and values. Query keys and values in __params__ are decoded strings
+and all interaction with __params__ should take place with decoded strings.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
@@ -253,12 +252,12 @@ that list is interpretted as multiple values.
 'repeated=1&repeated=2&repeated=3&space=jams&space=slams'
 ```
 
-This makes sense -- URL queries are inherently one dimensional. Query values
-cannot have subvalues.
+This makes sense: URL queries are inherently one dimensional -- query values
+can't have subvalues.
 
-See the [omdict](https://github.com/gruns/orderedmultidict) documentation for
-more information on interacting with the ordered multivalue dictionary
-__params__.
+See the [orderedmultimdict](https://github.com/gruns/orderedmultidict)
+documentation for more information on interacting with the ordered multivalue
+dictionary __params__.
 
 ##### Parameters
 
