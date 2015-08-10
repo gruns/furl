@@ -1464,8 +1464,6 @@ class TestFurl(unittest.TestCase):
         assert f.port == 9999
         assert f.url == 'http://www.pumps.com:9999/'
 
-        self.assertRaises(f.set, port='asdf')
-
     def test_add(self):
         f = furl.furl('http://pumps.com/')
 
