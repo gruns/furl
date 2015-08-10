@@ -281,8 +281,10 @@ parameter value.
 'http://sprop.su/?param'
 ```
 
-__encode(delimiter='&')__ can be used to encode query strings with delimiters
-like `;`.
+__encode(delimiter='&', quote_plus=True)__ can be used to encode query strings
+with delimiters like `;` and encode key-value pairs with plain percent-encoding
+('%20' not '+'). The default delimiter is '&' and the default key-value encoding
+is application/x-www-form-urlencoded ('+' not '%20').
 
 ```python
 >>> f.query = 'space=jams&woofs=squeeze+dog'
@@ -290,6 +292,8 @@ like `;`.
 'space=jams&woofs=squeeze+dog'
 >>> f.query.encode(';')
 'space=jams;woofs=squeeze+dog'
+>>> f.query.encode(quote_plus=False)
+'space=jams&woofs=squeeze%20dog'
 ```
 
 

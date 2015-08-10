@@ -518,11 +518,12 @@ class Query(object):
         for key, value in items:
             self._params.add(key, value)
 
-    def encode(self, delimiter='&', delimeter=_absent):
+    def encode(self, delimiter='&', quote_plus=True, delimeter=_absent):
         """
         Examples:
           Query('a=a&b=#').encode() == 'a=a&b=%23'
           Query('a=a&b=#').encode(';') == 'a=a;b=%23'
+          Query('a+b=c+d').encode(quote_plus=False) == 'a%20b=c%20d'
 
         Until furl v0.4.6, the 'delimiter' argument was incorrectly
         spelled 'delimeter'. For backwards compatibility, accept both
@@ -531,17 +532,21 @@ class Query(object):
         Returns: A URL encoded query string using <delimiter> as the
         delimiter separating key:value pairs. The most common and
         default delimiter is '&', but ';' can also be specified. ';' is
-        W3C recommended.
+        W3C recommended. Parameter keys and values are encoded
+        application/x-www-form-urlencoded if <quote_plus> is True,
+        percent-encoded otherwise.
         """
         if delimeter is not _absent:
             delimiter = delimeter
 
         pairs = []
+        sixurl = urllib.parse # six.moves.urllib.parse
+        quote_func = sixurl.quote_plus if quote_plus else sixurl.quote
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
-            quoted_key = quote_plus(utf8key, self.SAFE_KEY_CHARS)
-            quoted_value = quote_plus(utf8value, self.SAFE_VALUE_CHARS)
+            quoted_key = quote_func(utf8key, self.SAFE_KEY_CHARS)
+            quoted_value = quote_func(utf8value, self.SAFE_VALUE_CHARS)
             pair = '='.join([quoted_key, quoted_value])
             if value is None:  # Example: http://sprop.su/?param
                 pair = quoted_key

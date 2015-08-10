@@ -560,9 +560,6 @@ class TestQuery(unittest.TestCase):
             assert q.params.allitems() == items.allitems()
             pairs = ['%s=%s' % (i[0], i[1]) for i in self._quote_items(items)]
 
-            # encode() and __str__().
-            assert str(q) == q.encode() == q.encode('&')
-
             # encode() accepts both 'delimiter' and 'delimeter'. The
             # latter was incorrectly used until furl v0.4.6.
             e = q.encode
@@ -753,6 +750,18 @@ class TestQuery(unittest.TestCase):
 
         assert q1 == q11 and str(q1) == str(q11)
         assert q1 != q2 and str(q1) != str(q2)
+
+    def test_encode(self):
+        for items in self.items:
+            q = furl.Query(items.original())
+            # encode() and __str__().
+            assert str(q) == q.encode() == q.encode('&')
+            
+        # Accept both percent-encoded ('a=b%20c') and
+        # application/x-www-form-urlencoded ('a=b+c') pairs as input.
+        query = furl.Query('a=b%20c&d=e+f')
+        assert query.encode(';') == 'a=b+c;d=e+f'
+        assert query.encode(';', quote_plus=False) == 'a=b%20c;d=e%20f'
 
     def _quote_items(self, items):
         # Calculate the expected querystring with proper query encoding.
