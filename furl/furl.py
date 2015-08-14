@@ -1003,7 +1003,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     @property
     def url(self):
-        return str(self)
+        return self.tostr()
 
     @url.setter
     def url(self, url):
@@ -1230,6 +1230,30 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             self.fragment.query.remove(fragment_args)
         return self
 
+    def tostr(self, query_delimiter='&', query_quote_plus=True):
+        url = urllib.parse.urlunsplit((
+            self.scheme or '',  # Must be text type in Python 3.
+            self.netloc,
+            str(self.path),
+            self.query.encode(query_delimiter, query_quote_plus),
+            str(self.fragment),
+        ))
+
+        # Special cases.
+        if self.scheme is None:
+            if url.startswith('//'):
+                url = url[2:]
+            elif url.startswith('://'):
+                url = url[3:]
+        elif self.scheme in COLON_SEPARATED_SCHEMES:
+            # Change a '://' separator to ':'. Leave a ':' separator as-is.
+            url = _set_scheme(url, self.scheme)
+        elif (self.scheme is not None and
+              (url == '' or  # Protocol relative URL.
+               (url == '%s:' % self.scheme and not str(self.path)))):
+            url += '//'
+        return url
+
     def join(self, url):
         self.load(urljoin(self.url, str(url)))
         return self
@@ -1253,28 +1277,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             object.__setattr__(self, attr, value)
 
     def __unicode__(self):
-        url = urllib.parse.urlunsplit((
-            self.scheme or '',  # Must be text type in Python 3.
-            self.netloc,
-            str(self.path),
-            str(self.query),
-            str(self.fragment),
-        ))
-
-        # Special cases.
-        if self.scheme is None:
-            if url.startswith('//'):
-                url = url[2:]
-            elif url.startswith('://'):
-                url = url[3:]
-        elif self.scheme in COLON_SEPARATED_SCHEMES:
-            # Change a '://' separator to ':'. Leave a ':' separator as-is.
-            url = _set_scheme(url, self.scheme)
-        elif (self.scheme is not None and
-              (url == '' or  # Protocol relative URL.
-               (url == '%s:' % self.scheme and not str(self.path)))):
-            url += '//'
-        return url
+        return self.tostr()
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))

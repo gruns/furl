@@ -492,6 +492,27 @@ __remove()__ removes items from a furl object with the optional arguments
 
 ### Miscellaneous
 
+__tostr(query_delimiter='&', query_quote_plus=True)__ creates and returns a URL
+string. `query_delimiter` and `query_quote_plus` are passed unmodified to
+`Query.encode()`.
+
+```python
+>>> f = furl('http://spep.ru/?a+b=c+d&two%20tap=cat%20nap%24')
+>>> f.tostr()
+'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
+>> f.tostr(query_delimiter=';', query_quote_plus=False)
+'http://spep.ru/?a%20b=c%20d;two%20tap=cat%20nap$'
+```
+
+`furl.url` is a shortcut for `furl.tostr()`.
+
+```python
+>>> f.url
+'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
+>>> f.url == f.tostr() == str(f)
+True
+```
+
 __copy()__ creates and returns a new furl object with an identical URL.
 
 ```python

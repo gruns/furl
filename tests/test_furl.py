@@ -1682,6 +1682,16 @@ class TestFurl(unittest.TestCase):
             tojoin = furl.furl(join)
             assert f is f.join(tojoin) and f.url == result
 
+    def test_tostr(self):
+        f = furl.furl('http://blast.off/?a+b=c+d&two%20tap=cat%20nap%24')
+        assert f.tostr() == f.url
+        assert (f.tostr(query_delimiter=';') ==
+                'http://blast.off/?a+b=c+d;two+tap=cat+nap$')
+        assert (f.tostr(query_quote_plus=False) ==
+                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$')
+        assert (f.tostr(query_delimiter=';', query_quote_plus=False) ==
+                'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap$')
+
     def test_equality(self):
         assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
 
