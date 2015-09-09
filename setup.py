@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#
+# furl - URL manipulation made simple.
+#
+# Arthur Grunseid
+# grunseid.com
+# grunseid@gmail.com
+#
+# License: Build Amazing Things (Unlicense)
+
 import os
 import re
 import sys

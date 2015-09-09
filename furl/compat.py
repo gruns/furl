@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+
+#
+# furl - URL manipulation made simple.
+#
+# Arthur Grunseid
+# grunseid.com
+# grunseid@gmail.com
+#
+# License: Build Amazing Things (Unlicense)
+
 import sys
 
 if sys.version_info[0] == 2:
