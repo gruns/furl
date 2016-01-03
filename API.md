@@ -282,7 +282,7 @@ parameter value.
 ```
 
 __encode(delimiter='&', quote_plus=True)__ can be used to encode query strings
-with delimiters like `;` and encode key-value pairs with plain percent-encoding
+with delimiters like `;` and key-value pairs with standard percent-encoding
 ('%20' not '+'). The default delimiter is '&' and the default key-value encoding
 is application/x-www-form-urlencoded ('+' not '%20').
 
@@ -356,29 +356,40 @@ True
 
 ### Encoding
 
-Furl handles encoding for you, and furl's philosophy on encoding is simple:
-whole path, query, and fragment strings should always be encoded.
+Furl handles encoding for you, and furl's philosophy on encoding is simple: URL
+strings should always be percent-encoded.
 
 ```python
 >>> f = furl()
->>> f.path = 'supply%20encoded/whole%20path%20strings'
+>>> f.netloc = '%40user:%3Apass@google.com'
+>>> f.username, f.password
+'@user', ':pass'
+
+>>> f = furl()
+>>> f.path = 'supply%20percent%20encoded/path%20strings'
 >>> f.path.segments
-['supply encoded', 'whole path strings']
+['supply percent encoded', 'path strings']
 
->>> f.set(query='supply+encoded=query+strings,+too')
+>>> f.set(query='supply+percent+encoded=query+strings,+too')
 >>> f.query.params
-omdict1D([('supply encoded', 'query strings, too')])
+omdict1D([('supply percent encoded', 'query strings, too')])
 
->>> f.set(fragment='encoded%20path%20string?and+encoded=query+string+too')
+>>> f.set(fragment='percent%20encoded%20path?and+percent+encoded=query+too')
 >>> f.fragment.path.segments
-['encoded path string']
+['percent encoded path']
 >>> f.fragment.args
-omdict1D([('and encoded', 'query string too')])
+omdict1D([('and percent encoded', 'query too')])
 ```
 
-Path, Query, and Fragment strings should always be decoded.
+Direct username, password, path, query, and fragment strings should never be
+percent-encoded.
 
 ```python
+>>> f = furl('http://google.com')
+>>> f.set(username='@prap', password=':porps')
+>>> f.url
+'http://%40prap:%3Aporps@google.com'
+
 >>> f = furl()
 >>> f.set(path=['path segments are', 'decoded', '<>[]"#'])
 >>> str(f.path)
@@ -397,11 +408,11 @@ Path, Query, and Fragment strings should always be decoded.
 Python's
 [urllib.quote()](http://docs.python.org/library/urllib.html#urllib.quote) and
 [urllib.unquote()](http://docs.python.org/library/urllib.html#urllib.unquote)
-can be used to encode and decode path strings. Similarly,
+can be used to percent-encode and percent-decode path strings. Similarly,
 [urllib.quote_plus()](http://docs.python.org/library/urllib.html#urllib.quote_plus)
 and
 [urllib.unquote_plus()](http://docs.python.org/library/urllib.html#urllib.unquote_plus)
-can be used to encode and decode query strings.
+can be used to percent-encode and percent-decode query strings.
 
 
 ### Inline manipulation
@@ -525,7 +536,7 @@ __copy()__ creates and returns a new furl object with an identical URL.
 
 __join()__ joins the furl object's URL with the provided relative or absolute
 URL and returns the furl object for method chaining. __join()__'s action is the
-same as clicking on the provided relative or absolute URL in a browser.
+same as navigating to the provided URL from the current URL in a browser.
 
 ```python
 >>> f = furl('http://www.google.com')

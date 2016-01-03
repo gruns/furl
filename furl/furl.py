@@ -946,9 +946,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     @property
     def netloc(self):
-        userpass = self.username or ''
+        userpass = quote(self.username or '')
         if self.password is not None:
-            userpass += ':' + self.password
+            userpass += ':' + quote(self.password)
         if userpass or self.username is not None:
             userpass += '@'
 
@@ -964,7 +964,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         """
         Params:
           netloc: Network location string, like 'google.com' or
-            'google.com:99'.
+            'user:pass@google.com:99'.
         Raises: ValueError on invalid port or malformed IPv6 address.
         """
         # Raises ValueError on malformed IPv6 addresses.
@@ -1000,8 +1000,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         # self.host isn't updated.
         self.port = port  # Raises ValueError on invalid port.
         self.host = host or None
-        self.username = username or None
-        self.password = password or None
+        self.username = None if username is None else unquote(username)
+        self.password = None if password is None else unquote(password)
 
     @property
     def url(self):

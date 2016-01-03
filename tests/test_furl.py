@@ -1086,74 +1086,79 @@ class TestFurl(unittest.TestCase):
         # Empty usernames and passwords.
         for url in ['', 'http://www.pumps.com/']:
             f = furl.furl(url)
-            assert f.username is None and f.password is None
+            assert f.username is f.password is None
 
-        usernames = ['user', 'a-user_NAME$%^&09']
-        passwords = ['pass', 'a-PASS_word$%^&09']
         baseurl = 'http://www.google.com/'
+        usernames = ['', 'user', '@user', ' a-user_NAME$%^&09@:']
+        passwords = ['', 'pass', ':pass', ' a-PASS_word$%^&09@:']
 
         # Username only.
-        userurl = 'http://%s@www.google.com/'
         for username in usernames:
-            f = furl.furl(userurl % username)
+            encoded_username = urllib.parse.quote(username)
+            encoded_url = 'http://%s@www.google.com/' % encoded_username
+
+            f = furl.furl(encoded_url)
             assert f.username == username and f.password is None
 
             f = furl.furl(baseurl)
             f.username = username
             assert f.username == username and f.password is None
-            assert f.url == userurl % username
+            assert f.url == encoded_url
 
             f = furl.furl(baseurl)
             f.set(username=username)
             assert f.username == username and f.password is None
-            assert f.url == userurl % username
+            assert f.url == encoded_url
 
             f.remove(username=True)
-            assert f.username is None and f.password is None
-            assert f.url == baseurl
+            assert f.username is f.password is None and f.url == baseurl
 
         # Password only.
-        passurl = 'http://:%s@www.google.com/'
         for password in passwords:
-            f = furl.furl(passurl % password)
-            assert f.password == password and f.username is None
+            encoded_password = urllib.parse.quote(password)
+            encoded_url = 'http://:%s@www.google.com/' % encoded_password
+
+            f = furl.furl(encoded_url)
+            assert f.password == password and f.username == ''
 
             f = furl.furl(baseurl)
             f.password = password
-            assert f.password == password and f.username is None
-            assert f.url == passurl % password
+            assert f.password == password and not f.username
+            assert f.url == encoded_url
 
             f = furl.furl(baseurl)
             f.set(password=password)
-            assert f.password == password and f.username is None
-            assert f.url == passurl % password
+            assert f.password == password and not f.username
+            assert f.url == encoded_url
 
             f.remove(password=True)
-            assert not f.username and not f.password
-            assert f.url == baseurl
+            assert f.username is f.password is None and f.url == baseurl
 
         # Username and password.
-        userpassurl = 'http://%s:%s@www.google.com/'
         for username in usernames:
             for password in passwords:
-                f = furl.furl(userpassurl % (username, password))
+                encoded_username = urllib.parse.quote(username)
+                encoded_password = urllib.parse.quote(password)
+                encoded_url = 'http://%s:%s@www.google.com/' % (
+                    encoded_username, encoded_password)
+                
+                f = furl.furl(encoded_url)
                 assert f.username == username and f.password == password
 
                 f = furl.furl(baseurl)
                 f.username = username
                 f.password = password
                 assert f.username == username and f.password == password
-                assert f.url == userpassurl % (username, password)
+                assert f.url == encoded_url
 
                 f = furl.furl(baseurl)
                 f.set(username=username, password=password)
                 assert f.username == username and f.password == password
-                assert f.url == userpassurl % (username, password)
+                assert f.url == encoded_url
 
                 f = furl.furl(baseurl)
                 f.remove(username=True, password=True)
-                assert not f.username and not f.password
-                assert f.url == baseurl
+                assert f.username is f.password is None and f.url == baseurl
 
         # Username and password in the network location string.
         f = furl.furl()
