@@ -60,7 +60,7 @@ Get fancy.
 ```python
 >>> f = furl('http://www.google.com/search?q=query#1')
 >>> f.copy().remove(path=True).set(host='taco.com')
-...   .join('/pumps.html').add(fragment_path='party').url
+...  .join('/pumps.html').add(fragment_path='party').url
 'http://taco.com/pumps.html#party'
 ```
 
