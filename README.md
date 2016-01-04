@@ -55,6 +55,15 @@ Fragments have a path and a query, too.
 'http://www.google.com/#two/directories?one=argument'
 ```
 
+Get fancy.
+
+```python
+>>> f = furl('http://www.google.com/search?q=query#1')
+>>> f.copy().remove(path=True).set(host='taco.com')
+...   .join('/pumps.html').add(fragment_path='party').url
+'http://taco.com/pumps.html#party'
+```
+
 
 ### API
 
