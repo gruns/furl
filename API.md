@@ -20,7 +20,7 @@ scheme://username:password@host:port/path?query#fragment
  * __path__ is a Path object comprised of path segments.
  * __query__ is a Query object comprised of query arguments.
  * __fragment__ is a Fragment object comprised of a Path and Query object
-   separated by an optional '?' separator.
+   separated by an optional `?` separator.
 
 
 ### Scheme, Username, Password, Host, Port, and Network Location
@@ -66,8 +66,8 @@ provided __scheme__.
 
 URL paths in furl are Path objects that have __segments__, a list of zero or
 more path segments that can be manipulated directly. Path segments in
-__segments__ are decoded strings and all interaction with __segments__ should
-take place with decoded segment strings.
+__segments__ are percent-decoded and all interaction with __segments__ should
+take place with percent-decoded strings.
 
 ```python
 >>> f = furl('http://www.google.com/a/large%20ish/path')
@@ -100,12 +100,12 @@ Path('/a/large ish/path')
 '/segments/are/maintained/decoded/%5E%60%3C%3E%5B%5D%22%23%2F%3F'
 ```
 
-A path that starts with '/' is considered absolute, and a Path can be absolute
+A path that starts with `/` is considered absolute, and a Path can be absolute
 or not as specified (or set) by the boolean attribute __isabsolute__. URL Paths
 have a special restriction: they must be absolute if a __netloc__ (username,
 password, host, and/or port) is present. This restriction exists because a URL
-path must start with '/' to separate itself from a __netloc__. Fragment Paths
-have no such limitation and __isabsolute__ and can be be True or False without
+path must start with `/` to separate itself from a __netloc__. Fragment Paths
+have no such limitation and __isabsolute__ and can be True or False without
 restriction.
 
 Here's a URL Path example that illustrates how __isabsolute__ becomes True and
@@ -118,9 +118,9 @@ True
 >>> f.path.isabsolute = False
 >>> f.url
 'url/path'
->>> f.host = 'arc.io'
+>>> f.host = 'blaps.ru'
 >>> f.url
-'arc.io/url/path'
+'blaps.ru/url/path'
 >>> f.path.isabsolute
 True
 >>> f.path.isabsolute = False
@@ -128,7 +128,7 @@ Traceback (most recent call last):
   ...
 AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a username, password, host, and/or port). URL paths must be absolute if a netloc exists.
 >>> f.url
-'arc.io/url/path'
+'blaps.ru/url/path'
 ```
 
 Here's a fragment Path example.
@@ -145,7 +145,7 @@ True
 'http://www.google.com/#/absolute/fragment/path/'
 ```
 
-A path that ends with '/' is considered a directory, and otherwise considered a
+A path that ends with `/` is considered a directory, and otherwise considered a
 file. The Path attribute __isdir__ returns True if the path is a directory,
 False otherwise. Conversely, the attribute __isfile__ returns True if the path
 is a file, False otherwise.
@@ -179,8 +179,9 @@ Path object for method chaining.
 
 URL queries in furl are Query objects that have __params__, a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of
-query keys and values. Query keys and values in __params__ are decoded strings
-and all interaction with __params__ should take place with decoded strings.
+query keys and values. Query keys and values in __params__ are percent-decoded
+and all interaction with __params__ should take place with percent-decoded
+strings.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
@@ -253,7 +254,7 @@ that list is interpretted as multiple values.
 ```
 
 This makes sense: URL queries are inherently one dimensional -- query values
-can't have subvalues.
+can't have native subvalues.
 
 See the [orderedmultimdict](https://github.com/gruns/orderedmultidict)
 documentation for more information on interacting with the ordered multivalue
@@ -261,8 +262,8 @@ dictionary __params__.
 
 ##### Parameters
 
-To produce an empty query argument like `http://sprop.su/?param=`, use an empty
-string as the parameter value.
+To produce an empty query argument, like `http://sprop.su/?param=`, set the
+argument's value to the empty string.
 
 ```python
 >>> f = furl('http://sprop.su')
@@ -283,8 +284,8 @@ parameter value.
 
 __encode(delimiter='&', quote_plus=True)__ can be used to encode query strings
 with delimiters like `;` and key-value pairs with standard percent-encoding
-('%20' not '+'). The default delimiter is '&' and the default key-value encoding
-is application/x-www-form-urlencoded ('+' not '%20').
+(`%20` not `+`). The default delimiter is `&` and the default key-value encoding
+is application/x-www-form-urlencoded (`+` not `%20`).
 
 ```python
 >>> f.query = 'space=jams&woofs=squeeze+dog'
@@ -301,7 +302,7 @@ is application/x-www-form-urlencoded ('+' not '%20').
 ### Fragment
 
 URL fragments in furl are Fragment objects that have a Path __path__ and Query
-__query__ separated by an optional '?' __separator__.
+__query__ separated by an optional `?` __separator__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -315,8 +316,8 @@ Query('with=params')
 True
 ```
 
-Manipulation of Fragments is done through the Fragment's Path and Query
-instances, __path__ and __query__.
+Manipulation of Fragments is done via the Fragment's Path and Query instances,
+__path__ and __query__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -334,9 +335,9 @@ instances, __path__ and __query__.
 '/fragment/path?new=yep&with=params'
 ```
 
-Creating hash-bang fragments with furl illustrates the use of Fragment's
-__separator__. When __separator__ is False, the '?' separating __path__ and
-__query__ isn't included.
+Creating hash-bang fragments with furl illustrates the use of Fragment's boolean
+attribute __separator__. When __separator__ is False, the `?` that separates
+__path__ and __query__ isn't included.
 
 ```python
 >>> f = furl('http://www.google.com/')
@@ -381,8 +382,7 @@ omdict1D([('supply percent encoded', 'query strings, too')])
 omdict1D([('and percent encoded', 'query too')])
 ```
 
-Direct username, password, path, query, and fragment strings should never be
-percent-encoded.
+Raw, non-URL strings should never be percent-encoded.
 
 ```python
 >>> f = furl('http://google.com')
@@ -418,8 +418,8 @@ can be used to percent-encode and percent-decode query strings.
 ### Inline manipulation
 
 For quick, single-line URL manipulation, the __add()__, __set()__, and
-__remove()__ methods of furl objects manipulate various components of the URL
-and return the furl object for method chaining.
+__remove()__ methods of furl objects manipulate various URL components and
+return the furl object for method chaining.
 
 ```python
 >>> url = 'http://www.google.com/#fragment' 
