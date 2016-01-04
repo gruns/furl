@@ -459,7 +459,7 @@ __set()__ sets items of a furl object with the optional arguments
    or a path string to adopt as the fragment's path.
  * __fragment_args__: A dictionary of query keys and values for the fragment's
    query to adopt.
- * __fragment_separator__: Boolean whether or not there should be a '?'
+ * __fragment_separator__: Boolean whether or not there should be a `?`
    separator between the fragment path and the fragment query.
  * __host__: Host string to adopt.
  * __port__: Port number to adopt.
