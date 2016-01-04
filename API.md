@@ -440,10 +440,10 @@ __add()__ adds items to a furl object with the optional arguments
    fragment's query.
 
 ```python
->>> url = 'http://www.google.com/' 
->>> furl(url).add(path='/index.html', fragment_path='frag/path',
-                  fragment_args={'frag':'args'}).url
-'http://www.google.com/index.html#frag/path?frag=args'
+>>> f = furl('http://www.google.com/').add(
+...   path='/search', fragment_path='frag/path', fragment_args={'frag':'arg'})
+>>> f.url
+'http://www.google.com/search#frag/path?frag=args'
 ```
 
 __set()__ sets items of a furl object with the optional arguments
@@ -468,8 +468,10 @@ __set()__ sets items of a furl object with the optional arguments
 
 
 ```python
->>> furl().set(scheme='https', host='secure.google.com', port=99,
-               path='index.html', args={'some':'args'}, fragment='great job').url
+>>> f = furl().set(
+...   scheme='https', host='secure.google.com', port=99, path='index.html',
+...   args={'some':'args'}, fragment='great job')
+>>> f.url
 'https://secure.google.com:99/index.html?some=args#great%20job'
 ```
 
