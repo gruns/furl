@@ -882,8 +882,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         Raises: ValueError on invalid URL, like a malformed IPv6 address
         or invalid port.
         """
+        self.username = self.password = None
         self._host = self._port = self._scheme = None
-        self.username = self.password = self.scheme = None
 
         if not isinstance(url, six.string_types):
             url = str(url)
