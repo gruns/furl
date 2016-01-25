@@ -55,7 +55,7 @@ Fragments have a path and a query, too.
 'http://www.google.com/#two/directories?one=argument'
 ```
 
-Get fancy.
+Or get fancy.
 
 ```python
 >>> f = furl('http://www.google.com/search?q=query#1')
