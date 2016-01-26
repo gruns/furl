@@ -1645,33 +1645,37 @@ class TestFurl(unittest.TestCase):
                        'sup://www.pumps.org/brg/pap/mrf?a=b&c=d#frag?sup', ]
         run_tests = [
             # Join full URLs.
-            ('unknown://www.yahoo.com', 'unknown://www.yahoo.com'),
-            ('unknown://www.yahoo.com?one=two&three=four',
-             'unknown://www.yahoo.com?one=two&three=four'),
-            ('unknown://www.yahoo.com/new/url/?one=two#blrp',
-             'unknown://www.yahoo.com/new/url/?one=two#blrp'),
+            ('unknown://pepp.ru', 'unknown://pepp.ru'),
+            ('unknown://pepp.ru?one=two&three=four',
+             'unknown://pepp.ru?one=two&three=four'),
+            ('unknown://pepp.ru/new/url/?one=two#blrp',
+             'unknown://pepp.ru/new/url/?one=two#blrp'),
 
             # Absolute paths ('/foo').
-            ('/pump', 'unknown://www.yahoo.com/pump'),
-            ('/pump/2/dump', 'unknown://www.yahoo.com/pump/2/dump'),
-            ('/pump/2/dump/', 'unknown://www.yahoo.com/pump/2/dump/'),
+            ('/pump', 'unknown://pepp.ru/pump'),
+            ('/pump/2/dump', 'unknown://pepp.ru/pump/2/dump'),
+            ('/pump/2/dump/', 'unknown://pepp.ru/pump/2/dump/'),
 
             # Relative paths ('../foo').
-            ('./crit/', 'unknown://www.yahoo.com/pump/2/dump/crit/'),
-            ('.././../././././srp', 'unknown://www.yahoo.com/pump/2/srp'),
-            ('../././../nop', 'unknown://www.yahoo.com/nop'),
+            ('./crit/', 'unknown://pepp.ru/pump/2/dump/crit/'),
+            ('.././../././././srp', 'unknown://pepp.ru/pump/2/srp'),
+            ('../././../nop', 'unknown://pepp.ru/nop'),
 
             # Query included.
-            ('/erp/?one=two', 'unknown://www.yahoo.com/erp/?one=two'),
-            ('morp?three=four', 'unknown://www.yahoo.com/erp/morp?three=four'),
+            ('/erp/?one=two', 'unknown://pepp.ru/erp/?one=two'),
+            ('morp?three=four', 'unknown://pepp.ru/erp/morp?three=four'),
             ('/root/pumps?five=six',
-             'unknown://www.yahoo.com/root/pumps?five=six'),
+             'unknown://pepp.ru/root/pumps?five=six'),
 
             # Fragment included.
-            ('#sup', 'unknown://www.yahoo.com/root/pumps?five=six#sup'),
+            ('#sup', 'unknown://pepp.ru/root/pumps?five=six#sup'),
             ('/reset?one=two#yepYEP',
-             'unknown://www.yahoo.com/reset?one=two#yepYEP'),
-            ('./slurm#uwantpump?', 'unknown://www.yahoo.com/slurm#uwantpump?')
+             'unknown://pepp.ru/reset?one=two#yepYEP'),
+            ('./slurm#uwantpump?', 'unknown://pepp.ru/slurm#uwantpump?'),
+            
+            # Unicode.
+            ('/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
+            (u'/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
         ]
 
         for test in empty_tests:
