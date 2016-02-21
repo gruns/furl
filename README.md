@@ -78,10 +78,3 @@ Installing furl with pip is easy.
 ```
 $ pip install furl
 ```
-
-
-### Deprecated methods
-
-__f.pathstr__, __f.querystr__, and __f.fragmentstr__ are deprecated in favor of
-`str(f.path)`, `str(f.query)`, and `str(f.fragment)`. There should be one, and
-preferably only one, obvious way to serialize URL components to strings.
