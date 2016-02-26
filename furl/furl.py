@@ -931,9 +931,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     @port.setter
     def port(self, port):
         """
-        A port value can 1-65535 or None meaning no port specified. If <port>
-        is None and self.scheme is a known scheme in DEFAULT_PORTS, the default
-        port value from DEFAULT_PORTS will be used.
+        The port value can be 1-65535 or None, meaning no port specified. If
+        <port> is None and self.scheme is a known scheme in DEFAULT_PORTS,
+        the default port value from DEFAULT_PORTS will be used.
 
         Raises: ValueError on invalid port.
         """
