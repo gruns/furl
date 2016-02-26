@@ -1470,6 +1470,12 @@ class TestFurl(unittest.TestCase):
         assert f.port == 9999
         assert f.url == 'http://www.pumps.com:9999/'
 
+        # The port is inferred from scheme changes, if possible, but only if the
+        # port is otherwise unset (self.port is None).
+        assert furl.furl('unknown://pump.com').set(scheme='http').port == 80
+        assert furl.furl('unknown://pump.com:99').set(scheme='http').port == 99
+        assert furl.furl('http://pump.com:99').set(scheme='unknown').port == 99
+
     def test_add(self):
         f = furl.furl('http://pumps.com/')
 

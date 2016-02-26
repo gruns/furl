@@ -926,7 +926,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     @property
     def port(self):
-        return self._port
+        return self._port or DEFAULT_PORTS.get(self.scheme)
 
     @port.setter
     def port(self, port):
