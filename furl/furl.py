@@ -1455,7 +1455,7 @@ def utf8(o, default=_absent):
 
 def is_valid_port(port):
     port = str(port)
-    if not port.isdigit() or int(port) == 0 or int(port) > 65535:
+    if not port.isdigit() or not 0 < int(port) <= 65535:
         return False
     return True
 
