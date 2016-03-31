@@ -956,7 +956,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         if self.port and self.port != DEFAULT_PORTS.get(self.scheme):
             netloc += ':' + str(self.port)
 
-        netloc = ((userpass or '') + (netloc or ''))
+        netloc = (userpass or '') + (netloc or '')
         return netloc if (netloc or self.host == '') else None
 
     @netloc.setter
