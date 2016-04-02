@@ -1106,7 +1106,7 @@ class TestFurl(unittest.TestCase):
 
         # Username only.
         for username in usernames:
-            encoded_username = urllib.parse.quote(username)
+            encoded_username = urllib.parse.quote(username, safe='')
             encoded_url = 'http://%s@www.google.com/' % encoded_username
 
             f = furl.furl(encoded_url)
@@ -1127,7 +1127,7 @@ class TestFurl(unittest.TestCase):
 
         # Password only.
         for password in passwords:
-            encoded_password = urllib.parse.quote(password)
+            encoded_password = urllib.parse.quote(password, safe='')
             encoded_url = 'http://:%s@www.google.com/' % encoded_password
 
             f = furl.furl(encoded_url)
@@ -1149,8 +1149,8 @@ class TestFurl(unittest.TestCase):
         # Username and password.
         for username in usernames:
             for password in passwords:
-                encoded_username = urllib.parse.quote(username)
-                encoded_password = urllib.parse.quote(password)
+                encoded_username = urllib.parse.quote(username, safe='')
+                encoded_password = urllib.parse.quote(password, safe='')
                 encoded_url = 'http://%s:%s@www.google.com/' % (
                     encoded_username, encoded_password)
 
