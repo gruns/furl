@@ -736,7 +736,7 @@ class TestQuery(unittest.TestCase):
             q = furl.Query('%s=%s' % (key, value))
             assert q.params[key] == value
             assert str(q) == '%s=%s' % (key_encoded, value_encoded)
-            
+
             q = furl.Query()
             q.params[key] = value
             assert q.params[key] == value
@@ -757,7 +757,7 @@ class TestQuery(unittest.TestCase):
             q = furl.Query(items.original())
             # encode() and __str__().
             assert str(q) == q.encode() == q.encode('&')
-            
+
         # Accept both percent-encoded ('a=b%20c') and
         # application/x-www-form-urlencoded ('a=b+c') pairs as input.
         query = furl.Query('a=b%20c&d=e+f')
@@ -1089,12 +1089,24 @@ class TestFurl(unittest.TestCase):
             assert f.username is f.password is None
 
         baseurl = 'http://www.google.com/'
-        usernames = ['', 'user', '@user', ' a-user_NAME$%^&09@:']
-        passwords = ['', 'pass', ':pass', ' a-PASS_word$%^&09@:']
+        usernames = [
+            '',
+            'user',
+            '@user',
+            ' a-user_NAME$%^&09@:',
+            'a-user-with/slashes',
+        ]
+        passwords = [
+            '',
+            'pass',
+            ':pass',
+            ' a-PASS_word$%^&09@:',
+            'a-user-with/slashes',
+        ]
 
         # Username only.
         for username in usernames:
-            encoded_username = urllib.parse.quote(username)
+            encoded_username = urllib.parse.quote(username, safe='')
             encoded_url = 'http://%s@www.google.com/' % encoded_username
 
             f = furl.furl(encoded_url)
@@ -1115,7 +1127,7 @@ class TestFurl(unittest.TestCase):
 
         # Password only.
         for password in passwords:
-            encoded_password = urllib.parse.quote(password)
+            encoded_password = urllib.parse.quote(password, safe='')
             encoded_url = 'http://:%s@www.google.com/' % encoded_password
 
             f = furl.furl(encoded_url)
@@ -1137,11 +1149,11 @@ class TestFurl(unittest.TestCase):
         # Username and password.
         for username in usernames:
             for password in passwords:
-                encoded_username = urllib.parse.quote(username)
-                encoded_password = urllib.parse.quote(password)
+                encoded_username = urllib.parse.quote(username, safe='')
+                encoded_password = urllib.parse.quote(password, safe='')
                 encoded_url = 'http://%s:%s@www.google.com/' % (
                     encoded_username, encoded_password)
-                
+
                 f = furl.furl(encoded_url)
                 assert f.username == username and f.password == password
 
@@ -1678,7 +1690,7 @@ class TestFurl(unittest.TestCase):
             ('/reset?one=two#yepYEP',
              'unknown://pepp.ru/reset?one=two#yepYEP'),
             ('./slurm#uwantpump?', 'unknown://pepp.ru/slurm#uwantpump?'),
-            
+
             # Unicode.
             ('/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
             (u'/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
