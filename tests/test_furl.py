@@ -1089,8 +1089,20 @@ class TestFurl(unittest.TestCase):
             assert f.username is f.password is None
 
         baseurl = 'http://www.google.com/'
-        usernames = ['', 'user', '@user', ' a-user_NAME$%^&09@:']
-        passwords = ['', 'pass', ':pass', ' a-PASS_word$%^&09@:']
+        usernames = [
+            '',
+            'user',
+            '@user',
+            ' a-user_NAME$%^&09@:',
+            'a-user-with/slashes',
+        ]
+        passwords = [
+            '',
+            'pass',
+            ':pass',
+            ' a-PASS_word$%^&09@:',
+            'a-user-with/slashes',
+        ]
 
         # Username only.
         for username in usernames:
