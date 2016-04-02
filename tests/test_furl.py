@@ -736,7 +736,7 @@ class TestQuery(unittest.TestCase):
             q = furl.Query('%s=%s' % (key, value))
             assert q.params[key] == value
             assert str(q) == '%s=%s' % (key_encoded, value_encoded)
-            
+
             q = furl.Query()
             q.params[key] = value
             assert q.params[key] == value
@@ -757,7 +757,7 @@ class TestQuery(unittest.TestCase):
             q = furl.Query(items.original())
             # encode() and __str__().
             assert str(q) == q.encode() == q.encode('&')
-            
+
         # Accept both percent-encoded ('a=b%20c') and
         # application/x-www-form-urlencoded ('a=b+c') pairs as input.
         query = furl.Query('a=b%20c&d=e+f')
@@ -1141,7 +1141,7 @@ class TestFurl(unittest.TestCase):
                 encoded_password = urllib.parse.quote(password)
                 encoded_url = 'http://%s:%s@www.google.com/' % (
                     encoded_username, encoded_password)
-                
+
                 f = furl.furl(encoded_url)
                 assert f.username == username and f.password == password
 
@@ -1678,7 +1678,7 @@ class TestFurl(unittest.TestCase):
             ('/reset?one=two#yepYEP',
              'unknown://pepp.ru/reset?one=two#yepYEP'),
             ('./slurm#uwantpump?', 'unknown://pepp.ru/slurm#uwantpump?'),
-            
+
             # Unicode.
             ('/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
             (u'/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
