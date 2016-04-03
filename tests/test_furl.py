@@ -1089,12 +1089,12 @@ class TestFurl(unittest.TestCase):
             assert f.username is f.password is None
 
         baseurl = 'http://www.google.com/'
-        usernames = ['', 'user', '@user', ' a-user_NAME$%^&09@:']
-        passwords = ['', 'pass', ':pass', ' a-PASS_word$%^&09@:']
+        usernames = ['', 'user', '@user', ' a-user_NAME$%^&09@:/']
+        passwords = ['', 'pass', ':pass', ' a-PASS_word$%^&09@:/']
 
         # Username only.
         for username in usernames:
-            encoded_username = urllib.parse.quote(username)
+            encoded_username = urllib.parse.quote(username, safe='')
             encoded_url = 'http://%s@www.google.com/' % encoded_username
 
             f = furl.furl(encoded_url)
@@ -1115,7 +1115,7 @@ class TestFurl(unittest.TestCase):
 
         # Password only.
         for password in passwords:
-            encoded_password = urllib.parse.quote(password)
+            encoded_password = urllib.parse.quote(password, safe='')
             encoded_url = 'http://:%s@www.google.com/' % encoded_password
 
             f = furl.furl(encoded_url)
@@ -1137,8 +1137,8 @@ class TestFurl(unittest.TestCase):
         # Username and password.
         for username in usernames:
             for password in passwords:
-                encoded_username = urllib.parse.quote(username)
-                encoded_password = urllib.parse.quote(password)
+                encoded_username = urllib.parse.quote(username, safe='')
+                encoded_password = urllib.parse.quote(password, safe='')
                 encoded_url = 'http://%s:%s@www.google.com/' % (
                     encoded_username, encoded_password)
                 

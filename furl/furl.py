@@ -940,9 +940,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     @property
     def netloc(self):
-        userpass = quote(self.username or '')
+        userpass = quote(self.username or '', safe='')
         if self.password is not None:
-            userpass += ':' + quote(self.password)
+            userpass += ':' + quote(self.password, safe='')
         if userpass or self.username is not None:
             userpass += '@'
 
