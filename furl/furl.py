@@ -61,12 +61,6 @@ COLON_SEPARATED_SCHEMES = [
 ]
 
 
-def non_text_iterable(value):
-    b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
-    return b
-        
-
-
 class Path(object):
 
     """
@@ -1462,6 +1456,11 @@ def is_valid_port(port):
 
 def callable_attr(obj, attr):
     return hasattr(obj, attr) and callable(getattr(obj, attr))
+
+
+def non_text_iterable(value):
+    b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
+    return b
 
 
 #
