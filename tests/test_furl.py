@@ -1698,6 +1698,12 @@ class TestFurl(unittest.TestCase):
             tojoin = furl.furl(join)
             assert f is f.join(tojoin) and f.url == result
 
+        # Join multiple URLs.
+        f = furl.furl('')
+        f.join('path', 'tcp://blorp.biz', 'http://pepp.ru/', 'a/b/c',
+               '#uwantpump?')
+        assert f.url == 'http://pepp.ru/a/b/c#uwantpump?'
+
     def test_tostr(self):
         f = furl.furl('http://blast.off/?a+b=c+d&two%20tap=cat%20nap%24')
         assert f.tostr() == f.url

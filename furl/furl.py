@@ -1250,11 +1250,11 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             url += '//'
         return str(url)
 
-    def join(self, url):
-        if not isinstance(url, six.string_types):
-            url = str(url)
-
-        self.load(urljoin(self.url, url))
+    def join(self, *urls):
+        for url in urls:
+            if not isinstance(url, six.string_types):
+                url = str(url)
+            self.load(urljoin(self.url, url))
         return self
 
     def copy(self):
