@@ -257,7 +257,7 @@ class Path(object):
                          (path, self._path_from_segments(segments)))
                     warnings.warn(s, UserWarning)
             segments.append(utf8(segment))
-        
+
         # In Python 3, utf8() returns Bytes objects that must be decoded
         # into strings before they can be passed to urllib.unquote(). In
         # Python 2, utf8() returns strings that can be passed directly
@@ -536,7 +536,7 @@ class Query(object):
             delimiter = delimeter
 
         pairs = []
-        sixurl = urllib.parse # six.moves.urllib.parse
+        sixurl = urllib.parse  # six.moves.urllib.parse
         quote_func = sixurl.quote_plus if quote_plus else sixurl.quote
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
