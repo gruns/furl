@@ -951,7 +951,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         elif is_valid_port(port):
             self._port = int(str(port))
         else:
-            raise ValueError("Invalid port: '%s'" % port)
+            raise ValueError("Invalid port '%s'." % port)
 
     @property
     def netloc(self):
@@ -993,7 +993,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             if ']' in netloc:
                 colonpos, bracketpos = netloc.rfind(':'), netloc.rfind(']')
                 if colonpos > bracketpos and colonpos != bracketpos + 1:
-                    raise ValueError("Invalid netloc: '%s'" % netloc)
+                    raise ValueError("Invalid netloc '%s'." % netloc)
                 elif colonpos > bracketpos and colonpos == bracketpos + 1:
                     host, port = netloc.rsplit(':', 1)
                 else:
