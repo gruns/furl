@@ -916,6 +916,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         Raises: ValueError on malformed IPv6 address.
         """
         urllib.parse.urlsplit('http://%s/' % host)  # Raises ValueError.
+
+        if callable_attr(host, 'lower'):
+            host = host.lower()
         self._host = host
 
     @property
@@ -982,12 +985,12 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 elif colonpos > bracketpos and colonpos == bracketpos + 1:
                     host, port = netloc.rsplit(':', 1)
                 else:
-                    host = netloc.lower()
+                    host = netloc
             else:
                 host, port = netloc.rsplit(':', 1)
-                host = host.lower()
+                host = host
         else:
-            host = netloc.lower()
+            host = netloc
 
         # Avoid side effects by assigning self.port before self.host so
         # that if an exception is raised when assigning self.port,

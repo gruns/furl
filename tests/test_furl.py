@@ -1396,6 +1396,14 @@ class TestFurl(unittest.TestCase):
             with self.assertRaises(ValueError):
                 furl.furl('http://0:0:0:0:0:0:0:1]/')
 
+        # Host strings are always lowercase.
+        f = furl.furl('http://wWw.PuMpS.com')
+        assert f.host == 'www.pumps.com'
+        f.host = 'yEp.NoPe'
+        assert f.host == 'yep.nope'
+        f.set(host='FeE.fIe.FoE.fUm')
+        assert f.host == 'fee.fie.foe.fum'
+
     def test_netlocs(self):
         f = furl.furl('http://pumps.com/')
         netloc = '1.2.3.4.5.6:999'
@@ -1475,6 +1483,14 @@ class TestFurl(unittest.TestCase):
         assert furl.furl('unknown://pump.com').set(scheme='http').port == 80
         assert furl.furl('unknown://pump.com:99').set(scheme='http').port == 99
         assert furl.furl('http://pump.com:99').set(scheme='unknown').port == 99
+
+        # Domains are always lowercase.
+        f = furl.furl('http://wWw.PuMpS.com:9999')
+        assert f.netloc == 'www.pumps.com:9999'
+        f.netloc = 'yEp.NoPe:9999'
+        assert f.netloc == 'yep.nope:9999'
+        f.set(netloc='FeE.fIe.FoE.fUm:9999')
+        assert f.netloc == 'fee.fie.foe.fum:9999'
 
     def test_add(self):
         f = furl.furl('http://pumps.com/')
