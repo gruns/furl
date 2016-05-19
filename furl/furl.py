@@ -913,9 +913,21 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     @host.setter
     def host(self, host):
         """
-        Raises: ValueError on malformed IPv6 address.
+        Raises: ValueError on invalid host string or malformed IPv6 address.
         """
+        # Invalid IPv6 literal.
         urllib.parse.urlsplit('http://%s/' % host)  # Raises ValueError.
+
+        # Invalid host string.
+        resembles_ipv6_literal = (
+            host is not None and lget(host, 0) == '[' and ':' in host and
+            lget(host, -1) == ']')
+        if (host is not None and not resembles_ipv6_literal and
+            not is_valid_domain(host)):
+            errmsg = (
+                "Invalid host '%s'. Host strings must only contain "
+                "[\.\-a-zA-Z0-9] and can't have adjacent periods.")
+            raise ValueError(errmsg % host)
 
         if callable_attr(host, 'lower'):
             host = host.lower()
@@ -1436,6 +1448,13 @@ def remove_path_segments(segments, remove):
     return ret
 
 
+def lget(l, index, default=None):
+  try:
+    return l[index]
+  except IndexError:
+    return default
+
+
 def attemptstr(o):
     try:
         return str(o)
@@ -1519,3 +1538,19 @@ VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$')
 def is_valid_encoded_query_value(value):
     return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
+
+
+# RFC 1034
+#
+# Valid domain names must only contain [\.\-a-zA-Z0-9] and can't have adjacent
+# periods.
+VALID_DOMAIN_TOKEN_REGEX = re.compile(r'^[a-zA-Z0-9\-]+$')
+def is_valid_domain(domain):
+    toks = domain.split('.')
+    if toks[-1] == '':  # Trailing '.' in a fully qualified domain name.
+        toks.pop()
+
+    for tok in toks:
+        if tok == '' or not bool(VALID_DOMAIN_TOKEN_REGEX.match(tok)):
+            return False
+    return True

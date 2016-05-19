@@ -1376,6 +1376,14 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('http://192.168.1.101')
         f = furl.furl('http://[2001:db8:85a3:8d3:1319:8a2e:370:7348]/')
 
+        # Host strings are always lowercase.
+        f = furl.furl('http://wWw.PuMpS.com')
+        assert f.host == 'www.pumps.com'
+        f.host = 'yEp.NoPe'
+        assert f.host == 'yep.nope'
+        f.set(host='FeE.fIe.FoE.fUm')
+        assert f.host == 'fee.fie.foe.fum'
+
         # Invalid IPv4 addresses shouldn't raise an exception because
         # urlparse.urlsplit() doesn't raise an exception on invalid IPv4
         # addresses.
@@ -1396,13 +1404,12 @@ class TestFurl(unittest.TestCase):
             with self.assertRaises(ValueError):
                 furl.furl('http://0:0:0:0:0:0:0:1]/')
 
-        # Host strings are always lowercase.
-        f = furl.furl('http://wWw.PuMpS.com')
-        assert f.host == 'www.pumps.com'
-        f.host = 'yEp.NoPe'
-        assert f.host == 'yep.nope'
-        f.set(host='FeE.fIe.FoE.fUm')
-        assert f.host == 'fee.fie.foe.fum'
+        # Invalid host strings should raise ValueError.
+        for host in ['.', '..', 'a..b', '.a.b', '.a.b.']:
+            with self.assertRaises(ValueError):
+                f = furl.furl('http://./')
+        with self.assertRaises(ValueError):
+            f = furl.furl().set(host='invalid:domain@name.')
 
     def test_netlocs(self):
         f = furl.furl('http://pumps.com/')
