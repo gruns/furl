@@ -183,13 +183,13 @@ class TestPath(unittest.TestCase):
         assert str(p) == '/a/b/c/'
 
     def test_encoding(self):
-        encoded = ['a%20a', '/%7haypepps/', 'a/:@/a', 'a%2Fb']
-        unencoded = ['a+a', '/~haypepps/', 'a/:@/a', 'a/b']
+        decoded = ['a+a', '/#haypepps/', 'a/:@/a', 'a/b']
+        encoded = ['a%20a', '/%23haypepps/', 'a/:@/a', 'a%2Fb']
 
         for path in encoded:
             assert str(furl.Path(path)) == path
 
-        for path in unencoded:
+        for path in decoded:
             assert str(furl.Path(path)) == urllib.parse.quote(
                 path, "/:@-._~!$&'()*+,;=")
 

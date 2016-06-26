@@ -276,10 +276,9 @@ class Path(object):
 
         Returns: A path string with quoted path segments.
         """
-        if '%' not in ''.join(segments):  # Don't double-encode the path.
-            segments = [
-                quote(utf8(attemptstr(segment)), self.SAFE_SEGMENT_CHARS)
-                for segment in segments]
+        segments = [
+            quote(utf8(attemptstr(segment)), self.SAFE_SEGMENT_CHARS)
+            for segment in segments]
         return '/'.join(segments)
 
 
