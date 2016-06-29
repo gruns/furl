@@ -35,7 +35,7 @@ Or use furl's inline modification methods.
 'http://www.google.com/?two=2'
 ```
 
-Encoding is handled for you.
+Encoding is handled for you. Unicode, too.
 
 ```python
 >>> f = furl('http://www.google.com/')
@@ -43,6 +43,9 @@ Encoding is handled for you.
 >>> f.args['and some encoding'] = 'here, too'
 >>> f.url
 'http://www.google.com/some%20encoding%20here?and+some+encoding=here,+too'
+>>> f.set(host=u'ドメイン.テスト', path=u'джк', query=u'☃=☺')
+>>> f.url
+'http://xn--eckwd4c7c.xn--zckzah/%D0%B4%D0%B6%D0%BA?%E2%98%83=%E2%98%BA'
 ```
 
 Fragments have a path and a query, too.
