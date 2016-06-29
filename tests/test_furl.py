@@ -493,8 +493,8 @@ class TestPath(unittest.TestCase):
         assert p
 
     def test_unicode(self):
-        paths = ['/wiki/Восход', u'/wiki/Восход']
-        path_encoded = '/wiki/%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
+        paths = ['/wiki/ロリポップ', u'/wiki/ロリポップ']
+        path_encoded = '/wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
         for path in paths:
             p = furl.Path(path)
             assert str(p) == path_encoded
@@ -728,8 +728,8 @@ class TestQuery(unittest.TestCase):
         assert str(q) == 'prp=&slrp=' and q.params['slrp'] == ''
 
     def test_unicode(self):
-        pairs = [('Восход', 'testä'), (u'Восход', u'testä')]
-        key_encoded = '%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
+        pairs = [('ロリポップ', 'testä'), (u'ロリポップ', u'testä')]
+        key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
         value_encoded = 'test%C3%A4'
 
         for key, value in pairs:
@@ -905,12 +905,13 @@ class TestFragment(unittest.TestCase):
         f = furl.furl()
         f.fragment = 'a?b?c?d?'
         assert f.url == '#a?b?c?d?'
-        # TODO(grun): Once encoding has been fixed with URLPath and
-        # FragmentPath, the below line should be:
-        #
-        #  assert str(f.fragment) == str(f.path) == 'a?b?c?d?'
-        #
         assert str(f.fragment) == 'a?b?c?d?'
+
+    def test_unicode(self):
+        for fragment in ['ロリポップ', u'ロリポップ']:
+            f = furl.furl('http://sprop.ru/#ja').set(fragment=fragment)
+            assert str(f.fragment) == (
+                '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97')
 
     def test_equality(self):
         assert furl.Fragment() == furl.Fragment()
@@ -1004,11 +1005,29 @@ class TestFurl(unittest.TestCase):
         items = urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query, True)
         return (key, val) in items
 
+    def test_idna(self):
+        decoded_host = u'ドメイン.テスト'
+        encoded_url = 'http://user:pass@xn--eckwd4c7c.xn--zckzah/'
+
+        f = furl.furl(encoded_url)
+        assert f.username == 'user' and f.password == 'pass'
+        assert f.host == decoded_host
+
+        f = furl.furl(encoded_url)
+        assert f.host == decoded_host
+
+        f = furl.furl('http://user:pass@pumps.ru/')
+        f.set(host=decoded_host)
+        assert f.url == encoded_url
+
+        f = furl.furl().set(host=u'ロリポップ')
+        assert f.url == 'xn--9ckxbq5co'
+
     def test_unicode(self):
-        paths = ['Восход', u'Восход']
+        paths = ['ロリポップ', u'ロリポップ']
         pairs = [('testö', 'testä'), (u'testö', u'testä')]
-        path_encoded = u'%D0%92%D0%BE%D1%81%D1%85%D0%BE%D0%B4'
         key_encoded, value_encoded = u'test%C3%B6', u'test%C3%A4'
+        path_encoded = u'%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
 
         base_url = 'http://pumps.ru'
         full_url_utf8_str = '%s/%s?%s=%s' % (
@@ -1405,11 +1424,13 @@ class TestFurl(unittest.TestCase):
                 furl.furl('http://0:0:0:0:0:0:0:1]/')
 
         # Invalid host strings should raise ValueError.
-        for host in ['.', '..', 'a..b', '.a.b', '.a.b.']:
+        invalid_hosts = ['.', '..', 'a..b', '.a.b', '.a.b.', '$', 'a$b']
+        for host in invalid_hosts:
             with self.assertRaises(ValueError):
-                f = furl.furl('http://./')
-        with self.assertRaises(ValueError):
-            f = furl.furl().set(host='invalid:domain@name.')
+                f = furl.furl('http://%s/' % host)
+        for host in invalid_hosts + ['a/b']:
+            with self.assertRaises(ValueError):
+                f = furl.furl('http://google.com/').set(host=host)
 
     def test_netlocs(self):
         f = furl.furl('http://pumps.com/')

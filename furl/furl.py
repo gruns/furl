@@ -912,7 +912,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     @host.setter
     def host(self, host):
         """
-        Raises: ValueError on invalid host string or malformed IPv6 address.
+        Raises: ValueError on invalid host or malformed IPv6 address.
         """
         # Invalid IPv6 literal.
         urllib.parse.urlsplit('http://%s/' % host)  # Raises ValueError.
@@ -924,12 +924,15 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         if (host is not None and not resembles_ipv6_literal and
             not is_valid_domain(host)):
             errmsg = (
-                "Invalid host '%s'. Host strings must only contain "
-                "[\.\-a-zA-Z0-9] and can't have adjacent periods.")
-            raise ValueError(errmsg % host)
+                "Invalid host '%s'. Host strings must at least one non-period "
+                "character, can't contain any of '%s', and can't have "
+                "adjacent periods.")
+            raise ValueError(errmsg % (host, INVALID_DOMAIN_CHARS))
 
         if callable_attr(host, 'lower'):
             host = host.lower()
+        if callable_attr(host, 'startswith') and host.startswith('xn--'):
+            host = idna_decode(host)
         self._host = host
 
     @property
@@ -960,7 +963,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         if userpass or self.username is not None:
             userpass += '@'
 
-        netloc = self.host or ''
+        netloc = idna_encode(self.host) or ''
         if self.port and self.port != DEFAULT_PORTS.get(self.scheme):
             netloc += ':' + str(self.port)
 
@@ -1484,6 +1487,21 @@ def non_text_iterable(value):
     return b
 
 
+# TODO(grun): Support IDNA2008 via the third party idna module. See
+# https://github.com/gruns/furl/issues/73.
+
+def idna_encode(o):
+    if callable_attr(o, 'encode'):
+        return o.encode('idna').decode('utf8')
+    return o
+
+
+def idna_decode(o):
+    if callable_attr(utf8(o), 'decode'):
+        return utf8(o).decode('idna')
+    return o
+
+
 #
 # TODO(grun): These regex functions need to be expanded to reflect the
 # fact that the valid encoding for a URL Path segment is different from
@@ -1539,17 +1557,16 @@ def is_valid_encoded_query_value(value):
     return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
 
 
-# RFC 1034
-#
-# Valid domain names must only contain [\.\-a-zA-Z0-9] and can't have adjacent
-# periods.
-VALID_DOMAIN_TOKEN_REGEX = re.compile(r'^[a-zA-Z0-9\-]+$')
+INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
+INVALID_DOMAIN_CHARS_REGEX = re.compile(
+    '[%s]' % re.escape(INVALID_DOMAIN_CHARS))
 def is_valid_domain(domain):
     toks = domain.split('.')
     if toks[-1] == '':  # Trailing '.' in a fully qualified domain name.
         toks.pop()
 
     for tok in toks:
-        if tok == '' or not bool(VALID_DOMAIN_TOKEN_REGEX.match(tok)):
+        if INVALID_DOMAIN_CHARS_REGEX.search(tok) is not None:
             return False
-    return True
+
+    return '' not in toks  # Adjacent periods aren't allowed.
