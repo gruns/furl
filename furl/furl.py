@@ -61,6 +61,278 @@ COLON_SEPARATED_SCHEMES = [
 ]
 
 
+def lget(l, index, default=None):
+  try:
+    return l[index]
+  except IndexError:
+    return default
+
+
+def attemptstr(o):
+    try:
+        return str(o)
+    except:
+        return o
+
+
+def utf8(o, default=_absent):
+    try:
+        return o.encode('utf8')
+    except:
+        return o if default is _absent else default
+
+
+def callable_attr(obj, attr):
+    return hasattr(obj, attr) and callable(getattr(obj, attr))
+
+
+def non_text_iterable(value):
+    b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
+    return b
+
+
+# TODO(grun): Support IDNA2008 via the third party idna module. See
+# https://github.com/gruns/furl/issues/73.
+def idna_encode(o):
+    if callable_attr(o, 'encode'):
+        return o.encode('idna').decode('utf8')
+    return o
+
+
+def idna_decode(o):
+    if callable_attr(utf8(o), 'decode'):
+        return utf8(o).decode('idna')
+    return o
+
+
+def is_valid_port(port):
+    port = str(port)
+    if not port.isdigit() or not 0 < int(port) <= 65535:
+        return False
+    return True
+
+
+#
+# TODO(grun): These regex functions need to be expanded to reflect the
+# fact that the valid encoding for a URL Path segment is different from
+# a Fragment Path segment, and valid URL Query key and value encoding
+# is different than valid Fragment Query key and value encoding.
+#
+# For example, '?' and '#' don't need to be encoded in Fragment Path
+# segments but they must be encoded in URL Path segments.
+#
+# Similarly, '#' doesn't need to be encoded in Fragment Query keys and
+# values, but must be encoded in URL Query keys and values.
+#
+# Perhaps merge them with URLPath, FragmentPath, URLQuery, and
+# FragmentQuery when those new classes are created (see the TODO
+# currently at the top of the source, 02/03/2012).
+#
+
+# RFC 3986
+#   unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
+#
+#   pct-encoded = "%" HEXDIG HEXDIG
+#
+#   sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
+#                 / "*" / "+" / "," / ";" / "="
+#
+#   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+#
+#   ====
+#   Path
+#   ====
+#   segment       = *pchar
+#
+#   =====
+#   Query
+#   =====
+#   query       = *( pchar / "/" / "?" )
+#
+VALID_ENCODED_PATH_SEGMENT_REGEX = re.compile(
+    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$')
+def is_valid_encoded_path_segment(segment):
+    return bool(VALID_ENCODED_PATH_SEGMENT_REGEX.match(segment))
+
+
+VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
+    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$')
+def is_valid_encoded_query_key(key):
+    return bool(VALID_ENCODED_QUERY_KEY_REGEX.match(key))
+
+
+VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
+    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$')
+def is_valid_encoded_query_value(value):
+    return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
+
+
+INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
+INVALID_DOMAIN_CHARS_REGEX = re.compile(
+    '[%s]' % re.escape(INVALID_DOMAIN_CHARS))
+def is_valid_domain(domain):
+    toks = domain.split('.')
+    if toks[-1] == '':  # Trailing '.' in a fully qualified domain name.
+        toks.pop()
+
+    for tok in toks:
+        if INVALID_DOMAIN_CHARS_REGEX.search(tok) is not None:
+            return False
+
+    return '' not in toks  # Adjacent periods aren't allowed.
+
+
+def _get_scheme(url):
+    if url.lstrip().startswith('//'):  # Protocol relative URL.
+        return ''
+    beforeColon = url[:max(0, url.find(':'))]
+    if beforeColon in COLON_SEPARATED_SCHEMES:
+        return beforeColon
+    return url[:max(0, url.find('://'))] or None
+
+
+def _set_scheme(url, newscheme):
+    scheme = _get_scheme(url)
+    newscheme = newscheme or ''
+    newseparator = ':' if newscheme in COLON_SEPARATED_SCHEMES else '://'
+    if scheme == '':  # Protocol relative URL.
+        url = '%s:%s' % (newscheme, url)
+    elif scheme is None and url:  # No scheme.
+        url = ''.join([newscheme, newseparator, url])
+    elif scheme:  # Existing scheme.
+        remainder = url[len(scheme):]
+        if remainder.startswith('://'):
+            remainder = remainder[3:]
+        elif remainder.startswith(':'):
+            remainder = remainder[1:]
+        url = ''.join([newscheme, newseparator, remainder])
+    return url
+
+
+def urlsplit(url):
+    """
+    Parameters:
+      url: URL string to split.
+
+    Returns: urlparse.SplitResult tuple subclass, just like
+    urlparse.urlsplit() returns, with fields (scheme, netloc, path,
+    query, fragment, username, password, hostname, port). See the url
+    below for more details on urlsplit().
+
+      http://docs.python.org/library/urlparse.html#urlparse.urlsplit
+    """
+    original_scheme = _get_scheme(url)
+
+    def _change_urltoks_scheme(tup, scheme):
+        l = list(tup)
+        l[0] = scheme
+        return tuple(l)
+
+    # urlsplit() only parses the query for schemes in urlparse.uses_query,
+    # so switch to 'http' (a scheme in urlparse.uses_query) for
+    # urlparse.urlsplit() and switch back afterwards.
+    if original_scheme is not None:
+        url = _set_scheme(url, 'http')
+    toks = urllib.parse.urlsplit(url)
+    toks_orig_scheme = _change_urltoks_scheme(toks, original_scheme)
+    return urllib.parse.SplitResult(*toks_orig_scheme)
+
+
+def urljoin(base, url):
+    """
+    Parameters:
+      base: Base URL to join with <url>.
+      url: Relative or absolute URL to join with <base>.
+
+    Returns: The resultant URL from joining <base> and <url>.
+    """
+    base_scheme, url_scheme = urlsplit(base).scheme, urlsplit(url).scheme
+    httpbase = _set_scheme(base, 'http')
+    joined = urllib.parse.urljoin(httpbase, url)
+    if not url_scheme:
+        joined = _set_scheme(joined, base_scheme)
+    return joined
+
+
+def join_path_segments(*args):
+    """
+    Join multiple lists of path segments together, intelligently
+    handling path segments borders to preserve intended slashes of the
+    final constructed path.
+
+    This function is not encoding aware. It doesn't test for, or change,
+    the encoding of path segments it is passed.
+
+    Examples:
+      join_path_segments(['a'], ['b']) == ['a','b']
+      join_path_segments(['a',''], ['b']) == ['a','b']
+      join_path_segments(['a'], ['','b']) == ['a','b']
+      join_path_segments(['a',''], ['','b']) == ['a','','b']
+      join_path_segments(['a','b'], ['c','d']) == ['a','b','c','d']
+
+    Returns: A list containing the joined path segments.
+    """
+    finals = []
+    for segments in args:
+        if not segments or segments == ['']:
+            continue
+        elif not finals:
+            finals.extend(segments)
+        else:
+            # Example #1: ['a',''] + ['b'] == ['a','b']
+            # Example #2: ['a',''] + ['','b'] == ['a','','b']
+            if finals[-1] == '' and (segments[0] != '' or len(segments) > 1):
+                finals.pop(-1)
+            # Example: ['a'] + ['','b'] == ['a','b']
+            elif finals[-1] != '' and segments[0] == '' and len(segments) > 1:
+                segments = segments[1:]
+            finals.extend(segments)
+    return finals
+
+
+def remove_path_segments(segments, remove):
+    """
+    Removes the path segments of <remove> from the end of the path
+    segments <segments>.
+
+    Examples:
+      # '/a/b/c' - 'b/c' == '/a/'
+      remove_path_segments(['','a','b','c'], ['b','c']) == ['','a','']
+      # '/a/b/c' - '/b/c' == '/a'
+      remove_path_segments(['','a','b','c'], ['','b','c']) == ['','a']
+
+    Returns: The list of all remaining path segments after the segments
+    in <remove> have been removed from the end of <segments>. If no
+    segments from <remove> were removed from <segments>, <segments> is
+    returned unmodified.
+    """
+    # [''] means a '/', which is properly represented by ['', ''].
+    if segments == ['']:
+        segments.append('')
+    if remove == ['']:
+        remove.append('')
+
+    ret = None
+    if remove == segments:
+        ret = []
+    elif len(remove) > len(segments):
+        ret = segments
+    else:
+        toremove = list(remove)
+
+        if len(remove) > 1 and remove[0] == '':
+            toremove.pop(0)
+
+        if toremove and toremove == segments[-1 * len(toremove):]:
+            ret = segments[:len(segments) - len(toremove)]
+            if remove[0] != '' and ret:
+                ret.append('')
+        else:
+            ret = segments
+
+    return ret
+
+
 class Path(object):
 
     """
@@ -1297,276 +1569,3 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
-
-
-def _get_scheme(url):
-    if url.lstrip().startswith('//'):  # Protocol relative URL.
-        return ''
-    beforeColon = url[:max(0, url.find(':'))]
-    if beforeColon in COLON_SEPARATED_SCHEMES:
-        return beforeColon
-    return url[:max(0, url.find('://'))] or None
-
-
-def _set_scheme(url, newscheme):
-    scheme = _get_scheme(url)
-    newscheme = newscheme or ''
-    newseparator = ':' if newscheme in COLON_SEPARATED_SCHEMES else '://'
-    if scheme == '':  # Protocol relative URL.
-        url = '%s:%s' % (newscheme, url)
-    elif scheme is None and url:  # No scheme.
-        url = ''.join([newscheme, newseparator, url])
-    elif scheme:  # Existing scheme.
-        remainder = url[len(scheme):]
-        if remainder.startswith('://'):
-            remainder = remainder[3:]
-        elif remainder.startswith(':'):
-            remainder = remainder[1:]
-        url = ''.join([newscheme, newseparator, remainder])
-    return url
-
-
-def urlsplit(url):
-    """
-    Parameters:
-      url: URL string to split.
-
-    Returns: urlparse.SplitResult tuple subclass, just like
-    urlparse.urlsplit() returns, with fields (scheme, netloc, path,
-    query, fragment, username, password, hostname, port). See the url
-    below for more details on urlsplit().
-
-      http://docs.python.org/library/urlparse.html#urlparse.urlsplit
-    """
-    original_scheme = _get_scheme(url)
-
-    def _change_urltoks_scheme(tup, scheme):
-        l = list(tup)
-        l[0] = scheme
-        return tuple(l)
-
-    # urlsplit() only parses the query for schemes in urlparse.uses_query,
-    # so switch to 'http' (a scheme in urlparse.uses_query) for
-    # urlparse.urlsplit() and switch back afterwards.
-    if original_scheme is not None:
-        url = _set_scheme(url, 'http')
-    toks = urllib.parse.urlsplit(url)
-    toks_orig_scheme = _change_urltoks_scheme(toks, original_scheme)
-    return urllib.parse.SplitResult(*toks_orig_scheme)
-
-
-def urljoin(base, url):
-    """
-    Parameters:
-      base: Base URL to join with <url>.
-      url: Relative or absolute URL to join with <base>.
-
-    Returns: The resultant URL from joining <base> and <url>.
-    """
-    base_scheme, url_scheme = urlsplit(base).scheme, urlsplit(url).scheme
-    httpbase = _set_scheme(base, 'http')
-    joined = urllib.parse.urljoin(httpbase, url)
-    if not url_scheme:
-        joined = _set_scheme(joined, base_scheme)
-    return joined
-
-
-def join_path_segments(*args):
-    """
-    Join multiple lists of path segments together, intelligently
-    handling path segments borders to preserve intended slashes of the
-    final constructed path.
-
-    This function is not encoding aware. It doesn't test for, or change,
-    the encoding of path segments it is passed.
-
-    Examples:
-      join_path_segments(['a'], ['b']) == ['a','b']
-      join_path_segments(['a',''], ['b']) == ['a','b']
-      join_path_segments(['a'], ['','b']) == ['a','b']
-      join_path_segments(['a',''], ['','b']) == ['a','','b']
-      join_path_segments(['a','b'], ['c','d']) == ['a','b','c','d']
-
-    Returns: A list containing the joined path segments.
-    """
-    finals = []
-    for segments in args:
-        if not segments or segments == ['']:
-            continue
-        elif not finals:
-            finals.extend(segments)
-        else:
-            # Example #1: ['a',''] + ['b'] == ['a','b']
-            # Example #2: ['a',''] + ['','b'] == ['a','','b']
-            if finals[-1] == '' and (segments[0] != '' or len(segments) > 1):
-                finals.pop(-1)
-            # Example: ['a'] + ['','b'] == ['a','b']
-            elif finals[-1] != '' and segments[0] == '' and len(segments) > 1:
-                segments = segments[1:]
-            finals.extend(segments)
-    return finals
-
-
-def remove_path_segments(segments, remove):
-    """
-    Removes the path segments of <remove> from the end of the path
-    segments <segments>.
-
-    Examples:
-      # '/a/b/c' - 'b/c' == '/a/'
-      remove_path_segments(['','a','b','c'], ['b','c']) == ['','a','']
-      # '/a/b/c' - '/b/c' == '/a'
-      remove_path_segments(['','a','b','c'], ['','b','c']) == ['','a']
-
-    Returns: The list of all remaining path segments after the segments
-    in <remove> have been removed from the end of <segments>. If no
-    segments from <remove> were removed from <segments>, <segments> is
-    returned unmodified.
-    """
-    # [''] means a '/', which is properly represented by ['', ''].
-    if segments == ['']:
-        segments.append('')
-    if remove == ['']:
-        remove.append('')
-
-    ret = None
-    if remove == segments:
-        ret = []
-    elif len(remove) > len(segments):
-        ret = segments
-    else:
-        toremove = list(remove)
-
-        if len(remove) > 1 and remove[0] == '':
-            toremove.pop(0)
-
-        if toremove and toremove == segments[-1 * len(toremove):]:
-            ret = segments[:len(segments) - len(toremove)]
-            if remove[0] != '' and ret:
-                ret.append('')
-        else:
-            ret = segments
-
-    return ret
-
-
-def lget(l, index, default=None):
-  try:
-    return l[index]
-  except IndexError:
-    return default
-
-
-def attemptstr(o):
-    try:
-        return str(o)
-    except:
-        return o
-
-
-def utf8(o, default=_absent):
-    try:
-        return o.encode('utf8')
-    except:
-        return o if default is _absent else default
-
-
-def is_valid_port(port):
-    port = str(port)
-    if not port.isdigit() or not 0 < int(port) <= 65535:
-        return False
-    return True
-
-
-def callable_attr(obj, attr):
-    return hasattr(obj, attr) and callable(getattr(obj, attr))
-
-
-def non_text_iterable(value):
-    b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
-    return b
-
-
-# TODO(grun): Support IDNA2008 via the third party idna module. See
-# https://github.com/gruns/furl/issues/73.
-
-def idna_encode(o):
-    if callable_attr(o, 'encode'):
-        return o.encode('idna').decode('utf8')
-    return o
-
-
-def idna_decode(o):
-    if callable_attr(utf8(o), 'decode'):
-        return utf8(o).decode('idna')
-    return o
-
-
-#
-# TODO(grun): These regex functions need to be expanded to reflect the
-# fact that the valid encoding for a URL Path segment is different from
-# a Fragment Path segment, and valid URL Query key and value encoding
-# is different than valid Fragment Query key and value encoding.
-#
-# For example, '?' and '#' don't need to be encoded in Fragment Path
-# segments but they must be encoded in URL Path segments.
-#
-# Similarly, '#' doesn't need to be encoded in Fragment Query keys and
-# values, but must be encoded in URL Query keys and values.
-#
-# Perhaps merge them with URLPath, FragmentPath, URLQuery, and
-# FragmentQuery when those new classes are created (see the TODO
-# currently at the top of the source, 02/03/2012).
-#
-
-# RFC 3986
-#   unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
-#
-#   pct-encoded = "%" HEXDIG HEXDIG
-#
-#   sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
-#                 / "*" / "+" / "," / ";" / "="
-#
-#   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
-#
-#   ====
-#   Path
-#   ====
-#   segment       = *pchar
-#
-#   =====
-#   Query
-#   =====
-#   query       = *( pchar / "/" / "?" )
-#
-VALID_ENCODED_PATH_SEGMENT_REGEX = re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$')
-def is_valid_encoded_path_segment(segment):
-    return bool(VALID_ENCODED_PATH_SEGMENT_REGEX.match(segment))
-
-
-VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$')
-def is_valid_encoded_query_key(key):
-    return bool(VALID_ENCODED_QUERY_KEY_REGEX.match(key))
-
-
-VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$')
-def is_valid_encoded_query_value(value):
-    return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
-
-
-INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
-INVALID_DOMAIN_CHARS_REGEX = re.compile(
-    '[%s]' % re.escape(INVALID_DOMAIN_CHARS))
-def is_valid_domain(domain):
-    toks = domain.split('.')
-    if toks[-1] == '':  # Trailing '.' in a fully qualified domain name.
-        toks.pop()
-
-    for tok in toks:
-        if INVALID_DOMAIN_CHARS_REGEX.search(tok) is not None:
-            return False
-
-    return '' not in toks  # Adjacent periods aren't allowed.
