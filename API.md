@@ -538,7 +538,7 @@ __copy()__ creates and returns a new furl object with an identical URL.
 
 __join()__ joins the furl object's URL with the provided relative or absolute
 URL and returns the furl object for method chaining. __join()__'s action is the
-same as navigating to the provided URL from the current URL in a browser.
+same as navigating to the provided URL from the current URL in a web browser.
 
 ```python
 >>> f = furl('http://www.google.com')
