@@ -23,7 +23,7 @@ scheme://username:password@host:port/path?query#fragment
    separated by an optional `?` separator.
 
 
-### Scheme, Username, Password, Host, Port, and Network Location
+### Scheme, Username, Password, Host, Port, Network Location, and Origin
 
 __scheme__, __username__, __password__, and __host__ are strings or
 None. __port__ is an integer or None.
@@ -47,7 +47,7 @@ None
 ```
 
 __netloc__ is the string combination of __username__, __password__, __host__,
-and __port__, not including __port__ if it is None or the default port for the
+and __port__, not including __port__ if it's None or the default port for the
 provided __scheme__.
 
 ```python
@@ -59,6 +59,17 @@ provided __scheme__.
 
 >>> furl('http://user:pass@www.google.com:99/').netloc
 'user:pass@www.google.com:99'
+```
+
+__origin__ is the string combination of __scheme__, __host__, and __port__, not
+including __port__ if it's None or the default port for the provided __scheme__.
+
+```python
+>>> furl('http://www.google.com/').origin
+'http://www.google.com'
+
+>>> furl('http://www.google.com:99/').origin
+'http://www.google.com:99'
 ```
 
 
@@ -298,7 +309,6 @@ is application/x-www-form-urlencoded (`+` not `%20`).
 ```
 
 
-
 ### Fragment
 
 URL fragments in furl are Fragment objects that have a Path __path__ and Query
@@ -354,6 +364,7 @@ True
 >>> f.url
 'http://www.google.com/#!a=dict&of=args'
 ```
+
 
 ### Encoding
 
@@ -452,6 +463,7 @@ __set()__ sets items of a furl object with the optional arguments
  * __path__: List of path segments or a path string to adopt.
  * __scheme__: Scheme string to adopt.
  * __netloc__: Network location string to adopt.
+ * __origin__: Origin string to adopt.
  * __query__: Query string to adopt.
  * __query_params__: A dictionary of query keys and values to adopt.
  * __fragment__: Fragment string to adopt.

@@ -996,11 +996,16 @@ class TestFurl(unittest.TestCase):
         warnings.simplefilter("always")
 
     def _param(self, url, key, val):
-        # Note: urlparse.urlsplit() doesn't separate the query from the
-        # path for all schemes, only those schemes in the list
-        # urlparse.uses_query. So, as a result of using
-        # urlparse.urlsplit(), this little helper function only works
-        # when provided URLs whos schemes are also in
+        # urlsplit() only parses the query for schemes in urlparse.uses_query,
+        # so switch to 'http' (a scheme in urlparse.uses_query) for
+        # urlparse.urlsplit().
+        if '://' in url:
+            url = 'http://%s' % url.split('://', 1)[1]
+
+        # Note: urlparse.urlsplit() doesn't separate the query from the path
+        # for all schemes, only those schemes in the list urlparse.uses_query.
+        # So, as a result of using urlparse.urlsplit(), this little helper
+        # function only works when provided URLs whos schemes are also in
         # urlparse.uses_query.
         items = urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query, True)
         return (key, val) in items
@@ -1432,7 +1437,7 @@ class TestFurl(unittest.TestCase):
             with self.assertRaises(ValueError):
                 f = furl.furl('http://google.com/').set(host=host)
 
-    def test_netlocs(self):
+    def test_netloc(self):
         f = furl.furl('http://pumps.com/')
         netloc = '1.2.3.4.5.6:999'
         f.netloc = netloc
@@ -1454,7 +1459,7 @@ class TestFurl(unittest.TestCase):
             with self.assertRaises(ValueError):
                 f.netloc = '0:0:0:0:0:0:0:1]'
 
-        # Invalid ports.
+        # Invalid ports should raise an exception.
         with self.assertRaises(ValueError):
             f.netloc = '[0:0:0:0:0:0:0:1]:alksdflasdfasdf'
         with self.assertRaises(ValueError):
@@ -1463,6 +1468,35 @@ class TestFurl(unittest.TestCase):
         # No side effects.
         assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
         assert f.port == 888
+
+    def test_origin(self):
+        assert furl.furl().set(host='slurp.ru').origin == '://slurp.ru'
+        assert furl.furl('http://pep.ru:83/yep').origin == 'http://pep.ru:83'
+        assert furl.furl().set(origin='pep://yep.ru').origin == 'pep://yep.ru'
+        f = furl.furl('http://user:pass@pumps.com/path?query#fragemtn')
+        assert f.origin == 'http://pumps.com'
+
+        f = furl.furl('none://ignored/lol?sup').set(origin='sup://yep.biz:99')
+        assert f.url == 'sup://yep.biz:99/lol?sup'
+
+        # Username and password are unaffected.
+        f = furl.furl('http://user:pass@slurp.com')
+        f.origin = 'ssh://horse-machine.de'
+        assert f.url == 'ssh://user:pass@horse-machine.de'
+
+        # Malformed IPv6 should raise an exception because
+        # urlparse.urlsplit() raises an exception in Python v2.7+.
+        if PYTHON_27PLUS:
+            with self.assertRaises(ValueError):
+                f.origin = '[0:0:0:0:0:0:0:1'
+            with self.assertRaises(ValueError):
+                f.origin = 'http://0:0:0:0:0:0:0:1]'
+
+        # Invalid ports should raise an exception.
+        with self.assertRaises(ValueError):
+            f.origin = '[0:0:0:0:0:0:0:1]:alksdflasdfasdf'
+        with self.assertRaises(ValueError):
+            f.origin = 'http://pump2pump.org:777777777777'
 
     def test_ports(self):
         # Default port values.
@@ -1597,17 +1631,29 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('http://pumps.com')
         warnings.simplefilter("always")
 
-        # Host, port, and netloc overlap - host and port take
-        # precedence.
+        # Scheme, origin overlap. Scheme takes precedence.
+        with warnings.catch_warnings(record=True) as w1:
+            f.set(scheme='hi', origin='bye://sup.sup')
+            assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
+            assert f.scheme == 'hi'
+
+        # Netloc, origin, host and/or port. Host and port take precedence.
+        with warnings.catch_warnings(record=True) as w1:
+            f.set(netloc='dumps.com:99', origin='sup://pumps.com:88')
+            assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
         with warnings.catch_warnings(record=True) as w1:
             f.set(netloc='dumps.com:99', host='ohay.com')
             assert len(w1) == 1 and issubclass(w1[0].category, UserWarning)
-            f.host == 'ohay.com'
-            f.port == 99
+            assert f.host == 'ohay.com'
+            assert f.port == 99
         with warnings.catch_warnings(record=True) as w2:
             f.set(netloc='dumps.com:99', port=88)
             assert len(w2) == 1 and issubclass(w2[0].category, UserWarning)
-            f.port == 88
+            assert f.port == 88
+        with warnings.catch_warnings(record=True) as w2:
+            f.set(origin='http://dumps.com:99', port=88)
+            assert len(w2) == 1 and issubclass(w2[0].category, UserWarning)
+            assert f.port == 88
         with warnings.catch_warnings(record=True) as w3:
             f.set(netloc='dumps.com:99', host='ohay.com', port=88)
             assert len(w3) == 1 and issubclass(w3[0].category, UserWarning)
