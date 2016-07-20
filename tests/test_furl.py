@@ -1470,6 +1470,7 @@ class TestFurl(unittest.TestCase):
         assert f.port == 888
 
     def test_origin(self):
+        assert furl.furl().origin == '://'
         assert furl.furl().set(host='slurp.ru').origin == '://slurp.ru'
         assert furl.furl('http://pep.ru:83/yep').origin == 'http://pep.ru:83'
         assert furl.furl().set(origin='pep://yep.ru').origin == 'pep://yep.ru'
