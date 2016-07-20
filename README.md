@@ -48,7 +48,7 @@ Encoding is handled for you. Unicode, too.
 'http://xn--eckwd4c7c.xn--zckzah/%D0%B4%D0%B6%D0%BA?%E2%98%83=%E2%98%BA'
 ```
 
-Fragments have a path and a query, too.
+Fragments also have a path and a query.
 
 ```python
 >>> f = furl('http://www.google.com/')
