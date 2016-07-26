@@ -62,10 +62,10 @@ COLON_SEPARATED_SCHEMES = [
 
 
 def lget(l, index, default=None):
-  try:
-    return l[index]
-  except IndexError:
-    return default
+    try:
+        return l[index]
+    except IndexError:
+        return default
 
 
 def attemptstr(o):
@@ -151,18 +151,24 @@ def is_valid_port(port):
 #
 VALID_ENCODED_PATH_SEGMENT_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$')
+
+
 def is_valid_encoded_path_segment(segment):
     return bool(VALID_ENCODED_PATH_SEGMENT_REGEX.match(segment))
 
 
 VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$')
+
+
 def is_valid_encoded_query_key(key):
     return bool(VALID_ENCODED_QUERY_KEY_REGEX.match(key))
 
 
 VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
     r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$')
+
+
 def is_valid_encoded_query_value(value):
     return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
 
@@ -170,6 +176,8 @@ def is_valid_encoded_query_value(value):
 INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
 INVALID_DOMAIN_CHARS_REGEX = re.compile(
     '[%s]' % re.escape(INVALID_DOMAIN_CHARS))
+
+
 def is_valid_domain(domain):
     toks = domain.split('.')
     if toks[-1] == '':  # Trailing '.' in a fully qualified domain name.
@@ -1193,8 +1201,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         resembles_ipv6_literal = (
             host is not None and lget(host, 0) == '[' and ':' in host and
             lget(host, -1) == ']')
-        if (host is not None and not resembles_ipv6_literal and
-            not is_valid_domain(host)):
+        if host is not None and not resembles_ipv6_literal and \
+           not is_valid_domain(host):
             errmsg = (
                 "Invalid host '%s'. Host strings must at least one non-period "
                 "character, can't contain any of '%s', and can't have "
@@ -1426,7 +1434,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             <fragment_args>, and/or <fragment_separator>) are provided.
         Returns: <self>.
         """
-        present = lambda v: v is not _absent
+        def present(v):
+            return v is not _absent
+
         if present(scheme) and present(origin):
             s = ('Possible parameter overlap: <scheme> and <origin>. See '
                  'furl.set() documentation for more details.')
@@ -1470,7 +1480,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 self.host = host
             if port is not _absent:
                 self.port = port  # Raises ValueError on invalid port.
-            
+
             if path is not _absent:
                 self.path.load(path)
             if query is not _absent:
@@ -1589,9 +1599,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return not self == other
 
     def __setattr__(self, attr, value):
-        if (not PathCompositionInterface.__setattr__(self, attr, value) and
-            not QueryCompositionInterface.__setattr__(self, attr, value) and
-            not FragmentCompositionInterface.__setattr__(self, attr, value)):
+        if not PathCompositionInterface.__setattr__(self, attr, value) and \
+           not QueryCompositionInterface.__setattr__(self, attr, value) and \
+           not FragmentCompositionInterface.__setattr__(self, attr, value):
             object.__setattr__(self, attr, value)
 
     def __unicode__(self):

@@ -9,11 +9,11 @@
 #
 # License: Build Amazing Things (Unlicense)
 
+from .furl import *
+
 __title__ = 'furl'
 __version__ = '0.5.1'
 __license__ = 'Unlicense'
 __author__ = 'Arthur Grunseid'
 __contact__ = 'grunseid@gmail.com'
 __url__ = 'https://github.com/gruns/furl'
-
-from .furl import *

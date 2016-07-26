@@ -713,7 +713,8 @@ class TestQuery(unittest.TestCase):
             q.params = items.original()
             assert isinstance(q.params, omdict1D)
 
-            pairs = six.moves.zip(q.params.iterallitems(), items.iterallitems())
+            pairs = six.moves.zip(q.params.iterallitems(),
+                                  items.iterallitems())
             for item1, item2 in pairs:
                 assert item1 == item2
 
@@ -736,7 +737,7 @@ class TestQuery(unittest.TestCase):
             q = furl.Query('%s=%s' % (key, value))
             assert q.params[key] == value
             assert str(q) == '%s=%s' % (key_encoded, value_encoded)
-            
+
             q = furl.Query()
             q.params[key] = value
             assert q.params[key] == value
@@ -757,7 +758,7 @@ class TestQuery(unittest.TestCase):
             q = furl.Query(items.original())
             # encode() and __str__().
             assert str(q) == q.encode() == q.encode('&')
-            
+
         # Accept both percent-encoded ('a=b%20c') and
         # application/x-www-form-urlencoded ('a=b+c') pairs as input.
         query = furl.Query('a=b%20c&d=e+f')
@@ -855,7 +856,8 @@ class TestFragment(unittest.TestCase):
 
     def test_add(self):
         f = furl.Fragment('')
-        assert f is f.add(path='one two three', args=[('a', 'a'), ('s', 's s')])
+        assert f is f.add(path='one two three',
+                          args=[('a', 'a'), ('s', 's s')])
         assert str(f) == 'one%20two%20three?a=a&s=s+s'
 
         f = furl.Fragment('break?legs=broken')
@@ -864,7 +866,8 @@ class TestFragment(unittest.TestCase):
 
     def test_set(self):
         f = furl.Fragment('asdf?lol=sup&foo=blorp')
-        assert f is f.set(path='one two three', args=[('a', 'a'), ('s', 's s')])
+        assert f is f.set(path='one two three',
+                          args=[('a', 'a'), ('s', 's s')])
         assert str(f) == 'one%20two%20three?a=a&s=s+s'
 
         assert f is f.set(path='!', separator=False)
@@ -1060,8 +1063,8 @@ class TestFurl(unittest.TestCase):
             f = furl.furl(base_url).set(path=path)
             f.args[key] = value
             assert f.args[key] == value  # Unicode values aren't modified.
-            assert not key in f.url
-            assert not value in f.url
+            assert key not in f.url
+            assert value not in f.url
             assert urllib.parse.quote_plus(furl.utf8(key)) in f.url
             assert urllib.parse.quote_plus(furl.utf8(value)) in f.url
             f.path.segments = [path]
@@ -1165,7 +1168,7 @@ class TestFurl(unittest.TestCase):
                 encoded_password = urllib.parse.quote(password, safe='')
                 encoded_url = 'http://%s:%s@www.google.com/' % (
                     encoded_username, encoded_password)
-                
+
                 f = furl.furl(encoded_url)
                 assert f.username == username and f.password == password
 
@@ -1541,8 +1544,8 @@ class TestFurl(unittest.TestCase):
         assert f.port == 9999
         assert f.url == 'http://www.pumps.com:9999/'
 
-        # The port is inferred from scheme changes, if possible, but only if the
-        # port is otherwise unset (self.port is None).
+        # The port is inferred from scheme changes, if possible,
+        # but only if the port is otherwise unset (self.port is None).
         assert furl.furl('unknown://pump.com').set(scheme='http').port == 80
         assert furl.furl('unknown://pump.com:99').set(scheme='http').port == 99
         assert furl.furl('http://pump.com:99').set(scheme='unknown').port == 99
@@ -1563,7 +1566,8 @@ class TestFurl(unittest.TestCase):
         assert self._param(f.url, 'a', 'a')
         assert self._param(f.url, 'm', 'm&m')
         assert str(f.fragment) == '1?f=frp'
-        assert str(f.path) == urllib.parse.urlsplit(f.url).path == '/kwl%20jump'
+        assert str(f.path) == urllib.parse.urlsplit(f.url).path
+        assert urllib.parse.urlsplit(f.url).path == '/kwl%20jump'
 
         assert f is f.add(path='dir', fragment_path='23', args={'b': 'b'},
                           fragment_args={'b': 'bewp'})
@@ -1769,7 +1773,7 @@ class TestFurl(unittest.TestCase):
             ('/reset?one=two#yepYEP',
              'unknown://pepp.ru/reset?one=two#yepYEP'),
             ('./slurm#uwantpump?', 'unknown://pepp.ru/slurm#uwantpump?'),
-            
+
             # Unicode.
             ('/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
             (u'/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
@@ -1808,10 +1812,10 @@ class TestFurl(unittest.TestCase):
     def test_equality(self):
         assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
 
-        assert furl.furl() != None
+        assert furl.furl() is not None
 
         url = 'https://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#fragment'
-        assert furl.furl(url) != url # No furl to string comparisons (for now).
+        assert furl.furl(url) != url  # No furl to string comparisons.
         assert furl.furl(url) == furl.furl(url)
         assert furl.furl(url).remove(path=True) != furl.furl(url)
 

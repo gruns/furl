@@ -21,6 +21,7 @@ if list(sys.version_info[:2]) >= [2, 7]:
 else:
     from ordereddict import OrderedDict
 
+
 class UnicodeMixin(object):
     """
     Mixin class to handle defining the proper __str__/__unicode__ methods in
