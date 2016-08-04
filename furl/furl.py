@@ -13,6 +13,7 @@ import re
 import abc
 import warnings
 from posixpath import normpath
+from functools import partial
 
 import six
 from six.moves import urllib
@@ -149,28 +150,12 @@ def is_valid_port(port):
 #   =====
 #   query       = *( pchar / "/" / "?" )
 #
-VALID_ENCODED_PATH_SEGMENT_REGEX = re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$')
-
-
-def is_valid_encoded_path_segment(segment):
-    return bool(VALID_ENCODED_PATH_SEGMENT_REGEX.match(segment))
-
-
-VALID_ENCODED_QUERY_KEY_REGEX = re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$')
-
-
-def is_valid_encoded_query_key(key):
-    return bool(VALID_ENCODED_QUERY_KEY_REGEX.match(key))
-
-
-VALID_ENCODED_QUERY_VALUE_REGEX = re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$')
-
-
-def is_valid_encoded_query_value(value):
-    return bool(VALID_ENCODED_QUERY_VALUE_REGEX.match(value))
+is_valid_encoded_path_segment = partial(re.match, re.compile(
+    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$'))
+is_valid_encoded_query_key = partial(re.match, re.compile(
+    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$'))
+is_valid_encoded_query_value = partial(re.match, re.compile(
+    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$'))
 
 
 INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
