@@ -2029,6 +2029,11 @@ class TestFurl(unittest.TestCase):
         for invalid in invalids:
             assert not furl.is_valid_encoded_path_segment(invalid)
 
+        # check if result is auto-coerced to bool
+        for each in valids + invalids:
+            assert type(furl.is_valid_encoded_path_segment(each) is
+                        True) is bool
+
     def test_is_valid_encoded_query_key(key):
         valids = [('abcdefghijklmnopqrstuvwxyz'
                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -2041,6 +2046,11 @@ class TestFurl(unittest.TestCase):
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_key(invalid)
 
+        # check if result is auto-coerced to bool
+        for each in valids + invalids:
+            assert type(furl.is_valid_encoded_query_key(each) is
+                        True) is bool
+
     def test_is_valid_encoded_query_value(value):
         valids = [('abcdefghijklmnopqrstuvwxyz'
                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -2052,3 +2062,8 @@ class TestFurl(unittest.TestCase):
             assert furl.is_valid_encoded_query_value(valid)
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_value(invalid)
+
+        # check if result is auto-coerced to bool
+        for each in valids + invalids:
+            assert type(furl.is_valid_encoded_query_value(each) is
+                        True) is bool
