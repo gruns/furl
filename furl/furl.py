@@ -113,6 +113,13 @@ def is_valid_port(port):
     return True
 
 
+def static_vars(**kwargs):
+    def decorator(func):
+        for key, value in six.iteritems(kwargs):
+            setattr(func, key, value)
+        return func
+    return decorator
+
 #
 # TODO(grun): These regex functions need to be expanded to reflect the
 # fact that the valid encoding for a URL Path segment is different from
@@ -150,26 +157,36 @@ def is_valid_port(port):
 #   =====
 #   query       = *( pchar / "/" / "?" )
 #
-is_valid_encoded_path_segment = partial(re.match, re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\=]|(\%[\da-fA-F][\da-fA-F]))*$'))
-is_valid_encoded_query_key = partial(re.match, re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?]|(\%[\da-fA-F][\da-fA-F]))*$'))
-is_valid_encoded_query_value = partial(re.match, re.compile(
-    r'^([\w\-\.\~\:\@\!\$\&\'\(\)\*\+\,\;\/\?\=]|(\%[\da-fA-F][\da-fA-F]))*$'))
-
-
+PERCENT_REGEX = r'\%[a-fA-F\d][a-fA-F\d]'
 INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
-INVALID_DOMAIN_CHARS_REGEX = re.compile(
-    '[%s]' % re.escape(INVALID_DOMAIN_CHARS))
 
 
+@static_vars(regex=re.compile(
+    r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;='), PERCENT_REGEX)))
+def is_valid_encoded_path_segment(segment):
+    return is_valid_encoded_path_segment.regex.match(segment) is not None
+
+
+@static_vars(regex=re.compile(
+    r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;/?'), PERCENT_REGEX)))
+def is_valid_encoded_query_key(key):
+    return is_valid_encoded_query_key.regex.match(key) is not None
+
+
+@static_vars(regex=re.compile(
+    r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;/?='), PERCENT_REGEX)))
+def is_valid_encoded_query_value(value):
+    return is_valid_encoded_query_value.regex.match(value) is not None
+
+
+@static_vars(regex=re.compile('[%s]' % re.escape(INVALID_DOMAIN_CHARS)))
 def is_valid_domain(domain):
     toks = domain.split('.')
     if toks[-1] == '':  # Trailing '.' in a fully qualified domain name.
         toks.pop()
 
     for tok in toks:
-        if INVALID_DOMAIN_CHARS_REGEX.search(tok) is not None:
+        if is_valid_domain.regex.search(tok) is not None:
             return False
 
     return '' not in toks  # Adjacent periods aren't allowed.
