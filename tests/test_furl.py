@@ -14,7 +14,7 @@ import warnings
 from abc import ABCMeta, abstractmethod
 
 import six
-from six.moves import urllib
+from six.moves import zip, urllib
 
 import furl
 from furl.omdict1D import omdict1D
@@ -103,7 +103,7 @@ class itemstr(str, itemcontainer):
         parsed = urllib.parse.parse_qsl(self, keep_blank_values=True)
         pairstrs = [s2 for s1 in self.split('&')
                     for s2 in s1.split(';')]
-        for (key, value), pairstr in six.moves.zip(parsed, pairstrs):
+        for (key, value), pairstr in zip(parsed, pairstrs):
             if key == urllib.parse.quote_plus(pairstr):
                 value = None
             items.append((key, value))
@@ -713,8 +713,7 @@ class TestQuery(unittest.TestCase):
             q.params = items.original()
             assert isinstance(q.params, omdict1D)
 
-            pairs = six.moves.zip(q.params.iterallitems(),
-                                  items.iterallitems())
+            pairs = zip(q.params.iterallitems(), items.iterallitems())
             for item1, item2 in pairs:
                 assert item1 == item2
 
@@ -856,9 +855,8 @@ class TestFragment(unittest.TestCase):
 
     def test_add(self):
         f = furl.Fragment('')
-        assert f is f.add(path='one two three',
-                          args=[('a', 'a'), ('s', 's s')])
-        assert str(f) == 'one%20two%20three?a=a&s=s+s'
+        assert f is f.add(path='one two', args=[('a', 'a'), ('s', 's s')])
+        assert str(f) == 'one%20two?a=a&s=s+s'
 
         f = furl.Fragment('break?legs=broken')
         assert f is f.add(path='horse bones', args=[('a', 'a'), ('s', 's s')])
@@ -866,9 +864,8 @@ class TestFragment(unittest.TestCase):
 
     def test_set(self):
         f = furl.Fragment('asdf?lol=sup&foo=blorp')
-        assert f is f.set(path='one two three',
-                          args=[('a', 'a'), ('s', 's s')])
-        assert str(f) == 'one%20two%20three?a=a&s=s+s'
+        assert f is f.set(path='one two', args=[('a', 'a'), ('s', 's s')])
+        assert str(f) == 'one%20two?a=a&s=s+s'
 
         assert f is f.set(path='!', separator=False)
         assert f.separator is False
@@ -1544,8 +1541,8 @@ class TestFurl(unittest.TestCase):
         assert f.port == 9999
         assert f.url == 'http://www.pumps.com:9999/'
 
-        # The port is inferred from scheme changes, if possible,
-        # but only if the port is otherwise unset (self.port is None).
+        # The port is inferred from scheme changes, if possible, but
+        # only if the port is otherwise unset (self.port is None).
         assert furl.furl('unknown://pump.com').set(scheme='http').port == 80
         assert furl.furl('unknown://pump.com:99').set(scheme='http').port == 99
         assert furl.furl('http://pump.com:99').set(scheme='unknown').port == 99
@@ -1561,20 +1558,19 @@ class TestFurl(unittest.TestCase):
     def test_add(self):
         f = furl.furl('http://pumps.com/')
 
-        assert f is f.add(args={'a': 'a', 'm': 'm&m'}, path='kwl jump',
+        assert f is f.add(args={'a': 'a', 'm': 'm&m'}, path='sp ace',
                           fragment_path='1', fragment_args={'f': 'frp'})
         assert self._param(f.url, 'a', 'a')
         assert self._param(f.url, 'm', 'm&m')
         assert str(f.fragment) == '1?f=frp'
-        assert str(f.path) == urllib.parse.urlsplit(f.url).path
-        assert urllib.parse.urlsplit(f.url).path == '/kwl%20jump'
+        assert str(f.path) == urllib.parse.urlsplit(f.url).path == '/sp%20ace'
 
         assert f is f.add(path='dir', fragment_path='23', args={'b': 'b'},
                           fragment_args={'b': 'bewp'})
         assert self._param(f.url, 'a', 'a')
         assert self._param(f.url, 'm', 'm&m')
         assert self._param(f.url, 'b', 'b')
-        assert str(f.path) == '/kwl%20jump/dir'
+        assert str(f.path) == '/sp%20ace/dir'
         assert str(f.fragment) == '1/23?f=frp&b=bewp'
 
         # Supplying both <args> and <query_params> should raise a
@@ -1588,11 +1584,11 @@ class TestFurl(unittest.TestCase):
             assert params.index(('a', '1')) < params.index(('a', '2'))
 
     def test_set(self):
-        f = furl.furl('http://pumps.com/kwl%20jump/dir')
+        f = furl.furl('http://pumps.com/sp%20ace/dir')
         assert f is f.set(args={'no': 'nope'}, fragment='sup')
         assert 'a' not in f.args
         assert 'b' not in f.args
-        assert f.url == 'http://pumps.com/kwl%20jump/dir?no=nope#sup'
+        assert f.url == 'http://pumps.com/sp%20ace/dir?no=nope#sup'
 
         # No conflict warnings between <host>/<port> and <netloc>, or
         # <query> and <params>.
