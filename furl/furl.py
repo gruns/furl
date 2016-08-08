@@ -1203,8 +1203,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         resembles_ipv6_literal = (
             host is not None and lget(host, 0) == '[' and ':' in host and
             lget(host, -1) == ']')
-        if host is not None and not resembles_ipv6_literal and \
-           not is_valid_domain(host):
+        if (host is not None and not resembles_ipv6_literal and
+           not is_valid_domain(host)):
             errmsg = (
                 "Invalid host '%s'. Host strings must at least one non-period "
                 "character, can't contain any of '%s', and can't have "
@@ -1601,9 +1601,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return not self == other
 
     def __setattr__(self, attr, value):
-        if not PathCompositionInterface.__setattr__(self, attr, value) and \
-           not QueryCompositionInterface.__setattr__(self, attr, value) and \
-           not FragmentCompositionInterface.__setattr__(self, attr, value):
+        if (not PathCompositionInterface.__setattr__(self, attr, value) and
+           not QueryCompositionInterface.__setattr__(self, attr, value) and
+           not FragmentCompositionInterface.__setattr__(self, attr, value)):
             object.__setattr__(self, attr, value)
 
     def __unicode__(self):
