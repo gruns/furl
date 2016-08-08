@@ -1205,9 +1205,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         if (host is not None and not resembles_ipv6_literal and
            not is_valid_domain(host)):
             errmsg = (
-                "Invalid host '%s'. Host strings must at least one non-period "
-                "character, can't contain any of '%s', and can't have "
-                "adjacent periods.")
+                "Invalid host '%s'. Host strings must have at least one "
+                "non-period character, can't contain any of '%s', and can't "
+                "have adjacent periods.")
             raise ValueError(errmsg % (host, INVALID_DOMAIN_CHARS))
 
         if callable_attr(host, 'lower'):
