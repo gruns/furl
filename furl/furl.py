@@ -197,6 +197,8 @@ def _get_scheme(url):
     beforeColon = url[:max(0, url.find(':'))]
     if beforeColon in COLON_SEPARATED_SCHEMES:
         return beforeColon
+    if '?' in beforeColon:
+        return None
     return url[:max(0, url.find('://'))] or None
 
 
