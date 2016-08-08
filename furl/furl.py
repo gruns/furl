@@ -194,9 +194,9 @@ def is_valid_domain(domain):
 def _get_scheme(url):
     if url.lstrip().startswith('//'):  # Protocol relative URL.
         return ''
-    beforeColon = url[:max(0, url.find(':'))]
-    if beforeColon in COLON_SEPARATED_SCHEMES:
-        return beforeColon
+    before_colon = url[:max(0, url.find(':'))]
+    if before_colon in COLON_SEPARATED_SCHEMES:
+        return before_colon
     return url[:max(0, url.find('://'))] or None
 
 
