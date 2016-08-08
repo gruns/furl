@@ -13,7 +13,6 @@ import re
 import abc
 import warnings
 from posixpath import normpath
-from functools import partial
 
 import six
 from six.moves import urllib
