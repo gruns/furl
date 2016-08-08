@@ -2026,7 +2026,7 @@ class TestFurl(unittest.TestCase):
         for invalid in invalids:
             assert not furl.is_valid_scheme(invalid)
 
-    def test_is_valid_encoded_path_segment(segment):
+    def test_is_valid_encoded_path_segment(self):
         valids = [('abcdefghijklmnopqrstuvwxyz'
                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
                    '0123456789' '-._~' ":@!$&'()*+,;="),
@@ -2038,7 +2038,7 @@ class TestFurl(unittest.TestCase):
         for invalid in invalids:
             assert not furl.is_valid_encoded_path_segment(invalid)
 
-    def test_is_valid_encoded_query_key(key):
+    def test_is_valid_encoded_query_key(self):
         valids = [('abcdefghijklmnopqrstuvwxyz'
                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
                    '0123456789' '-._~' ":@!$&'()*+,;" '/?'),
@@ -2050,7 +2050,7 @@ class TestFurl(unittest.TestCase):
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_key(invalid)
 
-    def test_is_valid_encoded_query_value(value):
+    def test_is_valid_encoded_query_value(self):
         valids = [('abcdefghijklmnopqrstuvwxyz'
                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
                    '0123456789' '-._~' ":@!$&'()*+,;" '/?='),
