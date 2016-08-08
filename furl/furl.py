@@ -178,6 +178,14 @@ def is_valid_encoded_query_value(value):
     return is_valid_encoded_query_value.regex.match(value) is not None
 
 
+# Valid schemes start with with a letter and are optionally followed
+# by any combination of letters, digits, hyphens (-), periods (.),
+# and/or pluses (+).
+@static_vars(regex=re.compile(r'[a-zA-Z][a-zA-Z\-\.\+]*'))
+def is_valid_scheme(scheme):
+    return is_valid_scheme.regex.match(scheme) is not None
+
+
 @static_vars(regex=re.compile('[%s]' % re.escape(INVALID_DOMAIN_CHARS)))
 def is_valid_domain(domain):
     toks = domain.split('.')
@@ -194,10 +202,13 @@ def is_valid_domain(domain):
 def _get_scheme(url):
     if url.lstrip().startswith('//'):  # Protocol relative URL.
         return ''
+
     before_colon = url[:max(0, url.find(':'))]
     if before_colon in COLON_SEPARATED_SCHEMES:
-        return before_colon
-    return url[:max(0, url.find('://'))] or None
+        scheme = before_colon
+    else:
+        scheme = url[:max(0, url.find('://'))] or None
+    return scheme if (scheme is not None and is_valid_scheme(scheme)) else None
 
 
 def _set_scheme(url, newscheme):

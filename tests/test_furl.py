@@ -1106,6 +1106,10 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('mailto:')
         assert f.url == 'mailto:' and f.scheme == 'mailto'
 
+        # Ignore invalid schemes.
+        assert furl.furl('+invalid$scheme://lolsup').scheme is None
+        assert furl.furl('/api/test?url=http://a.com').scheme is None
+
     def test_username_and_password(self):
         # Empty usernames and passwords.
         for url in ['', 'http://www.pumps.com/']:
@@ -2012,6 +2016,15 @@ class TestFurl(unittest.TestCase):
             assert furl.is_valid_port(port)
         for port in invalids:
             assert not furl.is_valid_port(port)
+
+    def test_is_valid_scheme(self):
+        valids = ['a', 'ab', 'a-b', 'a.b', 'a+b', 'a----b', 'a123', 'a-b123', 'a+b.1-+']
+        invalids = ['1', '12', '12+', '-', '.', '+',  '1a', '+a', '.b.']
+
+        for valid in valids:
+            assert furl.is_valid_scheme(valid)
+        for invalid in invalids:
+            assert not furl.is_valid_scheme(invalid)
 
     def test_is_valid_encoded_path_segment(segment):
         valids = [('abcdefghijklmnopqrstuvwxyz'
