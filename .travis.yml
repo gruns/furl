@@ -2,6 +2,7 @@ language: python
 
 sudo: false
 env:
+    - TOXENV=codestyle
     - TOXENV=py26
     - TOXENV=py27
     - TOXENV=py33
