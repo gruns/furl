@@ -13,7 +13,6 @@
 import os
 import re
 import sys
-from sys import version_info
 from os.path import dirname, join as pjoin
 from setuptools import setup, find_packages
 
@@ -29,6 +28,10 @@ if sys.argv[-1] == 'publish':
 
 long_description = (
     'Information and documentation at https://github.com/gruns/furl.')
+
+tests_require = ['pycodestyle']
+if sys.version_info[:2] < (2, 7):
+    tests_require += ['unittest2']
 
 setup(
     name='furl',
@@ -61,5 +64,5 @@ setup(
         'orderedmultidict>=0.7.6',
     ],
     test_suite='tests',
-    tests_require=[] if list(version_info[:2]) >= [2, 7] else ['unittest2'],
+    tests_require=tests_require,
 )
