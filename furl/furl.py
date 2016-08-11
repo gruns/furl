@@ -120,16 +120,16 @@ def static_vars(**kwargs):
     return decorator
 
 #
-# TODO(grun): These regex functions need to be expanded to reflect the
-# fact that the valid encoding for a URL Path segment is different from
-# a Fragment Path segment, and valid URL Query key and value encoding
-# is different than valid Fragment Query key and value encoding.
+# TODO(grun): Update some of the regex functions below to reflect the fact that
+# the valid encoding of Path segments differs slightly from the valid encoding
+# of Fragment Path segments. Similarly, the valid encodings of Query keys and
+# values differ slightly from the valid encodings of Fragment Query keys and
+# values.
 #
-# For example, '?' and '#' don't need to be encoded in Fragment Path
-# segments but they must be encoded in URL Path segments.
-#
-# Similarly, '#' doesn't need to be encoded in Fragment Query keys and
-# values, but must be encoded in URL Query keys and values.
+# For example, '?' and '#' don't need to be encoded in Fragment Path segments
+# but they must be encoded in Path segments. Similarly, '#' doesn't need to be
+# encoded in Fragment Query keys and values, but must be encoded in Query keys
+# and values.
 #
 # Perhaps merge them with URLPath, FragmentPath, URLQuery, and
 # FragmentQuery when those new classes are created (see the TODO
@@ -144,17 +144,16 @@ def static_vars(**kwargs):
 #   sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
 #                 / "*" / "+" / "," / ";" / "="
 #
-#   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+#   pchar       = unreserved / pct-encoded / sub-delims / ":" / "@"
 #
-#   ====
-#   Path
-#   ====
-#   segment       = *pchar
+#   === Path ===
+#   segment     = *pchar
 #
-#   =====
-#   Query
-#   =====
+#   === Query ===
 #   query       = *( pchar / "/" / "?" )
+#
+#   === Scheme ===
+#   scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
 #
 PERCENT_REGEX = r'\%[a-fA-F\d][a-fA-F\d]'
 INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
@@ -178,9 +177,6 @@ def is_valid_encoded_query_value(value):
     return is_valid_encoded_query_value.regex.match(value) is not None
 
 
-# Valid schemes start with with a letter and are optionally followed
-# by any combination of letters, digits, hyphens (-), periods (.),
-# and/or pluses (+).
 @static_vars(regex=re.compile(r'[a-zA-Z][a-zA-Z\-\.\+]*'))
 def is_valid_scheme(scheme):
     return is_valid_scheme.regex.match(scheme) is not None
