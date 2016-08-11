@@ -1,17 +1,15 @@
 language: python
 
 sudo: false
+python:
+    - "2.6"
+    - "2.7"
+    - "3.3"
+    - "3.4"
+    - "3.5"
+    - "pypy"
 env:
     - TOXENV=codestyle
-    - TOXENV=py26
-    - TOXENV=py27
-    - TOXENV=py33
-    - TOXENV=py34
-    - TOXENV=py35
-    - TOXENV=pypy
 
-install:
-    - travis_retry pip install tox
-
-script:
-    - tox
+install: travis_retry pip install tox
+script: tox
