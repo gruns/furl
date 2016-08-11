@@ -2018,7 +2018,8 @@ class TestFurl(unittest.TestCase):
             assert not furl.is_valid_port(port)
 
     def test_is_valid_scheme(self):
-        valids = ['a', 'ab', 'a-b', 'a.b', 'a+b', 'a----b', 'a123', 'a-b123', 'a+b.1-+']
+        valids = ['a', 'ab', 'a-b', 'a.b', 'a+b', 'a----b', 'a123', 'a-b123',
+                  'a+b.1-+']
         invalids = ['1', '12', '12+', '-', '.', '+', '1a', '+a', '.b.']
 
         for valid in valids:
