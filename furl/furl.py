@@ -95,7 +95,7 @@ def non_text_iterable(value):
 # https://github.com/gruns/furl/issues/73.
 def idna_encode(o):
     if callable_attr(o, 'encode'):
-        return o.encode('idna').decode('utf8')
+        return str(o.encode('idna').decode('utf8'))
     return o
 
 
