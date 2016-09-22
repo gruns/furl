@@ -90,7 +90,7 @@ Path('/a/large ish/path')
 '/a/large%20ish/path'
 ```
 
-##### Manipulation
+#### Manipulation
 
 ```python
 >>> f.path.segments = ['a', 'new', 'path', '']
@@ -217,7 +217,7 @@ omdict1D([('one', '1'), ('two', '2')])
 True
 ```
 
-##### Manipulation
+#### Manipulation
 
 __params__ is a one dimensional
 [ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that
@@ -271,7 +271,7 @@ See the [orderedmultimdict](https://github.com/gruns/orderedmultidict)
 documentation for more information on interacting with the ordered multivalue
 dictionary __params__.
 
-##### Parameters
+#### Parameters
 
 To produce an empty query argument, like `http://sprop.su/?param=`, set the
 argument's value to the empty string.
