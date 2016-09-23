@@ -12,7 +12,7 @@
 from .furl import *
 
 __title__ = 'furl'
-__version__ = '0.5.2'
+__version__ = '0.5.3'
 __license__ = 'Unlicense'
 __author__ = 'Arthur Grunseid'
 __contact__ = 'grunseid@gmail.com'
