@@ -118,6 +118,15 @@ class itemstr(str, itemcontainer):
 
 class TestPath(unittest.TestCase):
 
+    def test_none(self):
+        p = furl.Path(None)
+        assert str(p) == ''
+
+        p = furl.Path('/a/b/c')
+        assert str(p) == '/a/b/c'
+        p.load(None)
+        assert str(p) == ''
+
     def test_isdir_isfile(self):
         for path in ['', '/']:
             p = furl.Path(path)
@@ -555,6 +564,15 @@ class TestQuery(unittest.TestCase):
         self.items = (self.itemlists + self.itemdicts + self.itemomdicts +
                       self.itemstrs)
 
+    def test_none(self):
+        q = furl.Query(None)
+        assert str(q) == ''
+
+        q = furl.Query('a=b&c=d')
+        assert str(q) == 'a=b&c=d'
+        q.load(None)
+        assert str(q) == ''
+
     def test_various(self):
         for items in self.items:
             q = furl.Query(items.original())
@@ -822,6 +840,15 @@ class TestFragment(unittest.TestCase):
         f.query.params['hi'] = 'gr8job'
         assert str(f) == 'no=dads&hi=gr8job'
 
+    def test_none(self):
+        f = furl.Fragment(None)
+        assert str(f) == ''
+
+        f = furl.Fragment('sup')
+        assert str(f) == 'sup'
+        f.load(None)
+        assert str(f) == ''
+
     def test_load(self):
         comps = [('', '', {}),
                  ('?', '%3F', {}),
@@ -1009,6 +1036,15 @@ class TestFurl(unittest.TestCase):
         # urlparse.uses_query.
         items = urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query, True)
         return (key, val) in items
+
+    def test_none(self):
+        f = furl.furl(None)
+        assert str(f) == ''
+
+        f = furl.furl('http://user:pass@pumps.ru/')
+        assert str(f) == 'http://user:pass@pumps.ru/'
+        f.load(None)
+        assert str(f) == ''
 
     def test_idna(self):
         decoded_host = u'ドメイン.テスト'

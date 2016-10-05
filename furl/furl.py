@@ -997,6 +997,9 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         self.path.load('')
         self.query.load('')
 
+        if fragment is None:
+            fragment = ''
+
         toks = fragment.split('?', 1)
         if len(toks) == 0:
             self._path.load('')
@@ -1166,6 +1169,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self.username = self.password = None
         self._host = self._port = self._scheme = None
 
+        if url is None:
+            url = ''
         if not isinstance(url, six.string_types):
             url = str(url)
 
