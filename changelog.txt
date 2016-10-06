@@ -1,4 +1,10 @@
 ===============================================================================
+ v0.5.4
+===============================================================================
+Fixed: When provided to constructors and load() methods, treat None as the empty
+  string, not the string 'None'. E.g. furl(None) == furl(''), not furl('None').
+
+===============================================================================
  v0.5.3
 ===============================================================================
 Fixed: In Python 2, furl.netloc and furl.origin return strings, not Unicode
