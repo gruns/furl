@@ -46,7 +46,7 @@ setup(
     include_package_data=True,
     platforms=['any'],
     classifiers=[
-        'Topic :: Internet',
+        'Topic :: Software Development :: Libraries',
         'Natural Language :: English',
         'License :: Freely Distributable',
         'Intended Audience :: Developers',
