@@ -368,8 +368,8 @@ True
 
 ### Encoding
 
-Furl handles encoding for you, and furl's philosophy on encoding is simple: URL
-strings should always be percent-encoded.
+Furl handles encoding for you, and furl's philosophy on encoding is simple: raw
+URL strings should always be percent-encoded.
 
 ```python
 >>> f = furl()
