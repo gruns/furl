@@ -61,7 +61,7 @@ setup(
     ],
     install_requires=[
         'six>=1.8.0',
-        'orderedmultidict>=0.7.6',
+        'orderedmultidict>=0.7.7',
     ],
     test_suite='tests',
     tests_require=tests_require,
