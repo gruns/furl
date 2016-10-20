@@ -1,4 +1,11 @@
 ===============================================================================
+ v0.5.5
+===============================================================================
+Changed: Bumped the orderedmultidict dependency from v0.7.6 to v0.7.7. The
+  latter, v0.7.7, better interoperates with other popular libraries, like
+  Requests.
+
+===============================================================================
  v0.5.4
 ===============================================================================
 Fixed: When provided to constructors and load() methods, treat None as the empty
