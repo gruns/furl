@@ -3,6 +3,7 @@
 \#*
 .tox
 dist/
+.eggs/
 build/
 *.pyc
 *.pyo
