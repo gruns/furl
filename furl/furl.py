@@ -119,6 +119,7 @@ def static_vars(**kwargs):
         return func
     return decorator
 
+
 #
 # TODO(grun): Update some of the regex functions below to reflect the fact that
 # the valid encoding of Path segments differs slightly from the valid encoding
@@ -240,9 +241,9 @@ def urlsplit(url):
     original_scheme = _get_scheme(url)
 
     def _change_urltoks_scheme(tup, scheme):
-        l = list(tup)
-        l[0] = scheme
-        return tuple(l)
+        toks = list(tup)
+        toks[0] = scheme
+        return tuple(toks)
 
     # urlsplit() only parses the query for schemes in urlparse.uses_query,
     # so switch to 'http' (a scheme in urlparse.uses_query) for
@@ -1454,8 +1455,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             s = ('Possible parameter overlap: <scheme> and <origin>. See '
                  'furl.set() documentation for more details.')
             warnings.warn(s, UserWarning)
-        l = [present(netloc), present(origin), present(host) or present(port)]
-        if sum(l) >= 2:
+        provided = [
+            present(netloc), present(origin), present(host) or present(port)]
+        if sum(provided) >= 2:
             s = ('Possible parameter overlap: <origin>, <netloc> and/or '
                  '(<host> and/or <port>) provided. See furl.set() '
                  'documentation for more details.')
@@ -1465,8 +1467,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                  '<query_params> provided. See furl.set() documentation for '
                  'more details.')
             warnings.warn(s, UserWarning)
-        l = [fragment_path, fragment_args, fragment_separator]
-        if present(fragment) and any(present(p) for p in l):
+        provided = [fragment_path, fragment_args, fragment_separator]
+        if present(fragment) and any(present(p) for p in provided):
             s = ('Possible parameter overlap: <fragment> and '
                  '(<fragment_path>and/or <fragment_args>) or <fragment> '
                  'and <fragment_separator> provided. See furl.set() '
