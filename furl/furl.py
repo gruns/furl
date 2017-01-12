@@ -1128,7 +1128,6 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       scheme://username:password@host:port/path?query#fragment
 
     Attributes:
-      DEFAULT_PORTS:
       strict: Boolean whether or not UserWarnings should be raised if
         improperly encoded path, query, or fragment strings are provided
         to methods that take such strings, like load(), add(), set(),
