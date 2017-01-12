@@ -246,8 +246,8 @@ def urlsplit(url):
         return tuple(toks)
 
     # urlsplit() only parses the query for schemes in urlparse.uses_query,
-    # so switch to 'http' (a scheme in urlparse.uses_query) for
-    # urlparse.urlsplit() and switch back afterwards.
+    # so switch to 'http', a scheme in urlparse.uses_query, for
+    # urlparse.urlsplit() then restore the original scheme afterwards.
     if original_scheme is not None:
         url = _set_scheme(url, 'http')
     toks = urllib.parse.urlsplit(url)
