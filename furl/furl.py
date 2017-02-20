@@ -1597,7 +1597,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         for url in urls:
             if not isinstance(url, six.string_types):
                 url = str(url)
-            self.load(urljoin(self.url, url))
+            newurl = urljoin(self.url, url)
+            self.load(newurl)
         return self
 
     def copy(self):
