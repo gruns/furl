@@ -14,7 +14,9 @@ import warnings
 from abc import ABCMeta, abstractmethod
 
 import six
-from six.moves import zip, urllib
+from six.moves import zip
+from six.moves.urllib.parse import (
+    quote, quote_plus, parse_qsl, urlsplit, SplitResult)
 
 import furl
 from furl.omdict1D import omdict1D
@@ -100,11 +102,11 @@ class itemstr(str, itemcontainer):
         # Keys and values get unquoted. i.e. 'a=a%20a' -> ['a', 'a a']. Empty
         # values without '=' have value None.
         items = []
-        parsed = urllib.parse.parse_qsl(self, keep_blank_values=True)
+        parsed = parse_qsl(self, keep_blank_values=True)
         pairstrs = [s2 for s1 in self.split('&')
                     for s2 in s1.split(';')]
         for (key, value), pairstr in zip(parsed, pairstrs):
-            if key == urllib.parse.quote_plus(pairstr):
+            if key == quote_plus(pairstr):
                 value = None
             items.append((key, value))
         return items
@@ -200,7 +202,7 @@ class TestPath(unittest.TestCase):
 
         safe = furl.Path.SAFE_SEGMENT_CHARS + '/'
         for path in decoded:
-            assert str(furl.Path(path)) == urllib.parse.quote(path, safe)
+            assert str(furl.Path(path)) == quote(path, safe)
 
         # Valid path segment characters should not be encoded.
         for char in ":@-._~!$&'()*+,;=":
@@ -211,7 +213,7 @@ class TestPath(unittest.TestCase):
         # Invalid path segment characters should be encoded.
         for char in ' ^`<>[]"?':
             f = furl.furl().set(path=char)
-            assert str(f.path) == f.url == urllib.parse.quote(char)
+            assert str(f.path) == f.url == quote(char)
             assert f.path.segments == [char]
 
         # Encode '/' within a path segment.
@@ -795,8 +797,8 @@ class TestQuery(unittest.TestCase):
         #   Valid query value characters: "/?:@-._~!$'()*,;="
         allitems_quoted = []
         for key, value in items.iterallitems():
-            pair = (urllib.parse.quote_plus(str(key), "/?:@-._~!$'()*,;"),
-                    urllib.parse.quote_plus(str(value), "/?:@-._~!$'()*,;="))
+            pair = (quote_plus(str(key), "/?:@-._~!$'()*,;"),
+                    quote_plus(str(value), "/?:@-._~!$'()*,;="))
             allitems_quoted.append(pair)
         return allitems_quoted
 
@@ -1041,7 +1043,7 @@ class TestFurl(unittest.TestCase):
         # So, as a result of using urlparse.urlsplit(), this little helper
         # function only works when provided URLs whos schemes are also in
         # urlparse.uses_query.
-        items = urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query, True)
+        items = parse_qsl(urlsplit(url).query, True)
         return (key, val) in items
 
     def test_none(self):
@@ -1105,8 +1107,8 @@ class TestFurl(unittest.TestCase):
             assert f.args[key] == value  # Unicode values aren't modified.
             assert key not in f.url
             assert value not in f.url
-            assert urllib.parse.quote_plus(furl.utf8(key)) in f.url
-            assert urllib.parse.quote_plus(furl.utf8(value)) in f.url
+            assert quote_plus(furl.utf8(key)) in f.url
+            assert quote_plus(furl.utf8(value)) in f.url
             f.path.segments = [path]
             assert f.path.segments == [path]  # Unicode values aren't modified.
             assert f.url == full_url_encoded
@@ -1165,7 +1167,7 @@ class TestFurl(unittest.TestCase):
 
         # Username only.
         for username in usernames:
-            encoded_username = urllib.parse.quote(username, safe='')
+            encoded_username = quote(username, safe='')
             encoded_url = 'http://%s@www.google.com/' % encoded_username
 
             f = furl.furl(encoded_url)
@@ -1186,7 +1188,7 @@ class TestFurl(unittest.TestCase):
 
         # Password only.
         for password in passwords:
-            encoded_password = urllib.parse.quote(password, safe='')
+            encoded_password = quote(password, safe='')
             encoded_url = 'http://:%s@www.google.com/' % encoded_password
 
             f = furl.furl(encoded_url)
@@ -1208,8 +1210,8 @@ class TestFurl(unittest.TestCase):
         # Username and password.
         for username in usernames:
             for password in passwords:
-                encoded_username = urllib.parse.quote(username, safe='')
-                encoded_password = urllib.parse.quote(password, safe='')
+                encoded_username = quote(username, safe='')
+                encoded_password = quote(password, safe='')
                 encoded_url = 'http://%s:%s@www.google.com/' % (
                     encoded_username, encoded_password)
 
@@ -1610,7 +1612,7 @@ class TestFurl(unittest.TestCase):
         assert self._param(f.url, 'a', 'a')
         assert self._param(f.url, 'm', 'm&m')
         assert str(f.fragment) == '1?f=frp'
-        assert str(f.path) == urllib.parse.urlsplit(f.url).path == '/sp%20ace'
+        assert str(f.path) == urlsplit(f.url).path == '/sp%20ace'
 
         assert f is f.add(path='dir', fragment_path='23', args={'b': 'b'},
                           fragment_args={'b': 'bewp'})
@@ -1867,34 +1869,34 @@ class TestFurl(unittest.TestCase):
         # treated as a path.
         urls = ['sup', '127.0.0.1', 'www.google.com', '192.168.1.1:8000']
         for url in urls:
-            assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
-            assert furl.urlsplit(url).path == urllib.parse.urlsplit(url).path
+            assert isinstance(furl.urlsplit(url), SplitResult)
+            assert furl.urlsplit(url).path == urlsplit(url).path
 
         # No changes to existing urlsplit() behavior for known schemes.
         url = 'http://www.pumps.com/'
-        assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
-        assert furl.urlsplit(url) == urllib.parse.urlsplit(url)
+        assert isinstance(furl.urlsplit(url), SplitResult)
+        assert furl.urlsplit(url) == urlsplit(url)
 
         url = 'https://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#fragment'
-        assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
-        assert furl.urlsplit(url) == urllib.parse.urlsplit(url)
+        assert isinstance(furl.urlsplit(url), SplitResult)
+        assert furl.urlsplit(url) == urlsplit(url)
 
         # Properly split the query from the path for unknown schemes.
         url = 'unknown://www.yahoo.com?one=two&three=four'
         correct = ('unknown', 'www.yahoo.com', '', 'one=two&three=four', '')
-        assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
+        assert isinstance(furl.urlsplit(url), SplitResult)
         assert furl.urlsplit(url) == correct
 
         url = 'sup://192.168.1.102:8080///one//two////?s=kwl%20string#frag'
         correct = ('sup', '192.168.1.102:8080', '///one//two////',
                    's=kwl%20string', 'frag')
-        assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
+        assert isinstance(furl.urlsplit(url), SplitResult)
         assert furl.urlsplit(url) == correct
 
         url = 'crazyyy://www.yahoo.co.uk/one/two/three?a=a&b=b&m=m%26m#frag'
         correct = ('crazyyy', 'www.yahoo.co.uk', '/one/two/three',
                    'a=a&b=b&m=m%26m', 'frag')
-        assert isinstance(furl.urlsplit(url), urllib.parse.SplitResult)
+        assert isinstance(furl.urlsplit(url), SplitResult)
         assert furl.urlsplit(url) == correct
 
     def test_join_path_segments(self):
