@@ -198,9 +198,9 @@ class TestPath(unittest.TestCase):
         for path in encoded:
             assert str(furl.Path(path)) == path
 
+        safe = furl.Path.SAFE_SEGMENT_CHARS + '/'
         for path in decoded:
-            assert str(furl.Path(path)) == urllib.parse.quote(
-                path, "/:@-._~!$&'()*+,;=")
+            assert str(furl.Path(path)) == urllib.parse.quote(path, safe)
 
         # Valid path segment characters should not be encoded.
         for char in ":@-._~!$&'()*+,;=":
@@ -220,6 +220,13 @@ class TestPath(unittest.TestCase):
         assert str(f.path) == 'a%2Fb'
         assert f.path.segments == [segment]
         assert f.url == 'a%2Fb'
+
+        # Encode percent signs in path segment stings.
+        assert str(furl.Path(['a%20d'])) == 'a%2520d'
+        assert str(furl.Path(['a%zzd'])) == 'a%25zzd'
+
+        # Percent-encodings should be capitalized, as per RFC 3986.
+        assert str(furl.Path('a%2fd')) == str(furl.Path('a%2Fd')) == 'a%2Fd'
 
     def test_load(self):
         self._test_set_load(furl.Path.load)

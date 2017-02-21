@@ -415,7 +415,8 @@ class Path(object):
 
         if self.isabsolute and len(segments) > 1 and segments[0] == '':
             segments.pop(0)
-        self.segments = [unquote(segment) for segment in segments]
+
+        self.segments = segments
 
         return self
 
