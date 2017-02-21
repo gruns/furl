@@ -64,7 +64,7 @@ class RunTests(TestCommand):
 long_description = (
     'Information and documentation at https://github.com/gruns/furl.')
 
-tests_require = ['pycodestyle']
+tests_require = ['six>=1.8.0', 'pycodestyle']
 if sys.version_info[:2] < (2, 7):
     tests_require += ['unittest2']
 
