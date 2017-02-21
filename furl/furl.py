@@ -71,14 +71,14 @@ def lget(l, index, default=None):
 def attemptstr(o):
     try:
         return str(o)
-    except:
+    except Exception:
         return o
 
 
 def utf8(o, default=_absent):
     try:
         return o.encode('utf8')
-    except:
+    except Exception:
         return o if default is _absent else default
 
 
@@ -1512,7 +1512,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 self.fragment.query.load(fragment_args)
             if fragment_separator is not _absent:
                 self.fragment.separator = fragment_separator
-        except:
+        except Exception:
             self.load(original_url)
             raise
 
