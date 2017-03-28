@@ -1,17 +1,28 @@
-# furl
+<p align="center">
+  <h1>furl</h1>
+</p>
 
-[![PyPI](https://img.shields.io/pypi/v/furl.svg?colorB=brightgreen)](https://pypi.python.org/pypi/furl)
-[![Travis](https://img.shields.io/travis/gruns/furl.svg)](https://travis-ci.org/gruns/furl)
+<p align="center">
+  <a href="https://pypi.python.org/pypi/furl">
+    <img src="https://badge.fury.io/py/furl.svg">
+  </a>
+  <a href="https://travis-ci.org/gruns/furl">
+    <img src="https://img.shields.io/travis/gruns/furl.svg">
+  </a>
+</p>
 
 ### furl is a small Python library that makes manipulating URLs simple.
 
 Python's standard [urllib](https://docs.python.org/2/library/urllib.html) and
 [urlparse](https://docs.python.org/2/library/urlparse.html) modules provide a
-number of URL manipulation functions, but using these functions to perform
-common URL manipulations proves tedious. Furl makes manipulating URLs easy.
+number of URL<br/>
+manipulation functions, but using these functions to perform
+common URL<br/>
+manipulations proves tedious. Furl makes manipulating URLs easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
-and supports both Python 2 and 3.
+and supports both Python 2<br/>
+and 3.
 
 Query arguments are easy. Really easy.
 
