@@ -15,8 +15,8 @@
 
 Python's standard [urllib](https://docs.python.org/2/library/urllib.html) and
 [urlparse](https://docs.python.org/2/library/urlparse.html) modules provide a
-number of URL manipulation<br/>
-functions, but using these functions to perform common<br/>
+number of URL<br/>
+manipulation functions, but using these functions to perform common<br/>
 URL manipulations proves tedious. Furl makes manipulating URLs easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
