@@ -15,14 +15,13 @@
 
 Python's standard [urllib](https://docs.python.org/2/library/urllib.html) and
 [urlparse](https://docs.python.org/2/library/urlparse.html) modules provide a
-number of URL<br/>
-manipulation functions, but using these functions to perform
-common URL<br/>
-manipulations proves tedious. Furl makes manipulating URLs easy.
+number of URL manipulation<br/>
+functions, but using these functions to perform common<br/>
+URL manipulations proves tedious. Furl makes manipulating URLs easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
-and supports both Python 2<br/>
-and 3.
+and supports<br/>
+both Python 2 and 3.
 
 Query arguments are easy. Really easy.
 
