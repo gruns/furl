@@ -1,6 +1,6 @@
-<p align="center">
-  <h1>furl</h1>
-</p>
+<h1 align="center">
+  furl
+</h1>
 
 <p align="center">
   <a href="https://pypi.python.org/pypi/furl">
