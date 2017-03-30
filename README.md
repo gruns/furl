@@ -1,9 +1,8 @@
 <h1 align="center">
   <br/>
-  <img src="https://cdn.rawgit.com/gruns/furl/master/logo.svg" alt="furl">
+  <img src="https://cdn.rawgit.com/gruns/furl/1162fce0abc5b349ff5f75c0e24a42504f426dc2/logo.svg" alt="furl">
   <br/>
-  furl<br/>
-  <br/>
+  furl
 </h1>
 
 <p align="center">
