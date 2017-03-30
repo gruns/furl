@@ -1,4 +1,6 @@
-# furl API
+<h1 align="center">
+  <img src="https://cdn.rawgit.com/gruns/furl/3708dde9ea13a6e040851ee089a5e2418933bfee/api.svg" width="320px" alt="furl API">
+</h1>
 
 ### Basics
 
