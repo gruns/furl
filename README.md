@@ -11,13 +11,15 @@
   </a>
 </p>
 
-### furl is a small Python library that makes manipulating URLs simple.
+### furl is a small Python library that makes parsing and manipulating URLs easy.
 
 Python's standard [urllib](https://docs.python.org/2/library/urllib.html) and
 [urlparse](https://docs.python.org/2/library/urlparse.html) modules provide a
 number of URL<br/>
-manipulation functions, but using these functions to perform common<br/>
-URL manipulations proves tedious. Furl makes manipulating URLs easy.
+related functions, but using these functions to perform common
+URL<br/>
+operations proves tedious. Furl makes parsing and manipulating URLs<br/>
+easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
 and supports both<br/>
