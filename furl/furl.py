@@ -45,7 +45,9 @@ DEFAULT_PORTS = {
     'ftp': 21,
     'ssh': 22,
     'http': 80,
+    'tftp': 69,
     'https': 443,
+    'telnet': 23,
 }
 
 # List of schemes that don't require two slashes after the colon. For example,
