@@ -4,7 +4,7 @@
 
 ### Basics
 
-furl objects let you access and modify the components of a URL
+furl objects let you access and modify the various components of a URL
 
 ```
 scheme://username:password@host:port/path?query#fragment
