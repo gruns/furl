@@ -20,10 +20,10 @@ manipulation functions, but using these functions to perform common<br/>
 URL manipulations proves tedious. Furl makes manipulating URLs easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
-and supports<br/>
-both Python 2 and 3.
+and supports both<br/>
+Python 2 and 3.
 
-Query arguments are easy. Really easy.
+Code time: Query arguments are easy. Really easy.
 
 ```python
 >>> from furl import furl
