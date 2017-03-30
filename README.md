@@ -1,9 +1,6 @@
-<h1 align="center">
-  <br/>
-  <img src="https://cdn.rawgit.com/gruns/furl/1162fce0abc5b349ff5f75c0e24a42504f426dc2/logo.svg" alt="furl">
-  <br/>
-  furl
-</h1>
+<p align="center">
+  <img src="https://cdn.rawgit.com/gruns/furl/1162fce0abc5b349ff5f75c0e24a42504f426dc2/logo.svg" width="240px" alt="furl">
+</p>
 
 <p align="center">
   <a href="https://pypi.python.org/pypi/furl">
