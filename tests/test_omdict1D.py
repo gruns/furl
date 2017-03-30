@@ -8,6 +8,7 @@
 # grunseid@gmail.com
 #
 # License: Build Amazing Things (Unlicense)
+#
 
 import unittest
 from itertools import chain, product, permutations
