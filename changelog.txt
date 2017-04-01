@@ -1,7 +1,7 @@
 ===============================================================================
  v1.0.0
 ===============================================================================
-Added: Add Python 3.6 as a test target.
+Added: Test against Python 3.6.
 Changed: Bumped the version number to v1.0 to signify that furl is a mature and
   stable library. Furl has been marked Production/Stable in setup.py for a long
   time anyhow -- it's high time for the version number to catch up.
