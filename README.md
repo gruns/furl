@@ -28,8 +28,8 @@ operations proves tedious. Furl makes parsing and manipulating URLs<br/>
 easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
-and supports both<br/>
-Python 2 and 3.
+and supports<br/>
+Python 2, Python 3, and PyPy.
 
 Code time: Query arguments are easy. Really easy.
 
