@@ -12,7 +12,9 @@
   <a href="http://unlicense.org/">
     <img src="https://img.shields.io/pypi/l/furl.svg">
   </a>
-  <img src="https://img.shields.io/pypi/pyversions/furl.svg">
+  <a href="https://pypi.python.org/pypi/furl">
+    <img src="https://img.shields.io/pypi/pyversions/furl.svg">
+  </a>
 </p>
 
 ### furl is a small Python library that makes parsing and manipulating URLs easy.
