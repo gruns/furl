@@ -550,6 +550,7 @@ class Path(object):
                          (path, self._path_from_segments(segments)))
                     warnings.warn(s, UserWarning)
             segments.append(utf8(segment))
+        del segment
 
         # In Python 3, utf8() returns Bytes objects that must be decoded
         # into strings before they can be passed to

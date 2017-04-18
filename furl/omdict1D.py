@@ -13,6 +13,11 @@
 from orderedmultidict import omdict
 
 
+def _quacks_like_a_list_but_not_str(duck):
+    return (hasattr(duck, '__iter__') and callable(duck.__iter__) and
+            not isinstance(duck, str))
+
+
 class omdict1D(omdict):
 
     """
@@ -43,18 +48,17 @@ class omdict1D(omdict):
       omd.updateall([(1,[1,11]), (2,[2,22])])
       omd.allitems == [(1,1), (1,11), (2,2), (2,22)]
     """
-
-    def add(self, key, value=[]):
-        if not self._quacks_like_a_list_but_not_str(value):
+    def add(self, key, value):
+        if not _quacks_like_a_list_but_not_str(value):
             value = [value]
         if value:
-            self._map.setdefault(key, [])
+            self._map.setdefault(key, list())
         for val in value:
             node = self._items.append(key, val)
             self._map[key].append(node)
         return self
 
-    def set(self, key, value=[None]):
+    def set(self, key, value):
         return self._set(key, value)
 
     def __setitem__(self, key, value):
@@ -71,7 +75,7 @@ class omdict1D(omdict):
         """
         for key, values in items:
             # <values> is not a list or an empty list.
-            like_list_not_str = self._quacks_like_a_list_but_not_str(values)
+            like_list_not_str = _quacks_like_a_list_but_not_str(values)
             if not like_list_not_str or (like_list_not_str and not values):
                 values = [values]
 
@@ -104,12 +108,8 @@ class omdict1D(omdict):
                     else:
                         leftovers.append((key, value))
 
-    def _set(self, key, value=[None]):
-        if not self._quacks_like_a_list_but_not_str(value):
+    def _set(self, key, value):
+        if not _quacks_like_a_list_but_not_str(value):
             value = [value]
         self.setlist(key, value)
         return self
-
-    def _quacks_like_a_list_but_not_str(self, duck):
-        return (hasattr(duck, '__iter__') and callable(duck.__iter__) and
-                not isinstance(duck, str))

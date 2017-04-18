@@ -587,7 +587,6 @@ class TestQuery(unittest.TestCase):
         for items in self.items:
             q = furl.Query(items.original())
             assert q.params.allitems() == items.allitems()
-            pairs = ['%s=%s' % (i[0], i[1]) for i in self._quote_items(items)]
 
             # encode() accepts both 'delimiter' and 'delimeter'. The
             # latter was incorrectly used until furl v0.4.6.
