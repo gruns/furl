@@ -2107,3 +2107,9 @@ class TestFurl(unittest.TestCase):
             assert furl.is_valid_encoded_query_value(valid)
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_value(invalid)
+
+    def test_unicode_query_keys_and_values(self):
+        f = furl.furl('http://site4dads.ru/')
+        f.args[six.u('testö')] = six.u('testä')
+
+        self.assertEqual(f.url, 'http://site4dads.ru/?test%C3%B6=test%C3%A4')
