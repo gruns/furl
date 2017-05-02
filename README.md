@@ -21,14 +21,14 @@
 
 Python's standard [urllib](https://docs.python.org/2/library/urllib.html) and
 [urlparse](https://docs.python.org/2/library/urlparse.html) modules provide a
-number of URL<br/>
+number of URL\
 related functions, but using these functions to perform common
-URL<br/>
-operations proves tedious. Furl makes parsing and manipulating URLs<br/>
+URL\
+operations proves tedious. Furl makes parsing and manipulating URLs\
 easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
-and supports<br/>
+and supports\
 Python 2, Python 3, PyPy2, and PyPy3.
 
 Code time: Query arguments are easy. Really easy.
