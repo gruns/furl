@@ -29,7 +29,7 @@ easy.
 
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
 and supports<br/>
-Python 2, Python 3, and PyPy.
+Python 2, Python 3, PyPy2, and PyPy3.
 
 Code time: Query arguments are easy. Really easy.
 
