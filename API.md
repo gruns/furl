@@ -18,10 +18,11 @@ scheme://username:password@host:port/path?query#fragment
  * __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names
   are all lowercase.
  * __port__ is an integer or None. A value of None means no port specified and
-  the default port for the given __scheme__ should be inferred, if possible.
+  the default port for the given __scheme__ should be inferred, if possible
+  (e.g. port 80 for the scheme `http`).
  * __path__ is a Path object comprised of path segments.
- * __query__ is a Query object comprised of query arguments.
- * __fragment__ is a Fragment object comprised of a Path and Query object
+ * __query__ is a Query object comprised of key:value query arguments.
+ * __fragment__ is a Fragment object comprised of a Path object and Query object
    separated by an optional `?` separator.
 
 
@@ -117,9 +118,9 @@ A path that starts with `/` is considered absolute, and a Path can be absolute
 or not as specified (or set) by the boolean attribute __isabsolute__. URL Paths
 have a special restriction: they must be absolute if a __netloc__ (username,
 password, host, and/or port) is present. This restriction exists because a URL
-path must start with `/` to separate itself from a __netloc__. Fragment Paths
-have no such limitation and __isabsolute__ and can be True or False without
-restriction.
+path must start with `/` to separate itself from the __netloc__, if
+present. Fragment Paths have no such limitation and __isabsolute__ and can be
+True or False without restriction.
 
 Here's a URL Path example that illustrates how __isabsolute__ becomes True and
 read-only in the presence of a __netloc__.
@@ -144,7 +145,9 @@ AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a 
 'blaps.ru/url/path'
 ```
 
-Here's a fragment Path example.
+Conversely, the __isabsolute__ attribute of Fragment Paths isn't bound by the
+same read-only restriction. URL fragments are always prefixed by a '#' character
+and don't need to be separated from the __netloc__.
 
 ```python
 >>> f = furl('http://www.google.com/#/absolute/fragment/path/')
