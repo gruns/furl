@@ -45,7 +45,7 @@ furl infers the default port for common schemes.
 443
 
 >>> f = furl('unknown://www.google.com/')
->>> print f.port
+>>> print(f.port)
 None
 ```
 
