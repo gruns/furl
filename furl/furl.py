@@ -1662,7 +1662,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         that are otherwise calculated on demand
         """
         fragment = self.fragment.toJSON()
-        return dict(scheme=self.scheme, netloc=self.netloc, path=self.path.toJSON(), query=self.query.toJSON(),
+        return dict(scheme=self.scheme, netloc=self.netloc,
+                    path=self.path.toJSON(), query=self.query.toJSON(),
                     fragment=self.fragment.toJSON(), url=self.tostr())
 
     def join(self, *urls):

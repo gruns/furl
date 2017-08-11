@@ -524,9 +524,9 @@ class TestPath(unittest.TestCase):
 
         p1 = furl.furl('http://example.com/a/b/c/d/').path.toJSON()
 
-        assert p1.get("segments") == ['a','b','c','d','']
+        assert p1.get("segments") == ['a', 'b', 'c', 'd', '']
         assert p1.get("isabsolute")
-        assert p1.get("isfile") == False
+        assert p1.get("isfile") is False
 
 
 class TestQuery(unittest.TestCase):
@@ -1004,9 +1004,10 @@ class TestFragment(unittest.TestCase):
         assert f
 
     def test_fragment_tojson(self):
-
-        p1 = furl.furl('a/path/great/job#lol=sup&foo=blorp').fragment.toJSON()
-        assert p1.get("query") == {'params': [['lol', 'sup'], ['foo', 'blorp']]}
+        f = furl.furl('a/path/great/job#lol=sup&foo=blorp')
+        f_fragment_json = f.fragment.toJSON()
+        assert f_fragment_json["query"]["params"] == [['lol', 'sup'],
+                                                      ['foo', 'blorp']]
 
 
 class TestFragmentCompositionInterface(unittest.TestCase):
@@ -1875,16 +1876,18 @@ class TestFurl(unittest.TestCase):
                 'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap$')
 
     def test_tojson(self):
-        f = furl.furl('http://blast.off/a/b/c/d.html?a+b=c+d&two%20tap=cat%20nap%24#uid3')
+        url = 'http://blast.off/a/b/c.html?a+b=c+d&two%20tap=cat%20nap%24#uid3'
+        f = furl.furl(url)
 
         furl_json = f.toJSON()
 
         assert furl_json['url'] == f.url
-        assert furl_json['path']['isfile'] == True
-        assert furl_json['path']['isdir'] == False
-        assert furl_json['path']['segments'] == ['a','b','c','d.html']
+        assert furl_json['path']['isfile']
+        assert furl_json['path']['isdir'] is False
+        assert furl_json['path']['segments'] == ['a', 'b', 'c.html']
         assert furl_json['fragment']['path']['segments'] == ['uid3']
-        assert furl_json['query']['params'] == [['a b', 'c d'],['two tap', 'cat nap$']]
+        assert furl_json['query']['params'] == [['a b', 'c d'],
+                                                ['two tap', 'cat nap$']]
         assert furl_json['scheme'] == 'http'
         assert furl_json['netloc'] == 'blast.off'
 
