@@ -12,6 +12,7 @@
 
 import re
 import abc
+import json
 import warnings
 from posixpath import normpath
 
@@ -512,6 +513,17 @@ class Path(object):
         """
         return not self.isdir
 
+    @property
+    def all_attributes(self):
+        """
+        Returns: all important attributes for JSON representation
+        that are otherwise calculated on demand
+        """
+        return dict(isdir=self.isdir,
+                    isfile=self.isfile,
+                    segments=self.segments,
+                    isabsolute=self.isabsolute)
+
     def __eq__(self, other):
         return str(self) == str(other)
 
@@ -530,6 +542,13 @@ class Path(object):
             else:
                 segments.insert(0, '')
         return self._path_from_segments(segments)
+
+    def toJSON(self):
+        """
+        Returns: a JSON representation of the path
+        """
+        attributes = self.all_attributes
+        return json.loads(json.dumps(attributes, sort_keys=True, indent=4))
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
@@ -856,6 +875,21 @@ class Query(object):
     def __str__(self):
         return self.encode()
 
+    def toJSON(self):
+        """
+        Returns: a JSON representation of the query
+        """
+        attributes = self.all_attributes
+        return json.loads(json.dumps(attributes, sort_keys=True, indent=4))
+
+    @property
+    def all_attributes(self):
+        """
+        Returns: all important attributes for JSON representation
+        that are otherwise calculated on demand
+        """
+        return dict(params=self.params.allitems(),)
+
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
 
@@ -1084,6 +1118,21 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         if query and path:
             return path + ('?' if self.separator else '') + query
         return path + query
+
+    def toJSON(self):
+        """
+        Returns: a JSON representation of the query
+        """
+        attributes = self.all_attributes
+        return json.loads(json.dumps(attributes, sort_keys=True, indent=4))
+
+    @property
+    def all_attributes(self):
+        """
+        Returns: all important attributes for JSON representation
+        that are otherwise calculated on demand
+        """
+        return dict(path=self.path.toJSON(), query=self.query.toJSON())
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
@@ -1598,6 +1647,23 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                (url == '%s:' % self.scheme and not str(self.path)))):
             url += '//'
         return str(url)
+
+    def toJSON(self):
+        """
+        Returns: a JSON representation of the query
+        """
+        attributes = self.all_attributes
+        return json.loads(json.dumps(attributes, sort_keys=True, indent=4))
+
+    @property
+    def all_attributes(self):
+        """
+        Returns: all important attributes for JSON representation
+        that are otherwise calculated on demand
+        """
+        fragment = self.fragment.toJSON()
+        return dict(scheme=self.scheme, netloc=self.netloc, path=self.path.toJSON(), query=self.query.toJSON(),
+                    fragment=self.fragment.toJSON(), url=self.tostr())
 
     def join(self, *urls):
         for url in urls:

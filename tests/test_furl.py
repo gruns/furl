@@ -23,6 +23,8 @@ import furl
 from furl.omdict1D import omdict1D
 from furl.compat import OrderedDict as odict
 
+import json
+
 PYTHON_27PLUS = sys.version_info >= (2, 7)
 
 if PYTHON_27PLUS:
@@ -518,6 +520,14 @@ class TestPath(unittest.TestCase):
             p = furl.Path(path)
             assert str(p) == path_encoded
 
+    def test_path_tojson(self):
+
+        p1 = furl.furl('http://example.com/a/b/c/d/').path.toJSON()
+
+        assert p1.get("segments") == ['a','b','c','d','']
+        assert p1.get("isabsolute")
+        assert p1.get("isfile") == False
+
 
 class TestQuery(unittest.TestCase):
 
@@ -802,6 +812,11 @@ class TestQuery(unittest.TestCase):
             allitems_quoted.append(pair)
         return allitems_quoted
 
+    def test_query_tojson(self):
+
+        p1 = furl.furl('http://example.com/path/?a=1&b=2').query.toJSON()
+        assert p1.get("params") == [['a', '1'], ['b', '2']]
+
 
 class TestQueryCompositionInterface(unittest.TestCase):
 
@@ -987,6 +1002,11 @@ class TestFragment(unittest.TestCase):
         f.query = 'a=a'
         f.separator = False
         assert f
+
+    def test_fragment_tojson(self):
+
+        p1 = furl.furl('a/path/great/job#lol=sup&foo=blorp').fragment.toJSON()
+        assert p1.get("query") == {'params': [['lol', 'sup'], ['foo', 'blorp']]}
 
 
 class TestFragmentCompositionInterface(unittest.TestCase):
@@ -1853,6 +1873,20 @@ class TestFurl(unittest.TestCase):
                 'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$')
         assert (f.tostr(query_delimiter=';', query_quote_plus=False) ==
                 'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap$')
+
+    def test_tojson(self):
+        f = furl.furl('http://blast.off/a/b/c/d.html?a+b=c+d&two%20tap=cat%20nap%24#uid3')
+
+        furl_json = f.toJSON()
+
+        assert furl_json['url'] == f.url
+        assert furl_json['path']['isfile'] == True
+        assert furl_json['path']['isdir'] == False
+        assert furl_json['path']['segments'] == ['a','b','c','d.html']
+        assert furl_json['fragment']['path']['segments'] == ['uid3']
+        assert furl_json['query']['params'] == [['a b', 'c d'],['two tap', 'cat nap$']]
+        assert furl_json['scheme'] == 'http'
+        assert furl_json['netloc'] == 'blast.off'
 
     def test_equality(self):
         assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
