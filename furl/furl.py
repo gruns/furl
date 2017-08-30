@@ -140,7 +140,8 @@ def static_vars(**kwargs):
 # currently at the top of the source, 02/03/2012).
 #
 
-# RFC 3986
+# RFC 3986 (https://www.ietf.org/rfc/rfc3986.txt)
+#
 #   unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
 #
 #   pct-encoded = "%" HEXDIG HEXDIG
