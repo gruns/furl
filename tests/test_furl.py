@@ -476,10 +476,10 @@ class TestPath(unittest.TestCase):
             assert p.normalize() is p and str(p) == str(p.normalize()) == path
 
         # Path modified.
-        tonormalize = [
+        to_normalize = [
             ('//', '/'), ('//a', '/a'), ('//a/', '/a/'), ('//a///', '/a/'),
             ('////a/..//b', '/b'), ('/a/..//b//./', '/b/')]
-        for path, normalized in tonormalize:
+        for path, normalized in to_normalize:
             p = furl.Path(path)
             assert p.normalize() is p and str(p.normalize()) == normalized
 
