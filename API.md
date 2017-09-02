@@ -404,14 +404,14 @@ For a dictionary representation of a fragment, use __asdict()__.
 >>> f = furl('http://www.google.com/#path?args=args')
 >>> f.query.asdict()
 { 'encoded': 'path?args=args',
+  'separator': True,
   'path': { 'encoded': 'path',
             'isabsolute': False,
             'isdir': False,
             'isfile': True,
             'segments': ['path']},
   'query': { 'encoded': 'args=args',
-             'params': [('args', 'args')]},
-  'separator': True }
+             'params': [('args', 'args')]} }
 ```
 
 
