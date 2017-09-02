@@ -518,6 +518,19 @@ class TestPath(unittest.TestCase):
             p = furl.Path(path)
             assert str(p) == path_encoded
 
+    def test_asdict(self):
+        segments = ['wiki', 'ロリポップ']
+        path_encoded = 'wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
+        p = furl.Path(path_encoded)
+        d = {
+            'isdir': False,
+            'isfile': True,
+            'isabsolute': False,
+            'segments': segments,
+            'encoded': path_encoded,
+            }
+        assert p.asdict() == d
+
 
 class TestQuery(unittest.TestCase):
 
@@ -791,6 +804,18 @@ class TestQuery(unittest.TestCase):
         assert query.encode(';') == 'a=b+c;d=e+f'
         assert query.encode(';', quote_plus=False) == 'a=b%20c;d=e%20f'
 
+    def test_asdict(self):
+        pairs = [('a', '1'), ('ロリポップ', 'testä')]
+        key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
+        value_encoded = 'test%C3%A4'
+        query_encoded = 'a=1&' + key_encoded + '=' + value_encoded
+        p = furl.Query(query_encoded)
+        d = {
+            'params': pairs,
+            'encoded': query_encoded,
+            }
+        assert p.asdict() == d
+
     def _quote_items(self, items):
         # Calculate the expected querystring with proper query encoding.
         #   Valid query key characters: "/?:@-._~!$'()*,;"
@@ -987,6 +1012,27 @@ class TestFragment(unittest.TestCase):
         f.query = 'a=a'
         f.separator = False
         assert f
+
+    def test_asdict(self):
+        segments = ['wiki', 'ロリポップ']
+        path_encoded = '/wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
+
+        pairs = [('a', '1'), ('ロリポップ', 'testä')]
+        key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
+        value_encoded = 'test%C3%A4'
+        query_encoded = 'a=1&' + key_encoded + '=' + value_encoded
+
+        fragment_encoded = path_encoded + '?' + query_encoded
+        p = furl.Path(path_encoded)
+        q = furl.Query(query_encoded)
+        f = furl.Fragment(fragment_encoded)
+        d = {
+            'separator': True,
+            'path': p.asdict(),
+            'query': q.asdict(),
+            'encoded': fragment_encoded,
+            }
+        assert f.asdict() == d
 
 
 class TestFragmentCompositionInterface(unittest.TestCase):
@@ -2107,3 +2153,39 @@ class TestFurl(unittest.TestCase):
             assert furl.is_valid_encoded_query_value(valid)
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_value(invalid)
+
+    def test_asdict(self):
+        segments = ['wiki', 'ロリポップ']
+        path_encoded = '/wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
+
+        pairs = [('a', '1'), ('ロリポップ', 'testä')]
+        key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
+        value_encoded = 'test%C3%A4'
+        query_encoded = 'a=1&' + key_encoded + '=' + value_encoded
+
+        host = u'ドメイン.テスト'
+        host_encoded = 'xn--eckwd4c7c.xn--zckzah'
+
+        fragment_encoded = path_encoded + '?' + query_encoded
+        url = ('https://user:pass@%s%s?%s#%s' % (
+            host_encoded, path_encoded, query_encoded, fragment_encoded))
+
+        p = furl.Path(path_encoded)
+        q = furl.Query(query_encoded)
+        f = furl.Fragment(fragment_encoded)
+        u = furl.furl(url)
+        d = {
+            'url': url,
+            'scheme': 'https',
+            'username': 'user',
+            'password': 'pass',
+            'host': host,
+            'host_encoded': host_encoded,
+            'port': 443,
+            'netloc': 'user:pass@xn--eckwd4c7c.xn--zckzah',
+            'origin': 'https://xn--eckwd4c7c.xn--zckzah',
+            'path': p.asdict(),
+            'query': q.asdict(),
+            'fragment': f.asdict(),
+            }
+        assert u.asdict() == d

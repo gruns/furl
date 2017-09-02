@@ -2,6 +2,8 @@
   <img src="https://cdn.rawgit.com/gruns/furl/3708dde9ea13a6e040851ee089a5e2418933bfee/api.svg" width="496px" alt="furl API">
 </h1>
 
+
+
 ### Basics
 
 furl objects let you access and modify the various components of a URL
@@ -24,6 +26,7 @@ scheme://username:password@host:port/path?query#fragment
  * __query__ is a Query object comprised of key:value query arguments.
  * __fragment__ is a Fragment object comprised of a Path object and Query object
    separated by an optional `?` separator.
+
 
 
 ### Scheme, Username, Password, Host, Port, Network Location, and Origin
@@ -74,6 +77,7 @@ including __port__ if it's None or the default port for the provided __scheme__.
 >>> furl('http://www.google.com:99/').origin
 'http://www.google.com:99'
 ```
+
 
 
 ### Path
@@ -189,6 +193,19 @@ Path object for method chaining.
 >>> f.url
 'http://www.google.com/a/b/c/'
 ```
+
+For a dictionary representation of a path, use __asdict()__.
+
+```python
+>>> f = furl('http://www.google.com/some/enc%20oding')
+>>> f.path.asdict()
+{ 'encoded': '/some/enc%20oding',
+  'isabsolute': True,
+  'isdir': False,
+  'isfile': True,
+  'segments': ['some', 'enc oding'] }
+```
+
 
 
 ### Query
@@ -313,6 +330,17 @@ is application/x-www-form-urlencoded (`+` not `%20`).
 'space=jams&woofs=squeeze%20dog'
 ```
 
+For a dictionary representation of a query, use __asdict()__.
+
+```python
+>>> f = furl('http://www.google.com/?space=ja+ms&space=slams')
+>>> f.query.asdict()
+{ 'encoded': 'space=ja+ms&space=slams',
+  'params': [('space', 'ja ms'),
+             ('space', 'slams')] }
+```
+
+
 
 ### Fragment
 
@@ -369,6 +397,23 @@ True
 >>> f.url
 'http://www.google.com/#!a=dict&of=args'
 ```
+
+For a dictionary representation of a fragment, use __asdict()__.
+
+```python
+>>> f = furl('http://www.google.com/#path?args=args')
+>>> f.query.asdict()
+{ 'encoded': 'path?args=args',
+  'path': { 'encoded': 'path',
+            'isabsolute': False,
+            'isdir': False,
+            'isfile': True,
+            'segments': ['path']},
+  'query': { 'encoded': 'args=args',
+             'params': [('args', 'args')]},
+  'separator': True }
+```
+
 
 
 ### Encoding
@@ -429,6 +474,7 @@ can be used to percent-encode and percent-decode path strings. Similarly,
 and
 [urllib.unquote_plus()](http://docs.python.org/library/urllib.html#urllib.unquote_plus)
 can be used to percent-encode and percent-decode query strings.
+
 
 
 ### Inline manipulation
@@ -520,6 +566,7 @@ __remove()__ removes items from a furl object with the optional arguments
 ```
 
 
+
 ### Miscellaneous
 
 __tostr(query_delimiter='&', query_quote_plus=True)__ creates and returns a URL
@@ -569,4 +616,36 @@ same as navigating to the provided URL from the current URL in a web browser.
 'http://www.google.com/path?query=yes#fragment'
 >>> f.join('unknown://www.yahoo.com/new/url/').url
 'unknown://www.yahoo.com/new/url/'
+```
+
+For a dictionary representation of a URL, use __asdict()__.
+
+```python
+>>> f = furl('https://xn--eckwd4c7c.xn--zckzah/path?args=args#frag')
+>>> f.asdict()
+{ 'url': 'https://xn--eckwd4c7c.xn--zckzah/path?args=args#frag',
+  'scheme': 'https',
+  'username': None
+  'password': None,
+  'host': 'ドメイン.テスト',
+  'host_encoded': 'xn--eckwd4c7c.xn--zckzah',
+  'port': 443,
+  'netloc': 'xn--eckwd4c7c.xn--zckzah',
+  'origin': 'https://xn--eckwd4c7c.xn--zckzah',
+  'path': { 'encoded': '/path',
+            'isabsolute': True,
+            'isdir': False,
+            'isfile': True,
+            'segments': ['path']},
+  'query': { 'encoded': 'args=args',
+             'params': [('args', 'args')]},
+  'fragment': { 'encoded': 'frag',
+                'path': { 'encoded': 'frag',
+                          'isabsolute': False,
+                          'isdir': False,
+                          'isfile': True,
+                          'segments': ['frag']},
+                'query': { 'encoded': '',
+                           'params': []},
+                'separator': True} }
 ```

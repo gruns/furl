@@ -475,6 +475,15 @@ class Path(object):
             self.load(normalized)
         return self
 
+    def asdict(self):
+        return {
+            'encoded': str(self),
+            'isdir': self.isdir,
+            'isfile': self.isfile,
+            'segments': self.segments,
+            'isabsolute': self.isabsolute,
+            }
+
     @property
     def isabsolute(self):
         if self._force_absolute(self):
@@ -843,6 +852,12 @@ class Query(object):
             pairs.append(pair)
         return delimiter.join(pairs)
 
+    def asdict(self):
+        return {
+            'encoded': str(self),
+            'params': self.params.allitems(),
+            }
+
     def __eq__(self, other):
         return str(self) == str(other)
 
@@ -1055,6 +1070,14 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         if args is not _absent:
             self.query.remove(args)
         return self
+
+    def asdict(self):
+        return {
+            'encoded': str(self),
+            'separator': self.separator,
+            'path': self.path.asdict(),
+            'query': self.query.asdict(),
+            }
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -1609,6 +1632,22 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     def copy(self):
         return self.__class__(self)
+
+    def asdict(self):
+        return {
+            'url': self.url,
+            'scheme': self.scheme,
+            'username': self.username,
+            'password': self.password,
+            'host': self.host,
+            'host_encoded': idna_encode(self.host),
+            'port': self.port,
+            'netloc': self.netloc,
+            'origin': self.origin,
+            'path': self.path.asdict(),
+            'query': self.query.asdict(),
+            'fragment': self.fragment.asdict(),
+            }
 
     def __eq__(self, other):
         try:
