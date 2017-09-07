@@ -83,8 +83,33 @@ Or get fancy.
 ```python
 >>> f = furl('http://www.google.com/search?q=query#1')
 >>> f.copy().remove(path=True).set(host='taco.com')
-...  .join('/pumps.html').add(fragment_path='party').url
-'http://taco.com/pumps.html#party'
+...  .join('/pumps.html').add(fragment_path='party').asdict()
+{ 'url': 'http://taco.com/pumps.html#party',
+  'scheme': 'http',
+  'username': None,
+  'password': None,
+  'host': 'taco.com',
+  'host_encoded': 'taco.com',
+  'port': 80,
+  'netloc': 'taco.com',
+  'origin': 'http://taco.com',
+  'path': { 'encoded': '/pumps.html',
+            'isabsolute': True,
+            'isdir': False,
+            'isfile': True,
+            'segments': ['pumps.html']},
+  'query': { 'encoded': '',
+             'params': []},
+  'fragment': { 'encoded': 'party',
+                'path': { 'encoded': 'party',
+                          'isabsolute': False,
+                          'isdir': False,
+                          'isfile': True,
+                          'segments': ['party']},
+                'query': { 'encoded': '',
+                           'params': []},
+                'separator': True}, }
+
 ```
 
 
