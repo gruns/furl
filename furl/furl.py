@@ -161,7 +161,7 @@ def static_vars(**kwargs):
 #   scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
 #
 PERCENT_REGEX = r'\%[a-fA-F\d][a-fA-F\d]'
-INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
+INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=;/'
 
 
 @static_vars(regex=re.compile(
