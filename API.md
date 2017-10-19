@@ -402,7 +402,7 @@ For a dictionary representation of a fragment, use __asdict()__.
 
 ```python
 >>> f = furl('http://www.google.com/#path?args=args')
->>> f.query.asdict()
+>>> f.fragment.asdict()
 { 'encoded': 'path?args=args',
   'separator': True,
   'path': { 'encoded': 'path',

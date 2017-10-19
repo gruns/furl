@@ -1620,6 +1620,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
               (url == '' or  # Protocol relative URL.
                (url == '%s:' % self.scheme and not str(self.path)))):
             url += '//'
+
         return str(url)
 
     def join(self, *urls):
