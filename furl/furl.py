@@ -161,7 +161,7 @@ def static_vars(**kwargs):
 #   scheme      = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
 #
 PERCENT_REGEX = r'\%[a-fA-F\d][a-fA-F\d]'
-INVALID_DOMAIN_CHARS = '!@#$%^&\'\"*()+=:;/'
+INVALID_HOST_CHARS = '!@#$%^&\'\"*()+=:;/'
 
 
 @static_vars(regex=re.compile(
@@ -187,14 +187,14 @@ def is_valid_scheme(scheme):
     return is_valid_scheme.regex.match(scheme) is not None
 
 
-@static_vars(regex=re.compile('[%s]' % re.escape(INVALID_DOMAIN_CHARS)))
-def is_valid_domain(domain):
-    toks = domain.split('.')
+@static_vars(regex=re.compile('[%s]' % re.escape(INVALID_HOST_CHARS)))
+def is_valid_host(hostname):
+    toks = hostname.split('.')
     if toks[-1] == '':  # Trailing '.' in a fully qualified domain name.
         toks.pop()
 
     for tok in toks:
-        if is_valid_domain.regex.search(tok) is not None:
+        if is_valid_host.regex.search(tok) is not None:
             return False
 
     return '' not in toks  # Adjacent periods aren't allowed.
@@ -651,8 +651,8 @@ class URLPathCompositionInterface(PathCompositionInterface):
 
     A URL path's isabsolute attribute is mutable if there's no
     netloc. The scheme doesn't matter. For example, the isabsolute
-    attribute of the URL path in 'mailto:user@domain.com', with scheme
-    'mailto' and path 'user@domain.com', is mutable because there is no
+    attribute of the URL path in 'mailto:user@host.com', with scheme
+    'mailto' and path 'user@host.com', is mutable because there is no
     netloc. See
 
       http://en.wikipedia.org/wiki/URI_scheme#Examples
@@ -1166,7 +1166,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         <username>. Initially None.
       scheme: URL scheme. A string ('http', 'https', '', etc) or None.
         All lowercase. Initially None.
-      host: URL host (domain, IPv4 address, or IPv6 address), not
+      host: URL host (hostname, IPv4 address, or IPv6 address), not
         including port. All lowercase. Initially None.
       port: Port. Valid port values are 1-65535, or None meaning no port
         specified.
@@ -1244,12 +1244,12 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             host is not None and lget(host, 0) == '[' and ':' in host and
             lget(host, -1) == ']')
         if (host is not None and not resembles_ipv6_literal and
-           not is_valid_domain(host)):
+           not is_valid_host(host)):
             errmsg = (
                 "Invalid host '%s'. Host strings must have at least one "
                 "non-period character, can't contain any of '%s', and can't "
                 "have adjacent periods.")
-            raise ValueError(errmsg % (host, INVALID_DOMAIN_CHARS))
+            raise ValueError(errmsg % (host, INVALID_HOST_CHARS))
 
         if callable_attr(host, 'lower'):
             host = host.lower()
