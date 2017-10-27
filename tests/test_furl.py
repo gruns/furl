@@ -1642,7 +1642,7 @@ class TestFurl(unittest.TestCase):
         assert furl.furl('unknown://pump.com:99').set(scheme='http').port == 99
         assert furl.furl('http://pump.com:99').set(scheme='unknown').port == 99
 
-        # Domains are always lowercase.
+        # Hostnames are always lowercase.
         f = furl.furl('http://wWw.PuMpS.com:9999')
         assert f.netloc == 'www.pumps.com:9999'
         f.netloc = 'yEp.NoPe:9999'
