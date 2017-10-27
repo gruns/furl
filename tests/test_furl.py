@@ -3,7 +3,7 @@
 #
 # furl - URL manipulation made simple.
 #
-# Arthur Grunseid
+# Ansgar Grunseid
 # grunseid.com
 # grunseid@gmail.com
 #

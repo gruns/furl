@@ -4,7 +4,7 @@
 #
 # furl - URL manipulation made simple.
 #
-# Arthur Grunseid
+# Ansgar Grunseid
 # grunseid.com
 # grunseid@gmail.com
 #
@@ -72,7 +72,7 @@ if sys.version_info[:2] < (2, 7):
 setup(
     name='furl',
     version=VERSION,
-    author='Arthur Grunseid',
+    author='Ansgar Grunseid',
     author_email='grunseid@gmail.com',
     url='https://github.com/gruns/furl',
     license='Unlicense',
