@@ -48,6 +48,7 @@ class omdict1D(omdict):
       omd.updateall([(1,[1,11]), (2,[2,22])])
       omd.allitems == [(1,1), (1,11), (2,2), (2,22)]
     """
+
     def add(self, key, value):
         if not _quacks_like_a_list_but_not_str(value):
             value = [value]
