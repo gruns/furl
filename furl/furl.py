@@ -1576,26 +1576,29 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
           password: If True, remove the password, if it exists.
         Returns: <self>.
         """
-        if port is True:
-            self.port = None
         if username is True:
             self.username = None
         if password is True:
             self.password = None
+        if port is True:
+            self.port = None
         if path is not _absent:
             self.path.remove(path)
+
         if args is not _absent:
             self.query.remove(args)
         if query is not _absent:
             self.query.remove(query)
-        if fragment is not _absent:
-            self.fragment.remove(fragment)
         if query_params is not _absent:
             self.query.remove(query_params)
+
+        if fragment is not _absent:
+            self.fragment.remove(fragment)
         if fragment_path is not _absent:
             self.fragment.path.remove(fragment_path)
         if fragment_args is not _absent:
             self.fragment.query.remove(fragment_args)
+
         return self
 
     def tostr(self, query_delimiter='&', query_quote_plus=True):
