@@ -908,10 +908,11 @@ class Query(object):
         elif callable_attr(items, 'iterallitems'):
             items = list(items.iterallitems())
         # Dictionary-like interface. e.g. {'a':1, 'b':2, 'c':3}
-        elif callable_attr(items, 'items'):
-            items = list(six.iteritems(items))
+        # elif callable_attr(items, 'items'):
         elif callable_attr(items, 'items'):
             items = list(items.items())
+        elif callable_attr(items, 'iteritems'):
+            items = list(items.iteritems())
         # Encoded query string. e.g. 'a=1&b=2&c=3'
         elif isinstance(items, six.string_types):
             items = self._extract_items_from_querystr(items)
