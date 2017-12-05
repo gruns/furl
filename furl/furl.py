@@ -1557,12 +1557,13 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         Parameters:
           args: Shortcut for query_params.
-          path: A list of path segments to remove from the end of the existing
-            path segments list, or a path string to remove from the end of the
-            existing path string, or True to remove the path portion of the URL
+          path: A list of path segments to remove from the end of the
+            existing path segments list, or a path string to remove from
+            the end of the existing path string, or True to remove the
+            path portion of the URL entirely.
+          query: A list of query keys to remove from the query, if they
+            exist, or True to remove the query portion of the URL
             entirely.
-          query: A list of query keys to remove from the query, if they exist,
-            or True to remove the query portion of the URL entirely.
           query_params: A list of query keys to remove from the query,
             if they exist.
           port: If True, remove the port from the network location
