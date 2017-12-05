@@ -542,19 +542,18 @@ __remove()__ removes items from a furl object with the optional arguments
 
  * __args__: Shortcut for __query_params__.
  * __path__: A list of path segments to remove from the end of the existing path
-        segments list, or a path string to remove from the end of the existing
-        path string, or True to remove the path entirely.
- * __fragment__: If True, remove the fragment portion of the URL entirely.
- * __query__: If True, remove the query portion of the URL entirely.
+       segments list, or a path string to remove from the end of the existing
+       path string, or True to remove the path portion of the URL entirely.
+ * __query__: A list of query keys to remove from the query, if they exist, or
+       True to remove the query portion of the URL entirely.
  * __query_params__: A list of query keys to remove from the query, if they
-        exist.
- * __port__: If True, remove the port from the network location string, if it
-   exists.
+       exist.
+ * __fragment__: If True, remove the fragment portion of the URL entirely.
  * __fragment_path__: A list of path segments to remove from the end of the
-   fragment's path segments, or a path string to remove from the end of the
-   fragment's path string, or True to remove the fragment path entirely.
+       fragment's path segments, or a path string to remove from the end of the
+       fragment's path string, or True to remove the fragment path entirely.
  * __fragment_args__: A list of query keys to remove from the fragment's query,
-   if they exist.
+       if they exist.
  * __username__: If True, remove the username, if it exists.
  * __password__: If True, remove the password, if it exists.
 
