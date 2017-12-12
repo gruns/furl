@@ -71,7 +71,7 @@ class omdict1D(omdict):
         Subclassed from omdict._bin_update_items() to make update() and
         updateall() process lists of values as multiple values.
 
-        <replacements and <leftovers> are modified directly, ala pass by
+        <replacements> and <leftovers> are modified directly, ala pass by
         reference.
         """
         for key, values in items:
