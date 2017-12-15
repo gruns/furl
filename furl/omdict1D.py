@@ -12,6 +12,8 @@
 
 from orderedmultidict import omdict
 
+_absent = object()
+
 
 def _quacks_like_a_list_but_not_str(duck):
     return (hasattr(duck, '__iter__') and callable(duck.__iter__) and
@@ -89,16 +91,12 @@ class omdict1D(omdict):
                 if value == []:
                     replacements[key] = []
                     leftovers[:] = [l for l in leftovers if key != l[0]]
-                    continue
-
                 # If there are existing items with key <key> that have
                 # yet to be marked for replacement, mark that item's
                 # value to be replaced by <value> by appending it to
-                # <replacements>.  TODO: Refactor for clarity
-                if (key in self and
-                    (key not in replacements or
-                     (key in replacements and
-                      replacements[key] == []))):
+                # <replacements>.
+                elif (key in self and
+                      replacements.get(key, _absent) in [[], _absent]):
                     replacements[key] = [value]
                 elif (key in self and not replace_at_most_one and
                       len(replacements[key]) < len(self.values(key))):
