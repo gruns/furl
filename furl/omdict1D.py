@@ -54,11 +54,14 @@ class omdict1D(omdict):
     def add(self, key, value):
         if not _quacks_like_a_list_but_not_str(value):
             value = [value]
+
         if value:
             self._map.setdefault(key, list())
+
         for val in value:
             node = self._items.append(key, val)
             self._map[key].append(node)
+
         return self
 
     def set(self, key, value):
