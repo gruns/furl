@@ -103,11 +103,10 @@ class omdict1D(omdict):
                 elif (key in self and not replace_at_most_one and
                       len(replacements[key]) < len(self.values(key))):
                     replacements[key].append(value)
+                elif replace_at_most_one:
+                    replacements[key] = [value]
                 else:
-                    if replace_at_most_one:
-                        replacements[key] = [value]
-                    else:
-                        leftovers.append((key, value))
+                    leftovers.append((key, value))
 
     def _set(self, key, value):
         if not _quacks_like_a_list_but_not_str(value):
