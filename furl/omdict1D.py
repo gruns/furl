@@ -12,12 +12,7 @@
 
 from orderedmultidict import omdict
 
-_absent = object()
-
-
-def _quacks_like_a_list_but_not_str(duck):
-    return (hasattr(duck, '__iter__') and callable(duck.__iter__) and
-            not isinstance(duck, str))
+from .common import is_iterable_but_not_string, absent as _absent
 
 
 class omdict1D(omdict):
@@ -52,7 +47,7 @@ class omdict1D(omdict):
     """
 
     def add(self, key, value):
-        if not _quacks_like_a_list_but_not_str(value):
+        if not is_iterable_but_not_string(value):
             value = [value]
 
         if value:
@@ -81,7 +76,7 @@ class omdict1D(omdict):
         """
         for key, values in items:
             # <values> is not a list or an empty list.
-            like_list_not_str = _quacks_like_a_list_but_not_str(values)
+            like_list_not_str = is_iterable_but_not_string(values)
             if not like_list_not_str or (like_list_not_str and not values):
                 values = [values]
 
@@ -110,7 +105,7 @@ class omdict1D(omdict):
                     leftovers.append((key, value))
 
     def _set(self, key, value):
-        if not _quacks_like_a_list_but_not_str(value):
+        if not is_iterable_but_not_string(value):
             value = [value]
         self.setlist(key, value)
         return self

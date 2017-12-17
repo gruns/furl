@@ -21,8 +21,8 @@ from six.moves.urllib.parse import quote, unquote, quote_plus
 
 from .omdict1D import omdict1D
 from .compat import basestring, UnicodeMixin
-
-_absent = object()
+from .common import (
+    callable_attr, is_iterable_but_not_string, absent as _absent)
 
 #
 # TODO(grun): Subclass Path, PathCompositionInterface, Query, and
@@ -407,10 +407,10 @@ class Path(object):
         """
         if not path:
             segments = []
-        elif callable_attr(path, 'split'):  # String interface.
-            segments = self._segments_from_path(path)
-        else:  # List interface.
+        elif is_iterable_but_not_string(path):  # List interface.
             segments = path
+        else:  # String interface.
+            segments = self._segments_from_path(path)
 
         if self._force_absolute(self):
             self._isabsolute = True if segments else False
@@ -431,8 +431,9 @@ class Path(object):
 
         Returns: <self>.
         """
-        newsegments = path  # List interface.
-        if callable_attr(path, 'split'):  # String interface.
+        if is_iterable_but_not_string(path):  # List interface.
+            newsegments = path
+        else:  # String interface.
             newsegments = self._segments_from_path(path)
 
         # Preserve the opening '/' if one exists already (self.segments
@@ -455,8 +456,9 @@ class Path(object):
         if path is True:
             self.load('')
         else:
-            segments = path  # List interface.
-            if isinstance(path, six.string_types):  # String interface.
+            if is_iterable_but_not_string(path):  # List interface.
+                segments = path
+            else:  # String interface.
                 segments = self._segments_from_path(path)
             base = ([''] if self.isabsolute else []) + self.segments
             self.load(remove_path_segments(base, segments))
