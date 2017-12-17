@@ -551,6 +551,10 @@ class Path(object):
 
         Raises: UserWarning if <path> is an improperly encoded path
         string and self.strict is True.
+
+        TODO(grun): Accept both list values and string values and
+        refactor the list vs string interface testing to this common
+        method.
         """
         segments = []
         for segment in path.split('/'):
