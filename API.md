@@ -316,9 +316,9 @@ parameter value.
 ```
 
 __encode(delimiter='&', quote_plus=True)__ can be used to encode query strings
-with delimiters like `;` and key-value pairs with standard percent-encoding
-(`%20` not `+`). The default delimiter is `&` and the default key-value encoding
-is application/x-www-form-urlencoded (`+` not `%20`).
+with delimiters like `;` and encode key-value pairs with standard
+percent-encoding (i.e. `%20` not `+`). The default delimiter is `&` and the
+default key-value encoding is application/x-www-form-urlencoded (`+` not `%20`).
 
 ```python
 >>> f.query = 'space=jams&woofs=squeeze+dog'
