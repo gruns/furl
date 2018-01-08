@@ -73,7 +73,7 @@ Fragments also have a path and a query.
 ```python
 >>> f = furl('http://www.google.com/')
 >>> f.fragment.path.segments = ['two', 'directories']
->>> f.fragment.args = {'one':'argument'}
+>>> f.fragment.args = {'one': 'argument'}
 >>> f.url
 'http://www.google.com/#two/directories?one=argument'
 ```
