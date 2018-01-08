@@ -150,7 +150,7 @@ AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a 
 ```
 
 Conversely, the __isabsolute__ attribute of Fragment Paths isn't bound by the
-same read-only restriction. URL fragments are always prefixed by a '#' character
+same read-only restriction. URL fragments are always prefixed by a `#` character
 and don't need to be separated from the __netloc__.
 
 ```python
