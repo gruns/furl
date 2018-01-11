@@ -82,10 +82,10 @@ setup(
     include_package_data=True,
     platforms=['any'],
     classifiers=[
-        'Topic :: Software Development :: Libraries',
+        'License :: Public Domain',
         'Natural Language :: English',
-        'License :: Freely Distributable',
         'Intended Audience :: Developers',
+        'Topic :: Software Development :: Libraries',
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
