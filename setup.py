@@ -62,9 +62,6 @@ class RunTests(TestCommand):
         sys.exit(0 if result.wasSuccessful() else -1)
 
 
-long_description = (
-    'Information and documentation at https://github.com/gruns/furl.')
-
 tests_require = ['six>=1.8.0', 'pycodestyle']
 if sys.version_info[:2] < (2, 7):
     tests_require += ['unittest2']
@@ -77,7 +74,9 @@ setup(
     url='https://github.com/gruns/furl',
     license='Unlicense',
     description='URL manipulation made simple.',
-    long_description=long_description,
+    long_description=(
+        'Information and documentation on furl can be found at '
+        'https://github.com/gruns/furl.'),
     packages=find_packages(),
     include_package_data=True,
     platforms=['any'],
