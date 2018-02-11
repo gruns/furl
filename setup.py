@@ -19,9 +19,9 @@ from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
 
 
-with open(pjoin(dirname(__file__), 'furl', '__init__.py')) as fd:
+with open(pjoin(dirname(__file__), 'furl', '__init__.py')) as fo:
     VERSION = re.compile(
-        r".*__version__ = '(.*?)'", re.S).match(fd.read()).group(1)
+        r".*__version__ = '(.*?)'", re.S).match(fo.read()).group(1)
 
 
 class Publish(Command):
