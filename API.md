@@ -3,7 +3,6 @@
 </h1>
 
 
-
 ### Basics
 
 furl objects let you access and modify the various components of a URL.
@@ -318,7 +317,8 @@ parameter value.
 __encode(delimiter='&', quote_plus=True)__ can be used to encode query strings
 with delimiters like `;` and encode key-value pairs with standard
 percent-encoding (i.e. `%20` not `+`). The default delimiter is `&` and the
-default key-value encoding is application/x-www-form-urlencoded (`+` not `%20`).
+default key-value encoding is application/x-www-form-urlencoded (i.e. `+` not
+`%20`).
 
 ```python
 >>> f.query = 'space=jams&woofs=squeeze+dog'
@@ -543,15 +543,15 @@ __remove()__ removes items from a furl object with the optional arguments
  * __args__: Shortcut for __query_params__.
  * __path__: A list of path segments to remove from the end of the existing path
        segments list, or a path string to remove from the end of the existing
-       path string, or True to remove the path portion of the URL entirely.
+       path string, or True to remove the entire path portion of the URL.
  * __query__: A list of query keys to remove from the query, if they exist, or
-       True to remove the query portion of the URL entirely.
+       True to remove the entire query portion of the URL.
  * __query_params__: A list of query keys to remove from the query, if they
        exist.
- * __fragment__: If True, remove the fragment portion of the URL entirely.
+ * __fragment__: If True, remove the entire fragment portion of the URL.
  * __fragment_path__: A list of path segments to remove from the end of the
        fragment's path segments, or a path string to remove from the end of the
-       fragment's path string, or True to remove the fragment path entirely.
+       fragment's path string, or True to remove the entire fragment path.
  * __fragment_args__: A list of query keys to remove from the fragment's query,
        if they exist.
  * __username__: If True, remove the username, if it exists.
