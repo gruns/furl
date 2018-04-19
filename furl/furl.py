@@ -55,11 +55,13 @@ DEFAULT_PORTS = {
 # 'mailto:user@google.com' instead of 'mailto://user@google.com'. Scheme
 # strings are lowercase.
 #
-# TODO(grun): Support schemes separated by just ':', not '://' without having
-# an explicit list. There are many such schemes in various URIs.
+# TODO(grun): Support all schemes separated by a single colon, and not
+# necessarily '://', without having an explicit list. See 'hier-part' in RFC
+# 3986.
 COLON_SEPARATED_SCHEMES = [
     'sms',
     'tel',
+    'acct',
     'mailto',
 ]
 
