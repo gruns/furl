@@ -1626,7 +1626,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             elif url.startswith('://'):
                 url = url[3:]
         elif self.scheme in COLON_SEPARATED_SCHEMES:
-            # Change a '://' separator to ':'. Leave a ':' separator as-is.
+            # Change a '://' separator to ':'. Leave a ':' separator as is.
             url = _set_scheme(url, self.scheme)
         elif (self.scheme is not None and
               (url == '' or  # Protocol relative URL.
