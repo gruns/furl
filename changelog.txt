@@ -1,6 +1,7 @@
 ================================================================================
  v1.0.2 (unreleased)
 ================================================================================
+Added: 'acct' to the list of colon separated schemes.
 Fixed: Restore furl.url's setter method. E.g. furl.url = 'http://www.foo.com/'.
 
 
