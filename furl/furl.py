@@ -1374,7 +1374,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     @url.setter
     def url(self, url):
-        return self._parse(url)
+        return self.load(url)
 
     def add(self, args=_absent, path=_absent, fragment_path=_absent,
             fragment_args=_absent, query_params=_absent):

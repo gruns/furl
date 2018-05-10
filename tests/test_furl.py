@@ -1380,6 +1380,13 @@ class TestFurl(unittest.TestCase):
         assert f.set(host='pumps.com', port=88).url == 'pumps.com:88'
         assert f.set(netloc='pumps.com:88').url == 'pumps.com:88'
 
+        # furl('...') and furl.url = '...' are functionally identical.
+        url = 'https://www.pumps.com/path?query#frag'
+        f1 = furl.furl(url)
+        f2 = furl.furl()
+        f2.url = url
+        assert f1 == f2
+
     def test_basic_manipulation(self):
         f = furl.furl('http://www.pumps.com/')
 
