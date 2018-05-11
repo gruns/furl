@@ -319,9 +319,9 @@ def remove_path_segments(segments, remove):
     segments <segments>.
 
     Examples:
-      # '/a/b/c' - 'b/c' == '/a/'
+      # ('/a/b/c', 'b/c') -> '/a/'
       remove_path_segments(['','a','b','c'], ['b','c']) == ['','a','']
-      # '/a/b/c' - '/b/c' == '/a'
+      # ('/a/b/c', '/b/c') -> '/a'
       remove_path_segments(['','a','b','c'], ['','b','c']) == ['','a']
 
     Returns: The list of all remaining path segments after the segments
@@ -745,8 +745,8 @@ class Query(object):
 
     Attributes:
       params: Ordered multivalue dictionary of query parameter key:value
-        pairs. Parameters in self.params are maintained URL decoded - 'a
-        b' not 'a+b'.
+        pairs. Parameters in self.params are maintained URL decoded,
+        e.g. 'a b' not 'a+b'.
       strict: Boolean whether or not UserWarnings should be raised if
         improperly encoded query strings are provided to methods that
         take such strings, like load(), add(), set(), remove(), etc.
