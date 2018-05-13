@@ -178,6 +178,9 @@ def is_valid_encoded_query_key(key):
     return is_valid_encoded_query_key.regex.match(key) is not None
 
 
+# TODO(grun): Handle query values with a key (e.g. '?a=1') and query values
+# with an empty key (e.g. ('?1') differently. See
+#   https://github.com/gruns/furl/issues/99
 @static_vars(regex=re.compile(
     r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;/?='), PERCENT_REGEX)))
 def is_valid_encoded_query_value(value):
