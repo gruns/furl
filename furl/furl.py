@@ -178,9 +178,6 @@ def is_valid_encoded_query_key(key):
     return is_valid_encoded_query_key.regex.match(key) is not None
 
 
-# TODO(grun): Handle query values with a key (e.g. '?a=1') and query values
-# with an empty key (e.g. ('?1') differently. See
-#   https://github.com/gruns/furl/issues/99
 @static_vars(regex=re.compile(
     r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;/?='), PERCENT_REGEX)))
 def is_valid_encoded_query_value(value):
@@ -721,7 +718,7 @@ class Query(object):
     The one dimensional aspect of omdict1D means that a list of values
     is interpreted as multiple values, not a single value which is
     itself a list of values. This is a reasonable distinction to make
-    because URL query parameters are one dimensional - query parameter
+    because URL query parameters are one dimensional: query parameter
     values cannot themselves be composed of sub-values.
 
     So what does this mean? This means we can safely interpret
