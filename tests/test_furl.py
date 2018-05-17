@@ -845,6 +845,9 @@ class TestQueryCompositionInterface(unittest.TestCase):
         assert isinstance(t.query, furl.Query)
         assert str(t.query) == ''
 
+        t.args = {'55': '66'}
+        assert t.args == {'55': '66'} and str(t.query) == '55=66'
+
         t.query = 'a=a&s=s s'
         assert isinstance(t.query, furl.Query)
         assert str(t.query) == 'a=a&s=s+s'
