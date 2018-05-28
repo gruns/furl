@@ -51,20 +51,6 @@ DEFAULT_PORTS = {
     'telnet': 23,
 }
 
-# List of schemes that don't require two slashes after the colon. For example,
-# 'mailto:user@google.com' instead of 'mailto://user@google.com'. Scheme
-# strings are lowercase.
-#
-# TODO(grun): Support all schemes separated by a single colon, and not
-# necessarily '://', without having an explicit list. See 'hier-part' in RFC
-# 3986.
-COLON_SEPARATED_SCHEMES = [
-    'sms',
-    'tel',
-    'acct',
-    'mailto',
-]
-
 
 def lget(l, index, default=None):
     try:
@@ -202,63 +188,80 @@ def is_valid_host(hostname):
     return '' not in toks  # Adjacent periods aren't allowed.
 
 
-def _get_scheme(url):
-    if url.lstrip().startswith('//'):  # Protocol relative URL.
+def get_scheme(url):
+    if url.startswith(':'):
         return ''
 
-    before_colon = url[:max(0, url.find(':'))]
-    if before_colon in COLON_SEPARATED_SCHEMES:
-        scheme = before_colon
-    else:
-        scheme = url[:max(0, url.find('://'))] or None
-    return scheme if (scheme is not None and is_valid_scheme(scheme)) else None
+    # Avoid incorrect scheme extraction with url.find(':') when other URL
+    # components, like the path, query, fragment, etc, may have a colon in
+    # them. For example, the URL 'a?query:', whose query has a ':' in it.
+    no_fragment = url.split('#', 1)[0]
+    no_query = no_fragment.split('?', 1)[0]
+    no_path_or_netloc = no_query.split('/', 1)[0]
+    scheme = url[:max(0, no_path_or_netloc.find(':'))] or None
+
+    if scheme is not None and not is_valid_scheme(scheme):
+        return None
+
+    return scheme
 
 
-def _set_scheme(url, newscheme):
-    scheme = _get_scheme(url)
-    newscheme = newscheme or ''
-    newseparator = ':' if newscheme in COLON_SEPARATED_SCHEMES else '://'
-    if scheme == '':  # Protocol relative URL.
-        url = '%s:%s' % (newscheme, url)
-    elif scheme is None and url:  # No scheme.
-        url = ''.join([newscheme, newseparator, url])
-    elif scheme:  # Existing scheme.
-        remainder = url[len(scheme):]
-        if remainder.startswith('://'):
-            remainder = remainder[3:]
-        elif remainder.startswith(':'):
-            remainder = remainder[1:]
-        url = ''.join([newscheme, newseparator, remainder])
+def strip_scheme(url):
+    scheme = get_scheme(url) or ''
+    url = url[len(scheme):]
+    if url.startswith(':'):
+        url = url[1:]
     return url
+
+
+def set_scheme(url, scheme):
+    after_scheme = strip_scheme(url)
+    if scheme is None:
+        return after_scheme
+    else:
+        return '%s:%s' % (scheme, after_scheme)
 
 
 def urlsplit(url):
     """
     Parameters:
       url: URL string to split.
-
     Returns: urlparse.SplitResult tuple subclass, just like
-    urlparse.urlsplit() returns, with fields (scheme, netloc, path,
-    query, fragment, username, password, hostname, port). See the url
-    below for more details on urlsplit().
-
-      http://docs.python.org/library/urlparse.html#urlparse.urlsplit
+      urlparse.urlsplit() returns, with fields (scheme, netloc, path,
+      query, fragment, username, password, hostname, port). See
+        http://docs.python.org/library/urlparse.html#urlparse.urlsplit
+      for more details on urlsplit().
     """
-    original_scheme = _get_scheme(url)
+    original_scheme = get_scheme(url)
 
-    def _change_urltoks_scheme(tup, scheme):
-        toks = list(tup)
-        toks[0] = scheme
-        return tuple(toks)
-
-    # urlsplit() only parses the query for schemes in urlparse.uses_query,
-    # so switch to 'http', a scheme in urlparse.uses_query, for
-    # urlparse.urlsplit() then restore the original scheme afterwards.
+    # urlsplit() parses URLs differently depending on whether or not the URL's
+    # scheme is in any of
+    #
+    #   urllib.parse.uses_fragment
+    #   urllib.parse.uses_netloc
+    #   urllib.parse.uses_params
+    #   urllib.parse.uses_query
+    #   urllib.parse.uses_relative
+    #
+    # For consistent URL parsing, switch the URL's scheme to 'http', a scheme
+    # in all of the aforementioned uses_* lists, and afterwards revert to the
+    # original scheme (which may or may not be in some, or all, of the the
+    # uses_* lists).
     if original_scheme is not None:
-        url = _set_scheme(url, 'http')
-    toks = urllib.parse.urlsplit(url)
-    toks_orig_scheme = _change_urltoks_scheme(toks, original_scheme)
-    return urllib.parse.SplitResult(*toks_orig_scheme)
+        url = set_scheme(url, 'http')
+
+    scheme, netloc, path, query, fragment = urllib.parse.urlsplit(url)
+
+    # Detect and preserve the '//' before the netloc, if present. E.g. preserve
+    # URLs like 'http:', 'http://', and '///sup' correctly.
+    after_scheme = strip_scheme(url)
+    if after_scheme.startswith('//'):
+        netloc = netloc or ''
+    else:
+        netloc = None
+
+    scheme = original_scheme
+    return urllib.parse.SplitResult(scheme, netloc, path, query, fragment)
 
 
 def urljoin(base, url):
@@ -269,11 +272,17 @@ def urljoin(base, url):
 
     Returns: The resultant URL from joining <base> and <url>.
     """
-    base_scheme, url_scheme = urlsplit(base).scheme, urlsplit(url).scheme
-    httpbase = _set_scheme(base, 'http')
-    joined = urllib.parse.urljoin(httpbase, url)
+    if not base:
+        return url
+
+    base_scheme = get_scheme(base)
+    url_scheme = get_scheme(url)
+
+    http_base = set_scheme(base, 'http')
+    joined = urllib.parse.urljoin(http_base, url)
     if not url_scheme:
-        joined = _set_scheme(joined, base_scheme)
+        joined = set_scheme(joined, base_scheme)
+
     return joined
 
 
@@ -1294,12 +1303,14 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         if userpass or self.username is not None:
             userpass += '@'
 
-        netloc = idna_encode(self.host) or ''
+        netloc = idna_encode(self.host)
         if self.port and self.port != DEFAULT_PORTS.get(self.scheme):
-            netloc += ':' + str(self.port)
+            netloc = (netloc or '') + (':' + str(self.port))
 
-        netloc = (userpass or '') + (netloc or '')
-        return netloc if (netloc or self.host == '') else None
+        if userpass or netloc:
+            netloc = (userpass or '') + (netloc or '')
+
+        return netloc
 
     @netloc.setter
     def netloc(self, netloc):
@@ -1314,14 +1325,14 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         username = password = host = port = None
 
-        if '@' in netloc:
+        if netloc and '@' in netloc:
             userpass, netloc = netloc.split('@', 1)
             if ':' in userpass:
                 username, password = userpass.split(':', 1)
             else:
                 username = userpass
 
-        if ':' in netloc:
+        if netloc and ':' in netloc:
             # IPv6 address literal.
             if ']' in netloc:
                 colonpos, bracketpos = netloc.rfind(':'), netloc.rfind(']')
@@ -1341,7 +1352,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         # that if an exception is raised when assigning self.port,
         # self.host isn't updated.
         self.port = port  # Raises ValueError on invalid port.
-        self.host = host or None
+        self.host = host
         self.username = None if username is None else unquote(username)
         self.password = None if password is None else unquote(password)
 
@@ -1621,19 +1632,15 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             str(self.fragment),
         ))
 
-        # Special cases.
-        if self.scheme is None:
-            if url.startswith('//'):
-                url = url[2:]
-            elif url.startswith('://'):
-                url = url[3:]
-        elif self.scheme in COLON_SEPARATED_SCHEMES:
-            # Change a '://' separator to ':'. Leave a ':' separator as is.
-            url = _set_scheme(url, self.scheme)
-        elif (self.scheme is not None and
-              (url == '' or  # Protocol relative URL.
-               (url == '%s:' % self.scheme and not str(self.path)))):
-            url += '//'
+        # Differentiate between '' and None values for scheme and netloc.
+        if self.scheme == '':
+            url = ':' + url
+
+        if self.netloc == '':
+            if self.scheme is None:
+                url = '//' + url
+            elif strip_scheme(url) == '':
+                url = url + '//'
 
         return str(url)
 

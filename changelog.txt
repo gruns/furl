@@ -1,9 +1,13 @@
 ================================================================================
  v1.0.2 (unreleased)
 ================================================================================
-Added: 'acct' to the list of colon separated schemes.
+Added: strip_scheme() public function.
+Changed: Make get_scheme() and set_scheme() functions public.
+Added: Support all schemes without a netloc/authority, like
+  'mailto:hi@email.com', without an explicit whitelist of such schemes
+  (e.g. tel:, sms:, mailto:, etc).
 Fixed: Restore furl.url's setter method. E.g. furl.url = 'http://www.foo.com/'.
-
+Removed: Support for Python 3.3, which reached EOL on 2017-09-29.
 
 ================================================================================
  v1.0.1

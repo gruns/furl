@@ -1120,7 +1120,7 @@ class TestFurl(unittest.TestCase):
         assert f.url == encoded_url
 
         f = furl.furl().set(host=u'ロリポップ')
-        assert f.url == 'xn--9ckxbq5co'
+        assert f.url == '//xn--9ckxbq5co'
 
     def test_unicode(self):
         paths = ['ロリポップ', u'ロリポップ']
@@ -1177,32 +1177,38 @@ class TestFurl(unittest.TestCase):
         # Protocol relative URLs.
         for url in ['//', '//sup.txt', '//arc.io/d/sup']:
             f = furl.furl(url)
-            assert f.scheme == '' and f.url == url
+            assert f.scheme is None and f.url == url
 
         f = furl.furl('//sup.txt')
-        assert f.scheme == ''
-        f.scheme = None
-        assert f.scheme is None and f.url == 'sup.txt'
+        assert f.scheme is None and f.url == '//sup.txt'
         f.scheme = ''
-        assert f.scheme == '' and f.url == '//sup.txt'
+        assert f.scheme == '' and f.url == '://sup.txt'
 
-        # Schemes without slashes , like 'mailto:'.
-        f = furl.furl('mailto:sup@sprp.ru')
-        assert f.url == 'mailto:sup@sprp.ru'
-        f = furl.furl('mailto://sup@sprp.ru')
-        assert f.url == 'mailto:sup@sprp.ru'
+        # Schemes without slashes, like 'mailto:'.
+        assert furl.furl('mailto:sup@sprp.ru').url == 'mailto:sup@sprp.ru'
+        assert furl.furl('mailto://sup@sprp.ru').url == 'mailto://sup@sprp.ru'
 
         f = furl.furl('mailto:sproop:spraps@sprp.ru')
         assert f.scheme == 'mailto'
-        assert f.username == 'sproop' and f.password == 'spraps'
-        assert f.host == 'sprp.ru'
+        assert f.path == 'sproop:spraps@sprp.ru'
 
         f = furl.furl('mailto:')
-        assert f.url == 'mailto:' and f.scheme == 'mailto'
+        assert f.url == 'mailto:' and f.scheme == 'mailto' and f.netloc is None
+
+        f = furl.furl('tel:+1-555-555-1234')
+        assert f.scheme == 'tel' and str(f.path) == '+1-555-555-1234'
+
+        f = furl.furl('urn:srp.com/ferret?query')
+        assert f.scheme == 'urn' and str(f.path) == 'srp.com/ferret'
+        assert str(f.query) == 'query'
 
         # Ignore invalid schemes.
         assert furl.furl('+invalid$scheme://lolsup').scheme is None
         assert furl.furl('/api/test?url=http://a.com').scheme is None
+
+        # Empty scheme.
+        f = furl.furl(':')
+        assert f.scheme == '' and f.netloc is None and f.url == ':'
 
     def test_username_and_password(self):
         # Empty usernames and passwords.
@@ -1300,19 +1306,20 @@ class TestFurl(unittest.TestCase):
         f = furl.furl()
         assert f.username is f.password is None
         f.username = 'uu'
-        assert f.username == 'uu' and f.password is None and f.url == 'uu@'
+        assert f.username == 'uu' and f.password is None and f.url == '//uu@'
         f.password = 'pp'
-        assert f.username == 'uu' and f.password == 'pp' and f.url == 'uu:pp@'
+        assert f.username == 'uu' and f.password == 'pp'
+        assert f.url == '//uu:pp@'
         f.username = ''
-        assert f.username == '' and f.password == 'pp' and f.url == ':pp@'
+        assert f.username == '' and f.password == 'pp' and f.url == '//:pp@'
         f.password = ''
-        assert f.username == f.password == '' and f.url == ':@'
+        assert f.username == f.password == '' and f.url == '//:@'
         f.password = None
-        assert f.username == '' and f.password is None and f.url == '@'
+        assert f.username == '' and f.password is None and f.url == '//@'
         f.username = None
         assert f.username is f.password is None and f.url == ''
         f.password = ''
-        assert f.username is None and f.password == '' and f.url == ':@'
+        assert f.username is None and f.password == '' and f.url == '//:@'
 
     def test_basics(self):
         url = 'hTtP://www.pumps.com/'
@@ -1378,10 +1385,10 @@ class TestFurl(unittest.TestCase):
         # with '//', as-is the default behavior of
         # urlparse.urlunsplit().
         f = furl.furl()
-        assert f.set(host='foo').url == 'foo'
-        assert f.set(host='pumps.com').url == 'pumps.com'
-        assert f.set(host='pumps.com', port=88).url == 'pumps.com:88'
-        assert f.set(netloc='pumps.com:88').url == 'pumps.com:88'
+        assert f.set(host='foo').url == '//foo'
+        assert f.set(host='pumps.com').url == '//pumps.com'
+        assert f.set(host='pumps.com', port=88).url == '//pumps.com:88'
+        assert f.set(netloc='pumps.com:88').url == '//pumps.com:88'
 
         # furl('...') and furl.url = '...' are functionally identical.
         url = 'https://www.pumps.com/path?query#frag'
@@ -1389,6 +1396,10 @@ class TestFurl(unittest.TestCase):
         f2 = furl.furl()
         f2.url = url
         assert f1 == f2
+
+        # Empty scheme and netloc.
+        f = furl.furl('://')
+        assert f.scheme == f.netloc == '' and f.url == '://'
 
     def test_basic_manipulation(self):
         f = furl.furl('http://www.pumps.com/')
@@ -1462,36 +1473,47 @@ class TestFurl(unittest.TestCase):
         # Scheme only.
         f = furl.furl('sup://')
         assert f.scheme == 'sup'
-        assert f.host is f.port is f.netloc is None
-        assert str(f.path) == ''
-        assert str(f.query) == ''
+        assert f.host == f.netloc == ''
+        assert f.port is None
+        assert str(f.path) == str(f.query) == str(f.fragment) == ''
         assert f.args == f.query.params == {}
-        assert str(f.fragment) == ''
-        assert f.url == 'sup://' and f.netloc is None
+        assert f.url == 'sup://'
         f.scheme = None
-        assert f.scheme is None and f.netloc is None and f.url == ''
+        assert f.scheme is None and f.netloc == '' and f.url == '//'
         f.scheme = ''
-        assert f.scheme == '' and f.netloc is None and f.url == '//'
+        assert f.scheme == '' and f.netloc == '' and f.url == '://'
+
+        f = furl.furl('sup:')
+        assert f.scheme == 'sup'
+        assert f.host is f.port is f.netloc is None
+        assert str(f.path) == str(f.query) == str(f.fragment) == ''
+        assert f.args == f.query.params == {}
+        assert f.url == 'sup:'
+        f.scheme = None
+        assert f.url == '' and f.netloc is None
+        f.scheme = ''
+        assert f.url == ':' and f.netloc is None
 
         # Host only.
         f = furl.furl().set(host='pumps.meat')
-        assert f.url == 'pumps.meat' and f.netloc == f.host == 'pumps.meat'
+        assert f.url == '//pumps.meat' and f.netloc == f.host == 'pumps.meat'
         f.host = None
         assert f.url == '' and f.host is f.netloc is None
         f.host = ''
-        assert f.url == '' and f.host == f.netloc == ''
+        assert f.url == '//' and f.host == f.netloc == ''
 
         # Port only.
         f = furl.furl()
         f.port = 99
-        assert f.url == ':99' and f.netloc is not None
+        assert f.url == '//:99' and f.netloc is not None
         f.port = None
         assert f.url == '' and f.netloc is None
 
         # urlparse.urlsplit() treats the first two '//' as the beginning
         # of a netloc, even if the netloc is empty.
         f = furl.furl('////path')
-        assert f.url == '//path' and str(f.path) == '//path'
+        assert f.netloc == '' and str(f.path) == '//path'
+        assert f.url == '////path'
 
         # TODO(grun): Test more odd URLs.
 
@@ -1499,7 +1521,7 @@ class TestFurl(unittest.TestCase):
         # No host.
         url = 'http:///index.html'
         f = furl.furl(url)
-        assert f.host is None and furl.furl(url).url == url
+        assert f.host == '' and furl.furl(url).url == url
 
         # Valid IPv4 and IPv6 addresses.
         f = furl.furl('http://192.168.1.101')
@@ -1573,6 +1595,10 @@ class TestFurl(unittest.TestCase):
         # No side effects.
         assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
         assert f.port == 888
+
+        # Empty netloc.
+        f = furl.furl('//')
+        assert f.scheme is None and f.netloc == '' and f.url == '//'
 
     def test_origin(self):
         assert furl.furl().origin == '://'
