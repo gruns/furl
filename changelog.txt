@@ -1,5 +1,5 @@
 ================================================================================
- v1.0.2 (unreleased)
+ v1.0.2
 ================================================================================
 Added: strip_scheme() public function.
 Changed: Make get_scheme() and set_scheme() functions public.
