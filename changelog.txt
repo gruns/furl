@@ -1,10 +1,10 @@
 ================================================================================
  v1.1 (unreleased)
 ================================================================================
-Changed: Support and preserve all query strings as provided. For example,
-  preserve the query '&&==' of 'http://foo.com?&&==' as-is. Empty key=value
-  pairs are stored as ('', None) in Query.params, e.g. [('', None), ('', None)]
-  for the query '&'.
+Fixed: Support and preserve all query strings as provided. For example, preserve
+  the query '&&==' of 'http://foo.com?&&==' as-is. Empty key=value pairs are
+  stored as ('', None) in Query.params, e.g. [('', None), ('', None)] for the
+  query '&'.
 Changed: Don't encode equal signs ('=') in query values if the key is empty.
   That is, allow and preserve queries like '?==3==' while also percent encoding
   equal signs in query values with an associted key, as expected. E.g.
