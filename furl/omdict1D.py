@@ -108,4 +108,5 @@ class omdict1D(omdict):
         if not is_iterable_but_not_string(value):
             value = [value]
         self.setlist(key, value)
+
         return self
