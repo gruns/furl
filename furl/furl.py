@@ -971,7 +971,6 @@ class Query(object):
         elif callable_attr(items, 'iterallitems'):
             items = list(items.iterallitems())
         # Dictionary-like interface. e.g. {'a':1, 'b':2, 'c':3}
-        # elif callable_attr(items, 'items'):
         elif callable_attr(items, 'items'):
             items = list(items.items())
         elif callable_attr(items, 'iteritems'):
