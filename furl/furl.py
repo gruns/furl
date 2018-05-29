@@ -752,6 +752,39 @@ class Query(object):
 
       str(f.query) == 'arg=one&arg=two&arg=three'
 
+
+    Additionally, while the set of allowed characters in URL queries is
+    defined in RFC 3986 section 3.4, the format for encoding key=value
+    pairs within the query is not. In turn, the parsing of encoded
+    key=value query pairs differs between implementations.
+
+    As a compromise to support equal signs in both key=value pair
+    encoded queries, like
+
+      https://www.google.com?a=1&b=2
+
+    and non-key=value pair encoded queries, like
+
+      https://www.google.com?===3===
+
+    equal signs are percent encoded in key=value pairs where the key is
+    non-empty, e.g.
+
+      https://www.google.com?equal-sign=%3D
+
+    but not encoded in key=value pairs where the key is empty, e.g.
+
+      https://www.google.com?===equal=sign===
+
+    This presents a reasonable compromise to accurately reproduce
+    non-key=value queries with equal signs while also still percent
+    encoding equal signs in key=value pair encoded queries, as
+    expected. See
+
+      https://github.com/gruns/furl/issues/99
+
+    for more details.
+
     Attributes:
       params: Ordered multivalue dictionary of query parameter key:value
         pairs. Parameters in self.params are maintained URL decoded,
@@ -762,7 +795,8 @@ class Query(object):
     """
 
     SAFE_KEY_CHARS = "/?:@-._~!$'()*,"
-    SAFE_VALUE_CHARS = "/?:@-._~!$'()*,="
+    SAFE_VALUE_CHARS_NON_EMPTY_KEY = SAFE_KEY_CHARS
+    SAFE_VALUE_CHARS_EMPTY_KEY = SAFE_KEY_CHARS + '='
 
     def __init__(self, query='', strict=False):
         self.strict = strict
@@ -772,7 +806,8 @@ class Query(object):
         self.load(query)
 
     def load(self, query):
-        self.params.load(self._items(query))
+        items = self._items(query)
+        self.params.load(items)
         return self
 
     def add(self, args):
@@ -861,13 +896,24 @@ class Query(object):
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
+
             quoted_key = quote_func(utf8key, self.SAFE_KEY_CHARS)
-            quoted_value = quote_func(utf8value, self.SAFE_VALUE_CHARS)
-            pair = '='.join([quoted_key, quoted_value])
-            if value is None:  # Example: http://sprop.su/?param
+            if not quoted_key:
+                safe_value_chars = self.SAFE_VALUE_CHARS_EMPTY_KEY
+            else:
+                safe_value_chars = self.SAFE_VALUE_CHARS_NON_EMPTY_KEY
+            quoted_value = quote_func(utf8value, safe_value_chars)
+
+            if value is None:  # Example: http://sprop.su/?param.
                 pair = quoted_key
+            else:
+                pair = '='.join([quoted_key, quoted_value])
+
             pairs.append(pair)
-        return delimiter.join(pairs)
+
+        query = delimiter.join(pairs)
+
+        return query
 
     def asdict(self):
         return {
@@ -941,27 +987,31 @@ class Query(object):
         return items
 
     def _extract_items_from_querystr(self, querystr):
-        pairstrs = [s2 for s1 in querystr.split('&') for s2 in s1.split(';')]
-
-        if self.strict:
-            pairs = [item.split('=', 1) for item in pairstrs]
-            pairs = [(p[0], '' if len(p) == 1 else p[1]) for p in pairs]
-            for key, value in pairs:
-                valid_key = is_valid_encoded_query_key(key)
-                valid_value = is_valid_encoded_query_value(value)
-                if not valid_key or not valid_value:
-                    s = ("Improperly encoded query string received: '%s'. "
-                         "Proceeding, but did you mean '%s'?" %
-                         (querystr, urllib.parse.urlencode(pairs)))
-                    warnings.warn(s, UserWarning)
-
         items = []
-        parsed_items = urllib.parse.parse_qsl(querystr, keep_blank_values=True)
-        for (key, value), pairstr in six.moves.zip(parsed_items, pairstrs):
-            # Empty value without '=', like '?sup'.
-            if key == quote_plus(utf8(pairstr)):
-                value = None
-            items.append((key, value))
+
+        pairstrs = [s2 for s1 in querystr.split('&') for s2 in s1.split(';')]
+        pairs = [item.split('=', 1) for item in pairstrs]
+        pairs = [(p[0], lget(p, 1, '')) for p in pairs]  # Pad with value ''.
+
+        for pairstr, (key, value) in six.moves.zip(pairstrs, pairs):
+            valid_key = is_valid_encoded_query_key(key)
+            valid_value = is_valid_encoded_query_value(value)
+            if self.strict and (not valid_key or not valid_value):
+                msg = (
+                    "Incorrectly percent encoded query string received: '%s'. "
+                    "Proceeding, but did you mean '%s'?" %
+                    (querystr, urllib.parse.urlencode(pairs)))
+                warnings.warn(msg, UserWarning)
+
+            key_decoded = unquote(key.replace('+', ' '))
+            # Empty value without a '=', e.g. '?sup'.
+            if key == pairstr:
+                value_decoded = None
+            else:
+                value_decoded = unquote(value.replace('+', ' '))
+
+            items.append((key_decoded, value_decoded))
+
         return items
 
 

@@ -30,7 +30,6 @@ if PYTHON_27PLUS:
 else:
     import unittest2 as unittest
 
-
 #
 # TODO(grun): Add tests for furl objects with strict=True. Make sure
 # UserWarnings are raised when improperly encoded path, query, and
@@ -104,10 +103,10 @@ class itemstr(str, itemcontainer):
         # values without '=' have value None.
         items = []
         parsed = parse_qsl(self, keep_blank_values=True)
-        pairstrs = [s2 for s1 in self.split('&')
-                    for s2 in s1.split(';')]
+        pairstrs = [
+            s2 for s1 in self.split('&') for s2 in s1.split(';')]
         for (key, value), pairstr in zip(parsed, pairstrs):
-            if key == quote_plus(pairstr):
+            if key == pairstr:
                 value = None
             items.append((key, value))
         return items
@@ -575,7 +574,7 @@ class TestQuery(unittest.TestCase):
             'a=a&c=c%5Ec', '<=>&^="', '%3C=%3E&%5E=%22', '%=%;`=`',
             '%25=%25&%60=%60',
             # Only keys, no values.
-            'asdfasdf', '/asdf/asdf/sdf', '*******', '!@#(*&@!#(*@!#', 'a&b&',
+            'asdfasdf', '/asdf/asdf/sdf', '*******', '!@#(*&@!#(*@!#', 'a&b',
             'a;b',
             # Repeated parameters.
             'a=a&a=a', 'space=a+a&space=b+b',
@@ -816,6 +815,36 @@ class TestQuery(unittest.TestCase):
             }
         assert p.asdict() == d
 
+    def test_value_encoding_empty_vs_nonempty_key(self):
+        pair = ('=', '=')
+        pair_encoded = '%3D=%3D'
+        assert furl.Query(pair_encoded).params.allitems() == [pair]
+
+        q = furl.Query()
+        q.params = [pair]
+        assert q.encode() == pair_encoded
+
+        empty_key_pair = ('', '==3===')
+        empty_key_encoded = '===3==='
+        assert furl.Query(empty_key_encoded).params.items() == [empty_key_pair]
+
+    def test_special_characters(self):
+        q = furl.Query('==3==')
+        assert q.params.allitems() == [('', '=3==')] and str(q) == '==3=='
+
+        f = furl.furl('https://www.google.com????')
+        assert f.args.allitems() == [('???', None)]
+
+        q = furl.Query('&=&')
+        assert q.params.allitems() == [('', None), ('', ''), ('', None)]
+        assert str(q) == '&=&'
+
+        url = 'https://www.google.com?&&?=&?'
+        f = furl.furl(url)
+        assert f.args.allitems() == [
+            ('', None), ('', None), ('?', ''), ('?', None)]
+        assert f.url == url
+
     def _quote_items(self, items):
         # Calculate the expected querystring with proper query encoding.
         #   Valid query key characters: "/?:@-._~!$'()*,;"
@@ -902,13 +931,13 @@ class TestFragment(unittest.TestCase):
                  ('dog?machine?yes', 'dog%3Fmachine%3Fyes', {}),
                  ('dog?machine=?yes', 'dog', {'machine': '?yes'}),
                  ('schtoot?a=a&hok%20sprm', 'schtoot',
-                  {'a': 'a', 'hok sprm': ''}),
+                  {'a': 'a', 'hok sprm': None}),
                  ('schtoot?a=a&hok sprm', 'schtoot',
-                  {'a': 'a', 'hok sprm': ''}),
+                  {'a': 'a', 'hok sprm': None}),
                  ('sch/toot?a=a&hok sprm', 'sch/toot',
-                  {'a': 'a', 'hok sprm': ''}),
+                  {'a': 'a', 'hok sprm': None}),
                  ('/sch/toot?a=a&hok sprm', '/sch/toot',
-                  {'a': 'a', 'hok sprm': ''}),
+                  {'a': 'a', 'hok sprm': None}),
                  ]
 
         for fragment, path, query in comps:
@@ -1459,8 +1488,8 @@ class TestFurl(unittest.TestCase):
             "sup://example.com/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+"
             ",==?/?:@-._~!$'()*+,;=/?:@-._~!$'()*+,;==#/?:@-._~!$&'()*+,;=")
         pathstr = "/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,=="
-        querystr = "/?:@-._~!$'()*+,=&=/?:@-._~!$'()*+,&=="
-        fragmentstr = "/?:@-._~!$=&'()*+,=&="
+        querystr = "/?:@-._~!$'()*+,&=/?:@-._~!$'()*+,&=="
+        fragmentstr = "/?:@-._~!$&'()*+,&="
         f = furl.furl(url)
         assert f.scheme == 'sup'
         assert f.host == 'example.com'
