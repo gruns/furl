@@ -892,17 +892,17 @@ class Query(object):
 
         pairs = []
         sixurl = urllib.parse  # six.moves.urllib.parse
-        quote_func = sixurl.quote_plus if quote_plus else sixurl.quote
+        quote_fn = sixurl.quote_plus if quote_plus else sixurl.quote
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
 
-            quoted_key = quote_func(utf8key, self.SAFE_KEY_CHARS)
+            quoted_key = quote_fn(utf8key, self.SAFE_KEY_CHARS)
             if not quoted_key:
                 safe_value_chars = self.SAFE_VALUE_CHARS_EMPTY_KEY
             else:
                 safe_value_chars = self.SAFE_VALUE_CHARS_NON_EMPTY_KEY
-            quoted_value = quote_func(utf8value, safe_value_chars)
+            quoted_value = quote_fn(utf8value, safe_value_chars)
 
             if value is None:  # Example: http://sprop.su/?param.
                 pair = quoted_key
