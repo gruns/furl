@@ -1,5 +1,5 @@
 ================================================================================
- v1.1 (unreleased)
+ v1.1
 ================================================================================
 Fixed: Support and preserve all query strings as provided. For example, preserve
   the query '&&==' of 'http://foo.com?&&==' as-is. Empty key=value pairs are
