@@ -851,8 +851,9 @@ class TestQuery(unittest.TestCase):
         #   Valid query value characters: "/?:@-._~!$'()*,;="
         allitems_quoted = []
         for key, value in items.iterallitems():
-            pair = (quote_plus(str(key), "/?:@-._~!$'()*,;"),
-                    quote_plus(str(value), "/?:@-._~!$'()*,;="))
+            pair = (
+                quote_plus(str(key), "/?:@-._~!$'()*,;"),
+                quote_plus(str(value), "/?:@-._~!$'()*,;="))
             allitems_quoted.append(pair)
         return allitems_quoted
 
