@@ -98,7 +98,7 @@ setup(
     ],
     install_requires=[
         'six>=1.8.0',
-        'orderedmultidict>=0.7.8',
+        'orderedmultidict>=1.0',
     ],
     cmdclass={
         'test': RunTests,
