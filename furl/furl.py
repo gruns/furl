@@ -17,7 +17,7 @@ from posixpath import normpath
 
 import six
 from six.moves import urllib
-from six.moves.urllib.parse import quote, unquote, quote_plus
+from six.moves.urllib.parse import quote, unquote
 
 from .omdict1D import omdict1D
 from .compat import basestring, UnicodeMixin
