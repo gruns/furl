@@ -1,4 +1,13 @@
 ================================================================================
+ v1.2 (unreleased)
+================================================================================
+Changed: Percent-encode all non-unreserved characters in Query key=value pairs,
+  including valid query characters (e.g. '=', '?', etc). Old behavior:
+  "?url=http://foo.com/". New behavior: "?url=http%3A%2F%2Ffoo.com%2F". Equal
+  signs remain decoded in query values where the key is empty, though, to allow
+  and preserve queries like '?==3=='.
+
+================================================================================
  v1.1
 ================================================================================
 Fixed: Support and preserve all query strings as provided. For example, preserve

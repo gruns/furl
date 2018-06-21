@@ -794,10 +794,6 @@ class Query(object):
         take such strings, like load(), add(), set(), remove(), etc.
     """
 
-    SAFE_KEY_CHARS = "/?:@-._~!$'()*,"
-    SAFE_VALUE_CHARS_NON_EMPTY_KEY = SAFE_KEY_CHARS
-    SAFE_VALUE_CHARS_EMPTY_KEY = SAFE_KEY_CHARS + '='
-
     def __init__(self, query='', strict=False):
         self.strict = strict
 
@@ -897,11 +893,8 @@ class Query(object):
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
 
-            quoted_key = quote_fn(utf8key, self.SAFE_KEY_CHARS)
-            if not quoted_key:
-                safe_value_chars = self.SAFE_VALUE_CHARS_EMPTY_KEY
-            else:
-                safe_value_chars = self.SAFE_VALUE_CHARS_NON_EMPTY_KEY
+            quoted_key = quote_fn(utf8key)
+            safe_value_chars = '=' if not quoted_key else ''
             quoted_value = quote_fn(utf8value, safe_value_chars)
 
             if value is None:  # Example: http://sprop.su/?param.

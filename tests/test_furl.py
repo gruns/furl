@@ -839,7 +839,7 @@ class TestQuery(unittest.TestCase):
         assert q.params.allitems() == [('', None), ('', ''), ('', None)]
         assert str(q) == '&=&'
 
-        url = 'https://www.google.com?&&?=&?'
+        url = 'https://www.google.com?&&%3F=&%3F'
         f = furl.furl(url)
         assert f.args.allitems() == [
             ('', None), ('', None), ('?', ''), ('?', None)]
@@ -1489,8 +1489,13 @@ class TestFurl(unittest.TestCase):
             "sup://example.com/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+"
             ",==?/?:@-._~!$'()*+,;=/?:@-._~!$'()*+,;==#/?:@-._~!$&'()*+,;=")
         pathstr = "/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,=="
-        querystr = "/?:@-._~!$'()*+,&=/?:@-._~!$'()*+,&=="
-        fragmentstr = "/?:@-._~!$&'()*+,&="
+        querystr = (
+            quote_plus("/?:@-._~!$'()* ,") + '&' +
+            '=' + quote_plus("/?:@-._~!$'()* ,") + '&' +
+            '==')
+        fragmentstr = (
+            '/?' + quote_plus(':@-._~!$') + '&' +
+            quote_plus("'()* ,") + '&' + '=')
         f = furl.furl(url)
         assert f.scheme == 'sup'
         assert f.host == 'example.com'
@@ -1960,11 +1965,11 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('http://blast.off/?a+b=c+d&two%20tap=cat%20nap%24')
         assert f.tostr() == f.url
         assert (f.tostr(query_delimiter=';') ==
-                'http://blast.off/?a+b=c+d;two+tap=cat+nap$')
+                'http://blast.off/?a+b=c+d;two+tap=cat+nap%24')
         assert (f.tostr(query_quote_plus=False) ==
-                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$')
+                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap%24')
         assert (f.tostr(query_delimiter=';', query_quote_plus=False) ==
-                'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap$')
+                'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap%24')
 
     def test_equality(self):
         assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
