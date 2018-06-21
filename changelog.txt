@@ -1,6 +1,7 @@
 ================================================================================
- v1.1.1 (unreleased)
+ v1.2 (unreleased)
 ================================================================================
+Added: Path segment appending via the division operator (__truediv__()).
 Changed: Bump orderedmultidict dependency to v1.0.
 Changed: Percent-encode all non-unreserved characters in Query key=value pairs,
   including valid query characters (e.g. '=', '?', etc). Old behavior:

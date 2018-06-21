@@ -193,6 +193,18 @@ Path object for method chaining.
 'http://www.google.com/a/b/c/'
 ```
 
+Path segments can also be appended with the division operator, like
+[Pathlib's
+Path](https://docs.python.org/3/library/pathlib.html#pathlib.Path).
+
+```python
+>>> from __future__ import division  # For Python 2.x.
+>>> f = furl('path')
+>>> f.path / 'more' / 'path segments/'
+>>> f.url
+'/path/more/path%20segments/'
+```
+
 For a dictionary representation of a path, use __asdict()__.
 
 ```python
@@ -567,6 +579,19 @@ __remove()__ removes items from a furl object with the optional arguments
 
 
 ### Miscellaneous
+
+Like [Pathlib's
+Path](https://docs.python.org/3/library/pathlib.html#pathlib.Path),
+path segments can be appended to a furl object's Path with the
+division operator.
+
+```python
+>>> from __future__ import division  # For Python 2.x.
+>>> f = furl('http://www.google.com/path?example=arg#frag')
+>>> f / 'add' / 'seg ments/'
+>>> f.url
+http://www.google.com/path/add/seg%20ments/?example=arg#frag
+```
 
 __tostr(query_delimiter='&', query_quote_plus=True)__ creates and returns a URL
 string. `query_delimiter` and `query_quote_plus` are passed unmodified to

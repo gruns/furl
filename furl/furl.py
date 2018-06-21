@@ -534,6 +534,9 @@ class Path(object):
         """
         return not self.isdir
 
+    def __truediv__(self, path):
+        return self.add(path)
+
     def __eq__(self, other):
         return str(self) == str(other)
 
@@ -1712,6 +1715,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             'query': self.query.asdict(),
             'fragment': self.fragment.asdict(),
             }
+
+    def __truediv__(self, path):
+        return self.add(path=path)
 
     def __eq__(self, other):
         try:
