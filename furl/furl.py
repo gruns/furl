@@ -73,10 +73,6 @@ def utf8(o, default=_absent):
         return o if default is _absent else default
 
 
-def callable_attr(obj, attr):
-    return hasattr(obj, attr) and callable(getattr(obj, attr))
-
-
 def non_text_iterable(value):
     b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
     return b
