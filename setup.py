@@ -62,7 +62,7 @@ class RunTests(TestCommand):
         sys.exit(0 if result.wasSuccessful() else -1)
 
 
-tests_require = ['six>=1.8.0', 'pycodestyle']
+tests_require = ['flake8', 'six>=1.8.0']
 if sys.version_info[:2] < (2, 7):
     tests_require += ['unittest2']
 
