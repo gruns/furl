@@ -1,6 +1,7 @@
 ================================================================================
- v1.2 (unreleased)
+ v1.1.1 (unreleased)
 ================================================================================
+Changed: Bump orderedmultidict dependency to v1.0.
 Changed: Percent-encode all non-unreserved characters in Query key=value pairs,
   including valid query characters (e.g. '=', '?', etc). Old behavior:
   "?url=http://foo.com/". New behavior: "?url=http%3A%2F%2Ffoo.com%2F". Equal
