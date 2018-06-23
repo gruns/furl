@@ -73,9 +73,8 @@ def utf8(o, default=_absent):
         return o if default is _absent else default
 
 
-def non_text_iterable(value):
-    b = callable_attr(value, '__iter__') and not isinstance(value, basestring)
-    return b
+def non_string_iterable(o):
+    return callable_attr(o, '__iter__') and not isinstance(o, string_types)
 
 
 # TODO(grun): Support IDNA2008 via the third party idna module. See
@@ -840,11 +839,11 @@ class Query(object):
         if callable_attr(query, 'items'):
             items = self._items(query)
         # List of keys or items to remove.
-        elif non_text_iterable(query):
+        elif non_string_iterable(query):
             items = query
 
         for item in items:
-            if non_text_iterable(item) and len(item) == 2:
+            if non_string_iterable(item) and len(item) == 2:
                 key, value = item
                 self.params.popvalue(key, value, None)
             else:
