@@ -193,9 +193,8 @@ Path object for method chaining.
 'http://www.google.com/a/b/c/'
 ```
 
-Path segments can also be appended with the division operator, like
-[Pathlib's
-Path](https://docs.python.org/3/library/pathlib.html#pathlib.Path).
+Path segments can also be appended with the slash operator, like with
+[pathlib.Path](https://docs.python.org/3/library/pathlib.html#operators).
 
 ```python
 >>> from __future__ import division  # For Python 2.x.
@@ -580,10 +579,8 @@ __remove()__ removes items from a furl object with the optional arguments
 
 ### Miscellaneous
 
-Like [Pathlib's
-Path](https://docs.python.org/3/library/pathlib.html#pathlib.Path),
-path segments can be appended to a furl object's Path with the
-division operator.
+Like [pathlib.Path](https://docs.python.org/3/library/pathlib.html#operators),
+path segments can be appended to a furl object's Path with the slash operator.
 
 ```python
 >>> from __future__ import division  # For Python 2.x.
