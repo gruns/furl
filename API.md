@@ -587,7 +587,7 @@ path segments can be appended to a furl object's Path with the slash operator.
 >>> f = furl('http://www.google.com/path?example=arg#frag')
 >>> f / 'add' / 'seg ments/'
 >>> f.url
-http://www.google.com/path/add/seg%20ments/?example=arg#frag
+'http://www.google.com/path/add/seg%20ments/?example=arg#frag'
 ```
 
 __tostr(query_delimiter='&', query_quote_plus=True)__ creates and returns a URL
