@@ -10,7 +10,7 @@
 # License: Build Amazing Things (Unlicense)
 #
 
-from .furl import *
+from .furl import *  # noqa
 
 __title__ = 'furl'
 __version__ = '1.1'

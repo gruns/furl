@@ -20,7 +20,7 @@ from six.moves import urllib
 from six.moves.urllib.parse import quote, unquote
 
 from .omdict1D import omdict1D
-from .compat import basestring, UnicodeMixin
+from .compat import string_types, UnicodeMixin
 from .common import (
     callable_attr, is_iterable_but_not_string, absent as _absent)
 

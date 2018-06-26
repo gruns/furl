@@ -14,15 +14,15 @@ import sys
 
 
 if sys.version_info[0] == 2:
-    basestring = basestring
+    string_types = basestring  # noqa
 else:
-    basestring = (str, bytes)
+    string_types = (str, bytes)
 
 
 if list(sys.version_info[:2]) >= [2, 7]:
-    from collections import OrderedDict
+    from collections import OrderedDict  # noqa
 else:
-    from ordereddict import OrderedDict
+    from ordereddict import OrderedDict  # noqa
 
 
 class UnicodeMixin(object):

@@ -1061,10 +1061,8 @@ class TestFragment(unittest.TestCase):
         assert f
 
     def test_asdict(self):
-        segments = ['wiki', 'ロリポップ']
         path_encoded = '/wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
 
-        pairs = [('a', '1'), ('ロリポップ', 'testä')]
         key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
         value_encoded = 'test%C3%A4'
         query_encoded = 'a=1&' + key_encoded + '=' + value_encoded
@@ -2252,10 +2250,8 @@ class TestFurl(unittest.TestCase):
             assert not furl.is_valid_encoded_query_value(invalid)
 
     def test_asdict(self):
-        segments = ['wiki', 'ロリポップ']
         path_encoded = '/wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
 
-        pairs = [('a', '1'), ('ロリポップ', 'testä')]
         key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
         value_encoded = 'test%C3%A4'
         query_encoded = 'a=1&' + key_encoded + '=' + value_encoded
