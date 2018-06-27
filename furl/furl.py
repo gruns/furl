@@ -577,10 +577,9 @@ class Path(object):
             segments.append(utf8(segment))
         del segment
 
-        # In Python 3, utf8() returns Bytes objects that must be decoded
-        # into strings before they can be passed to
-        # six.moves.urllib.parse.unquote(). In Python 2, utf8() returns
-        # strings that can be passed directly to urllib.unquote().
+        # In Python 3, utf8() returns Bytes objects that must be decoded into
+        # strings before they can be passed to unquote(). In Python 2, utf8()
+        # returns strings that can be passed directly to urllib.unquote().
         segments = [
             segment.decode('utf8')
             if isinstance(segment, bytes) and not isinstance(segment, str)
