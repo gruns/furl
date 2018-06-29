@@ -1,5 +1,5 @@
 ================================================================================
- v1.2 (unreleased)
+ v1.2
 ================================================================================
 Added: Path segment appending via the division operator (__truediv__()).
 Changed: Bump orderedmultidict dependency to v1.0.
@@ -8,7 +8,7 @@ Changed: Percent-encode all non-unreserved characters in Query key=value pairs,
   including valid query characters (e.g. '=', '?', etc). Old encoding:
   "?url=http://foo.com/"; new encoding: "?url=http%3A%2F%2Ffoo.com%2F". Equal
   signs remain decoded in query values where the key is empty to allow for, and
-  preserve, queries like '?==3==', though.
+  preserve, queries like '?==3=='.
 
 ================================================================================
  v1.1
