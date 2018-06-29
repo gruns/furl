@@ -1168,9 +1168,9 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         if path and (not query or not self.separator):
             path = path.replace('%3F', '?')
 
-        if query and path:
-            return path + ('?' if self.separator else '') + query
-        return path + query
+        separator = '?' if path and query and self.separator else ''
+
+        return path + separator + query
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
