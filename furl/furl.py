@@ -256,6 +256,7 @@ def urlsplit(url):
         netloc = None
 
     scheme = original_scheme
+
     return urllib.parse.SplitResult(scheme, netloc, path, query, fragment)
 
 
@@ -300,6 +301,7 @@ def join_path_segments(*args):
     Returns: A list containing the joined path segments.
     """
     finals = []
+
     for segments in args:
         if not segments or segments == ['']:
             continue
@@ -314,6 +316,7 @@ def join_path_segments(*args):
             elif finals[-1] != '' and segments[0] == '' and len(segments) > 1:
                 segments = segments[1:]
             finals.extend(segments)
+
     return finals
 
 
@@ -459,6 +462,7 @@ class Path(object):
             segments.insert(0, '')
 
         self.load(join_path_segments(segments, newsegments))
+
         return self
 
     def set(self, path):
@@ -475,6 +479,7 @@ class Path(object):
                 segments = self._segments_from_path(path)
             base = ([''] if self.isabsolute else []) + self.segments
             self.load(remove_path_segments(base, segments))
+
         return self
 
     def normalize(self):
@@ -488,6 +493,7 @@ class Path(object):
             if normalized.startswith('//'):  # http://bugs.python.org/636648
                 normalized = '/' + normalized.lstrip('/')
             self.load(normalized)
+
         return self
 
     def asdict(self):
@@ -855,6 +861,7 @@ class Query(object):
             else:
                 key = item
                 self.params.pop(key, None)
+
         return self
 
     @property
@@ -1115,6 +1122,7 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
             self.path.add(path)
         if args is not _absent:
             self.query.add(args)
+
         return self
 
     def set(self, path=_absent, args=_absent, separator=_absent):
@@ -1124,6 +1132,7 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
             self.query.load(args)
         if separator is True or separator is False:
             self.separator = separator
+
         return self
 
     def remove(self, fragment=_absent, path=_absent, args=_absent):
@@ -1133,6 +1142,7 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
             self.path.remove(path)
         if args is not _absent:
             self.query.remove(args)
+
         return self
 
     def asdict(self):
@@ -1279,6 +1289,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self.path.load(tokens.path)
         self.query.load(tokens.query)
         self.fragment.load(tokens.fragment)
+
         return self
 
     @property
@@ -1410,6 +1421,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         if self.port and self.port != DEFAULT_PORTS.get(self.scheme):
             port = ':%s' % self.port
         origin = '%s://%s%s' % (scheme, host, port)
+
         return origin
 
     @origin.setter
@@ -1479,6 +1491,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             self.query.add(query_params)
         if fragment_path is not _absent or fragment_args is not _absent:
             self.fragment.add(path=fragment_path, args=fragment_args)
+
         return self
 
     def set(self, args=_absent, path=_absent, fragment=_absent, scheme=_absent,
