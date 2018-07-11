@@ -24,21 +24,6 @@ from .compat import string_types, UnicodeMixin
 from .common import (
     callable_attr, is_iterable_but_not_string, absent as _absent)
 
-#
-# TODO(grun): Subclass Path, PathCompositionInterface, Query, and
-# QueryCompositionInterface into two subclasses each - one for the URL
-# and one for the Fragment.
-#
-# Subclasses will clean up the code because the valid encodings are
-# different between a URL Path and a Fragment Path and a URL Query and a
-# Fragment Query.
-#
-# For example, '?' and '#' don't need to be encoded in Fragment Path
-# segments but must be encoded in URL Path segments.
-#
-# Similarly, '#' doesn't need to be encoded in Fragment Query keys and
-# values, but must be encoded in URL Query keys and values.
-#
 
 # Map of various URL schemes to their default ports. Scheme strings are
 # lowercase.
