@@ -75,7 +75,7 @@ setup(
     license='Unlicense',
     description='URL manipulation made simple.',
     long_description=(
-        'Information and documentation on furl can be found at '
+        'Information and documentation can be found at '
         'https://github.com/gruns/furl.'),
     packages=find_packages(),
     include_package_data=True,
