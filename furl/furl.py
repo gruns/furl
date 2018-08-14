@@ -202,6 +202,12 @@ def set_scheme(url, scheme):
         return '%s:%s' % (scheme, after_scheme)
 
 
+# 'netloc' in Python parlance, 'authority' in RFC 3986 parlance.
+def has_netloc(url):
+    scheme = get_scheme(url)
+    return url.startswith('//' if scheme is None else scheme + '://')
+
+
 def urlsplit(url):
     """
     Parameters:
@@ -253,16 +259,30 @@ def urljoin(base, url):
 
     Returns: The resultant URL from joining <base> and <url>.
     """
-    if not base:
-        return url
+    base_scheme = get_scheme(base) if has_netloc(base) else None
+    url_scheme = get_scheme(url) if has_netloc(url) else None
 
-    base_scheme = get_scheme(base)
-    url_scheme = get_scheme(url)
+    if base_scheme is not None:
+        # For consistent URL joining, switch the base URL's scheme to
+        # 'http'. urllib.parse.urljoin() behaves differently depending on the
+        # scheme. E.g.
+        #
+        #   >>> urllib.parse.urljoin('http://google.com/', 'hi')
+        #   'http://google.com/hi'
+        #
+        # vs
+        #
+        #   >>> urllib.parse.urljoin('asdf://google.com/', 'hi')
+        #   'hi'
+        root = set_scheme(base, 'http')
+    else:
+        root = base
 
-    http_base = set_scheme(base, 'http')
-    joined = urllib.parse.urljoin(http_base, url)
-    if not url_scheme:
-        joined = set_scheme(joined, base_scheme)
+    joined = urllib.parse.urljoin(root, url)
+
+    new_scheme = url_scheme if url_scheme is not None else base_scheme
+    if new_scheme is not None and has_netloc(joined):
+        joined = set_scheme(joined, new_scheme)
 
     return joined
 

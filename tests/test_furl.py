@@ -1985,6 +1985,15 @@ class TestFurl(unittest.TestCase):
                '#uwantpump?')
         assert f.url == 'http://pepp.ru/a/b/c#uwantpump?'
 
+        # In edge cases (e.g. URLs without an authority/netloc), behave
+        # identically to urllib.parse.urljoin().
+        f = furl.furl('wss://slrp.com/').join('foo:1')
+        assert f.url == 'wss://slrp.com/foo:1'
+        f = furl.furl('wss://slrp.com/').join('foo:1:rip')
+        assert f.url == 'foo:1:rip'
+        f = furl.furl('scheme:path').join('foo:blah')
+        assert f.url == 'foo:blah'
+
     def test_tostr(self):
         f = furl.furl('http://blast.off/?a+b=c+d&two%20tap=cat%20nap%24')
         assert f.tostr() == f.url
