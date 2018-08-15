@@ -18,6 +18,10 @@ from posixpath import normpath
 import six
 from six.moves import urllib
 from six.moves.urllib.parse import quote, unquote
+try:
+    from icecream import ic
+except ImportError:  # Graceful fallback if IceCream isn't installed.
+    ic = lambda *a: None if not a else (a[0] if len(a) == 1 else a)
 
 from .omdict1D import omdict1D
 from .compat import string_types, UnicodeMixin
