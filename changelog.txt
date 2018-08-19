@@ -1,5 +1,5 @@
 ================================================================================
- v1.2.1 (Unreleased)
+ v1.2.1
 ================================================================================
 Fixed: Join URLs without an authority (e.g. 'foo:blah') consistently with
   urllib.parse.urljoin().
