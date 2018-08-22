@@ -1287,8 +1287,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             url = str(url)
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
-        # Python 2.7+. In Python <= 2.6, urlsplit() doesn't raise a
-        # ValueError on malformed IPv6 addresses.
+        # Python 2.7+.
         tokens = urlsplit(url)
 
         self.netloc = tokens.netloc  # Raises ValueError in Python 2.7+.

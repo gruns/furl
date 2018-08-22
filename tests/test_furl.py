@@ -12,7 +12,6 @@
 
 from __future__ import division
 
-import sys
 import warnings
 from abc import ABCMeta, abstractmethod
 
@@ -25,12 +24,8 @@ import furl
 from furl.omdict1D import omdict1D
 from furl.compat import OrderedDict as odict
 
-PYTHON_27PLUS = sys.version_info >= (2, 7)
+import unittest
 
-if PYTHON_27PLUS:
-    import unittest
-else:
-    import unittest2 as unittest
 
 #
 # TODO(grun): Add tests for furl objects with strict=True. Make sure
@@ -1604,15 +1599,12 @@ class TestFurl(unittest.TestCase):
         # exception on invalid IPv6 addresses.
         furl.furl('http://[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]/')
 
-        # Malformed IPv6 should raise an exception because
-        # urlparse.urlsplit() raises an exception in Python v2.7+. In
-        # Python <= 2.6, urlsplit() doesn't raise a ValueError on
-        # malformed IPv6 addresses.
-        if PYTHON_27PLUS:
-            with self.assertRaises(ValueError):
-                furl.furl('http://[0:0:0:0:0:0:0:1/')
-            with self.assertRaises(ValueError):
-                furl.furl('http://0:0:0:0:0:0:0:1]/')
+        # Malformed IPv6 should raise an exception because urlparse.urlsplit()
+        # raises an exception on malformed IPv6 addresses.
+        with self.assertRaises(ValueError):
+            furl.furl('http://[0:0:0:0:0:0:0:1/')
+        with self.assertRaises(ValueError):
+            furl.furl('http://0:0:0:0:0:0:0:1]/')
 
         # Invalid host strings should raise ValueError.
         invalid_hosts = ['.', '..', 'a..b', '.a.b', '.a.b.', '$', 'a$b']
@@ -1638,12 +1630,11 @@ class TestFurl(unittest.TestCase):
         assert f.port == 888
 
         # Malformed IPv6 should raise an exception because
-        # urlparse.urlsplit() raises an exception in Python v2.7+.
-        if PYTHON_27PLUS:
-            with self.assertRaises(ValueError):
-                f.netloc = '[0:0:0:0:0:0:0:1'
-            with self.assertRaises(ValueError):
-                f.netloc = '0:0:0:0:0:0:0:1]'
+        # urlparse.urlsplit() raises an exception
+        with self.assertRaises(ValueError):
+            f.netloc = '[0:0:0:0:0:0:0:1'
+        with self.assertRaises(ValueError):
+            f.netloc = '0:0:0:0:0:0:0:1]'
 
         # Invalid ports should raise an exception.
         with self.assertRaises(ValueError):
@@ -1675,13 +1666,12 @@ class TestFurl(unittest.TestCase):
         f.origin = 'ssh://horse-machine.de'
         assert f.url == 'ssh://user:pass@horse-machine.de'
 
-        # Malformed IPv6 should raise an exception because
-        # urlparse.urlsplit() raises an exception in Python v2.7+.
-        if PYTHON_27PLUS:
-            with self.assertRaises(ValueError):
-                f.origin = '[0:0:0:0:0:0:0:1'
-            with self.assertRaises(ValueError):
-                f.origin = 'http://0:0:0:0:0:0:0:1]'
+        # Malformed IPv6 should raise an exception because urlparse.urlsplit()
+        # raises an exception.
+        with self.assertRaises(ValueError):
+            f.origin = '[0:0:0:0:0:0:0:1'
+        with self.assertRaises(ValueError):
+            f.origin = 'http://0:0:0:0:0:0:0:1]'
 
         # Invalid ports should raise an exception.
         with self.assertRaises(ValueError):

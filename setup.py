@@ -62,10 +62,6 @@ class RunTests(TestCommand):
         sys.exit(0 if result.wasSuccessful() else -1)
 
 
-tests_require = ['flake8', 'six>=1.8.0']
-if sys.version_info[:2] < (2, 7):
-    tests_require += ['unittest2']
-
 setup(
     name='furl',
     version=VERSION,
@@ -87,7 +83,7 @@ setup(
         'Topic :: Software Development :: Libraries',
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
@@ -105,5 +101,5 @@ setup(
         'test': RunTests,
         'publish': Publish,
     },
-    tests_require=tests_require,
+    tests_require=['flake8', 'six>=1.8.0'],
 )
