@@ -29,15 +29,34 @@ from .common import (
     callable_attr, is_iterable_but_not_string, absent as _absent)
 
 
-# Map of various URL schemes to their default ports. Scheme strings are
+# Map of common protocols, as suggested by the common protocols included in
+# urllib/parse.py, to their default ports. Protocol scheme strings are
 # lowercase.
 DEFAULT_PORTS = {
+    'ws': 80,
     'ftp': 21,
+    'git': 9418,
+    'hdl': 2641,
+    'nfs': 111,
+    'sip': 5060,
     'ssh': 22,
+    'svn': 3690,
+    'wss': 443,
     'http': 80,
+    'imap': 143,
+    'nntp': 119,
+    'sftp': 22,
+    'sips': 5061,
     'tftp': 69,
+    'rtsp': 554,
+    'wais': 210,
     'https': 443,
+    'rsync': 873,
+    'rtspu': 5004,
+    'snews': 563,
+    'gopher': 70,
     'telnet': 23,
+    'prospero': 191,
 }
 
 
