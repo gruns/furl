@@ -1,1 +1,2 @@
 include LICENSE.md README.md API.md
+recursive-include tests/ *.py
