@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="api.svg" width="496px" alt="furl API">
+  <img src="api.svg" width="496px" height="101px" alt="furl API">
 </h1>
 
 
