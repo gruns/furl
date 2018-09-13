@@ -17,7 +17,7 @@
   </a>
 </p>
 
-### furl is a small Python library that makes parsing and manipulating URLs easy.
+### furl is a small Python library that makes parsing and<br>manipulating URLs easy.
 
 Python's standard [urllib](https://docs.python.org/2/library/urllib.html) and
 [urlparse](https://docs.python.org/2/library/urlparse.html) modules provide a
