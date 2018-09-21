@@ -526,6 +526,9 @@ class TestPath(unittest.TestCase):
         p /= 'c d/'
         assert str(p) == 'a/b/c%20d/'
 
+        p /= furl.Path('e')
+        assert str(p) == 'a/b/c%20d/e'
+
     def test_truediv(self):
         p = furl.Path()
 
@@ -541,7 +544,6 @@ class TestPath(unittest.TestCase):
         p3 = furl.Path('e')
         p4 = furl.Path('f')
         assert p3 / p4 == furl.Path('e/f')
-
 
     def test_asdict(self):
         segments = ['wiki', 'ロリポップ']
