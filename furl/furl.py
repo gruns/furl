@@ -482,7 +482,9 @@ class Path(object):
 
         Returns: <self>.
         """
-        if is_iterable_but_not_string(path):  # List interface.
+        if isinstance(path, Path):
+            newsegments = path.segments
+        elif is_iterable_but_not_string(path):  # List interface.
             newsegments = path
         else:  # String interface.
             newsegments = self._segments_from_path(path)

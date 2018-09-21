@@ -537,6 +537,12 @@ class TestPath(unittest.TestCase):
         assert str(p2) == 'a/b'
         assert str(p) == ''
 
+        # Paths should be joinable with other path
+        p3 = furl.Path('e')
+        p4 = furl.Path('f')
+        assert p3 / p4 == furl.Path('e/f')
+
+
     def test_asdict(self):
         segments = ['wiki', 'ロリポップ']
         path_encoded = 'wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
@@ -1510,6 +1516,9 @@ class TestFurl(unittest.TestCase):
 
         f2 = f / 'c' / 'd e/'
         assert f2.url == 'http://www.pumps.com/c/d%20e/'
+
+        f3 = f / furl.Path('f')
+        assert f3.url == 'http://www.pumps.com/f'
 
     def test_odd_urls(self):
         # Empty.
