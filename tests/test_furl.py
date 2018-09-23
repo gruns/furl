@@ -514,17 +514,36 @@ class TestPath(unittest.TestCase):
             p = furl.Path(path)
             assert str(p) == path_encoded
 
+    def test_itruediv(self):
+        p = furl.Path()
+
+        p /= 'a'
+        assert str(p) == 'a'
+
+        p /= 'b'
+        assert str(p) == 'a/b'
+
+        p /= 'c d/'
+        assert str(p) == 'a/b/c%20d/'
+
+        p /= furl.Path('e')
+        assert str(p) == 'a/b/c%20d/e'
+
     def test_truediv(self):
         p = furl.Path()
 
-        p = p / 'a'
-        assert str(p) == 'a'
+        p1 = p / 'a'
+        assert str(p1) == 'a'
+        assert p1 is not p
 
-        p = p / 'b'
-        assert str(p) == 'a/b'
+        p2 = p / 'a' / 'b'
+        assert str(p2) == 'a/b'
+        assert str(p) == ''
 
-        p = p / 'c' / 'd e/'
-        assert str(p) == 'a/b/c/d%20e/'
+        # Paths should be joinable with other path
+        p3 = furl.Path('e')
+        p4 = furl.Path('f')
+        assert p3 / p4 == furl.Path('e/f')
 
     def test_asdict(self):
         segments = ['wiki', 'ロリポップ']
@@ -1478,17 +1497,30 @@ class TestFurl(unittest.TestCase):
         f.host = 'ohay.com'
         assert str(f) == 'sup://ohay.com/hay%20supppp?space=1+2#sup'
 
+    def test_path_itruediv(self):
+        f = furl.furl('http://www.pumps.com/')
+
+        f /= 'a'
+        assert f.url == 'http://www.pumps.com/a'
+
+        f /= 'b'
+        assert f.url == 'http://www.pumps.com/a/b'
+
+        f /= 'c d/'
+        assert f.url == 'http://www.pumps.com/a/b/c%20d/'
+
     def test_path_truediv(self):
         f = furl.furl('http://www.pumps.com/')
 
-        f = f / 'a'
-        assert f.url == 'http://www.pumps.com/a'
+        f1 = f / 'a'
+        assert f.url == 'http://www.pumps.com/'
+        assert f1.url == 'http://www.pumps.com/a'
 
-        f = f / 'b'
-        assert f.url == 'http://www.pumps.com/a/b'
+        f2 = f / 'c' / 'd e/'
+        assert f2.url == 'http://www.pumps.com/c/d%20e/'
 
-        f = f / 'c' / 'd e/'
-        assert f.url == 'http://www.pumps.com/a/b/c/d%20e/'
+        f3 = f / furl.Path('f')
+        assert f3.url == 'http://www.pumps.com/f'
 
     def test_odd_urls(self):
         # Empty.

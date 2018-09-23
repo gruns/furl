@@ -442,6 +442,13 @@ class Path(object):
 
         self.load(path)
 
+    def copy(self):
+        return self.__class__(
+            path=self.segments,
+            force_absolute=self._force_absolute,
+            strict=self.strict
+        )
+
     def load(self, path):
         """
         Load <path>, replacing any existing path. <path> can either be a
@@ -470,12 +477,14 @@ class Path(object):
 
     def add(self, path):
         """
-        Add <path> to the existing path. <path> can either be a list of
-        segments or a path string to append to the existing path.
+        Add <path> to the existing path. <path> can either be a Path instance,
+        a list of segments or a path string to append to the existing path.
 
         Returns: <self>.
         """
-        if is_iterable_but_not_string(path):  # List interface.
+        if isinstance(path, Path):
+            newsegments = path.segments
+        elif is_iterable_but_not_string(path):  # List interface.
             newsegments = path
         else:  # String interface.
             newsegments = self._segments_from_path(path)
@@ -571,7 +580,7 @@ class Path(object):
         return not self.isdir
 
     def __truediv__(self, path):
-        return self.add(path)
+        return self.copy().add(path)
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -1758,7 +1767,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             }
 
     def __truediv__(self, path):
-        return self.add(path=path)
+        return self.copy().add(path=path)
 
     def __eq__(self, other):
         try:
