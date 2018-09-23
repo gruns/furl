@@ -533,14 +533,15 @@ class TestPath(unittest.TestCase):
         p = furl.Path()
 
         p1 = p / 'a'
-        assert str(p1) == 'a'
         assert p1 is not p
+        assert str(p1) == 'a'
 
         p2 = p / 'a' / 'b'
-        assert str(p2) == 'a/b'
+        assert p2 is not p
         assert str(p) == ''
+        assert str(p2) == 'a/b'
 
-        # Paths should be joinable with other path
+        # Path objects should be joinable with other Path objects.
         p3 = furl.Path('e')
         p4 = furl.Path('f')
         assert p3 / p4 == furl.Path('e/f')
