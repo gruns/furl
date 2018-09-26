@@ -1,10 +1,10 @@
 ================================================================================
  v2.0.0 (unreleased)
 ================================================================================
-Changed: furl.__truediv__() and Path.__truediv__() now behave like
-  Pathlib.__truediv__() and return a new instance, no longer modifying the
-  original instance. Old: furl('1') / '2' -> '1/2'. New: furl('1') /= '2' ->
-  '1/2'.
+Changed: furl.__truediv__() and Path.__truediv__() now mirror
+  Pathlib.__truediv__()'s behavior and return a new instance. The original
+  instance is no longer modified. Old behavior: f = furl('1'); f / '2' -> str(f)
+  == '1'. New behavior: f = furl('1'); f /= '2' -> str(f) == '1/2'.
 Fixed: Path.load() now accepts Path instances, e.g. f.path.load(Path('hi')).
 Removed: Support for Python 2.6, which reached EOL on 2013-10-29.
 
