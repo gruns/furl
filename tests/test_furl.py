@@ -235,15 +235,17 @@ class TestPath(unittest.TestCase):
 
     def _test_set_load(self, path_set_or_load):
         p = furl.Path('a/b/c/')
+        assert path_set_or_load(p, furl.Path('asdf/asdf/')) == p
+        assert not p.isabsolute and str(p) == 'asdf/asdf/'
+
         assert path_set_or_load(p, 'asdf/asdf/') == p
-        assert not p.isabsolute
-        assert str(p) == 'asdf/asdf/'
+        assert not p.isabsolute and str(p) == 'asdf/asdf/'
+
         assert path_set_or_load(p, ['a', 'b', 'c', '']) == p
-        assert not p.isabsolute
-        assert str(p) == 'a/b/c/'
+        assert not p.isabsolute and str(p) == 'a/b/c/'
+
         assert path_set_or_load(p, ['', 'a', 'b', 'c', '']) == p
-        assert p.isabsolute
-        assert str(p) == '/a/b/c/'
+        assert p.isabsolute and str(p) == '/a/b/c/'
 
     def test_add(self):
         # URL paths.

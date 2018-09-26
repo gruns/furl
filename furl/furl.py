@@ -444,13 +444,15 @@ class Path(object):
 
     def load(self, path):
         """
-        Load <path>, replacing any existing path. <path> can either be a
-        list of segments or a path string to adopt.
+        Load <path>, replacing any existing path. <path> can either be
+        a Path instance, a list of segments, a path string to adopt.
 
         Returns: <self>.
         """
         if not path:
             segments = []
+        elif isinstance(path, Path):
+            segments = path.segments
         elif is_iterable_but_not_string(path):  # List interface.
             segments = path
         else:  # String interface.
