@@ -471,7 +471,7 @@ class Path(object):
     def add(self, path):
         """
         Add <path> to the existing path. <path> can either be a Path instance,
-        a list of segments or a path string to append to the existing path.
+        a list of segments, or a path string to append to the existing path.
 
         Returns: <self>.
         """
