@@ -199,9 +199,10 @@ Path segments can also be appended with the slash operator, like with
 ```python
 >>> from __future__ import division  # For Python 2.x.
 >>> f = furl('path')
->>> f.path / 'more' / 'path segments/'
+>>> f.path /= 'with'
+>>> f.path = f.path / 'more' / 'path segments/'
 >>> f.url
-'/path/more/path%20segments/'
+'/path/with/more/path%20segments/'
 ```
 
 For a dictionary representation of a path, use __asdict()__.
@@ -585,7 +586,8 @@ path segments can be appended to a furl object's Path with the slash operator.
 ```python
 >>> from __future__ import division  # For Python 2.x.
 >>> f = furl('http://www.google.com/path?example=arg#frag')
->>> f / 'add' / 'seg ments/'
+>>> f /= 'add'
+>>> f = f / 'seg ments/'
 >>> f.url
 'http://www.google.com/path/add/seg%20ments/?example=arg#frag'
 ```
