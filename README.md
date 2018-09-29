@@ -3,18 +3,10 @@
 </h1>
 
 <p align="center">
-  <a href="https://pypi.python.org/pypi/furl">
-    <img src="https://badge.fury.io/py/furl.svg">
-  </a>
-  <a href="https://travis-ci.org/gruns/furl">
-    <img src="https://img.shields.io/travis/gruns/furl.svg">
-  </a>
-  <a href="http://unlicense.org/">
-    <img src="https://img.shields.io/pypi/l/furl.svg">
-  </a>
-  <a href="https://pypi.python.org/pypi/furl">
-    <img src="https://img.shields.io/pypi/pyversions/furl.svg">
-  </a>
+  <a href="https://pypi.python.org/pypi/furl"><img src="https://badge.fury.io/py/furl.svg"></a>
+  <a href="https://travis-ci.org/gruns/furl"><img src="https://img.shields.io/travis/gruns/furl.svg"></a>
+  <a href="http://unlicense.org/"><img src="https://img.shields.io/pypi/l/furl.svg"></a>
+  <a href="https://pypi.python.org/pypi/furl"><img src="https://img.shields.io/pypi/pyversions/furl.svg"></a>
 </p>
 
 ### furl is a small Python library that makes parsing and<br>manipulating URLs easy.
