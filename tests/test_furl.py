@@ -1154,6 +1154,12 @@ class TestFurl(unittest.TestCase):
         items = parse_qsl(urlsplit(url).query, True)
         return (key, val) in items
 
+    def test_constructor_and_set(self):
+        f = furl.furl(
+            'http://user:pass@pumps.ru/', args={'hi':'bye'},
+            scheme='scrip', path='prorp', host='horp', fragment='fraggg')
+        assert f.url == 'scrip://user:pass@horp/prorp?hi=bye#fraggg'
+
     def test_none(self):
         f = furl.furl(None)
         assert str(f) == ''

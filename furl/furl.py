@@ -1293,7 +1293,12 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
       fragment: Fragment object from FragmentCompositionInterface.
     """
 
-    def __init__(self, url='', strict=False):
+    def __init__(self, url='', args=_absent, path=_absent, fragment=_absent,
+                 scheme=_absent, netloc=_absent, origin=_absent,
+                 fragment_path=_absent, fragment_args=_absent,
+                 fragment_separator=_absent, host=_absent, port=_absent,
+                 query=_absent, query_params=_absent, username=_absent,
+                 password=_absent, strict=False):
         """
         Raises: ValueError on invalid url.
         """
@@ -1303,6 +1308,12 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         self.strict = strict
 
         self.load(url)  # Raises ValueError on invalid url.
+        self.set(
+            args=args, path=path, fragment=fragment, scheme=scheme,
+            netloc=netloc, origin=origin, fragment_path=fragment_path,
+            fragment_args=fragment_args, fragment_separator=fragment_separator,
+            host=host, port=port, query=query, query_params=query_params,
+            username=username, password=password)
 
     def load(self, url):
         """

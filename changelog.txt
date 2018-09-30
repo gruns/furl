@@ -1,6 +1,8 @@
 ================================================================================
  v2.0.0 (unreleased)
 ================================================================================
+Added: All URL components to furl()'s constructor. E.g.
+  f = furl(scheme='http', host='host', path='/lolsup').
 Changed: furl.__truediv__() and Path.__truediv__() now mirror
   Pathlib.__truediv__()'s behavior and return a new instance. The original
   instance is no longer modified. Old behavior: f = furl('1'); f / '2' -> str(f)
