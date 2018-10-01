@@ -1156,7 +1156,7 @@ class TestFurl(unittest.TestCase):
 
     def test_constructor_and_set(self):
         f = furl.furl(
-            'http://user:pass@pumps.ru/', args={'hi':'bye'},
+            'http://user:pass@pumps.ru/', args={'hi': 'bye'},
             scheme='scrip', path='prorp', host='horp', fragment='fraggg')
         assert f.url == 'scrip://user:pass@horp/prorp?hi=bye#fraggg'
 
