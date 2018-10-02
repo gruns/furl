@@ -1,5 +1,5 @@
 ================================================================================
- v2.0.0 (unreleased)
+ v2.0.0
 ================================================================================
 Added: All URL components (scheme, host, path, etc) to furl()'s constructor as
   keyword arguments. E.g. f = furl(scheme='http', host='host', path='/lolsup').
