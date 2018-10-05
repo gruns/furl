@@ -946,7 +946,11 @@ class Query(object):
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
 
-            quoted_key = quote_fn(utf8key)
+            # Override quote()'s default safe='/' parameter for consistent
+            # quoting across quote() (safe='/' by default) and quote_plus()
+            # (safe='' by default).
+            safe_key_chars = ''
+            quoted_key = quote_fn(utf8key, safe_key_chars)
             safe_value_chars = '=' if not quoted_key else ''
             quoted_value = quote_fn(utf8value, safe_value_chars)
 

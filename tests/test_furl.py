@@ -834,6 +834,11 @@ class TestQuery(unittest.TestCase):
         assert query.encode(';') == 'a=b+c;d=e+f'
         assert query.encode(';', quote_plus=False) == 'a=b%20c;d=e%20f'
 
+        # Encode '/' consistently across quote_plus=True and quote_plus=False.
+        query = furl.Query('a /b')
+        assert query.encode(quote_plus=True) == 'a+%2Fb'
+        assert query.encode(quote_plus=False) == 'a%20%2Fb'
+
     def test_asdict(self):
         pairs = [('a', '1'), ('ロリポップ', 'testä')]
         key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
