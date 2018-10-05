@@ -846,6 +846,15 @@ class Query(object):
         take such strings, like load(), add(), set(), remove(), etc.
     """
 
+    # From RFC 3986:
+    #   query       = *( pchar / "/" / "?" )
+    #   pchar       = unreserved / pct-encoded / sub-delims / ":" / "@"
+    #   unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
+    #   sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
+    #                     / "*" / "+" / "," / ";" / "="
+    SAFE_KEY_CHARS = "/?:@-._~!$&'()*+,;"
+    SAFE_VALUE_CHARS = SAFE_KEY_CHARS + '='
+
     def __init__(self, query='', strict=False):
         self.strict = strict
 
@@ -918,9 +927,11 @@ class Query(object):
         for key, value in items:
             self._params.add(key, value)
 
-    def encode(self, delimiter='&', quote_plus=True, delimeter=_absent):
+    def encode(self, delimiter='&', quote_plus=True, dont_quote='',
+               delimeter=_absent):
         """
         Examples:
+
           Query('a=a&b=#').encode() == 'a=a&b=%23'
           Query('a=a&b=#').encode(';') == 'a=a;b=%23'
           Query('a+b=c+d').encode(quote_plus=False) == 'a%20b=c%20d'
@@ -932,26 +943,38 @@ class Query(object):
         Returns: A URL encoded query string using <delimiter> as the
         delimiter separating key:value pairs. The most common and
         default delimiter is '&', but ';' can also be specified. ';' is
-        W3C recommended. Parameter keys and values are encoded
-        application/x-www-form-urlencoded if <quote_plus> is True,
-        percent-encoded otherwise.
+        W3C recommended.
+
+        Keys and values are encoded application/x-www-form-urlencoded if
+        <quote_plus> is True, percent-encoded otherwise.
         """
         if delimeter is not _absent:
             delimiter = delimeter
 
-        pairs = []
         sixurl = urllib.parse  # six.moves.urllib.parse
         quote_fn = sixurl.quote_plus if quote_plus else sixurl.quote
+
+        pairs = []
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
             utf8value = utf8(value, utf8(attemptstr(value)))
 
-            # Override quote()'s default safe='/' parameter for consistent
-            # quoting across quote() (safe='/' by default) and quote_plus()
-            # (safe='' by default).
-            safe_key_chars = ''
+            def cull_unsafe_chars(s, safe):  # E.g. '//?^#' -> '/?'.
+                return ''.join(set(safe) & set(s))
+
+            if dont_quote is True:
+                safe_key_chars = self.SAFE_KEY_CHARS
+            else:
+                safe_key_chars = cull_unsafe_chars(
+                    self.SAFE_KEY_CHARS, dont_quote)
             quoted_key = quote_fn(utf8key, safe_key_chars)
-            safe_value_chars = '=' if not quoted_key else ''
+
+            if dont_quote is True:
+                safe_value_chars = self.SAFE_VALUE_CHARS
+            else:
+                safe_value_chars = cull_unsafe_chars(
+                    self.SAFE_VALUE_CHARS,
+                    (dont_quote or '') + ('=' if not quoted_key else ''))
             quoted_value = quote_fn(utf8value, safe_value_chars)
 
             if value is None:  # Example: http://sprop.su/?param.
@@ -1738,12 +1761,15 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         return self
 
-    def tostr(self, query_delimiter='&', query_quote_plus=True):
+    def tostr(self, query_delimiter='&', query_quote_plus=True,
+              query_dont_quote=''):
+        encoded_query = self.query.encode(
+            query_delimiter, query_quote_plus, query_dont_quote)
         url = urllib.parse.urlunsplit((
             self.scheme or '',  # Must be text type in Python 3.
             self.netloc,
             str(self.path),
-            self.query.encode(query_delimiter, query_quote_plus),
+            encoded_query,
             str(self.fragment),
         ))
 

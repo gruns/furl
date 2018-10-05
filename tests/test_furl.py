@@ -839,6 +839,14 @@ class TestQuery(unittest.TestCase):
         assert query.encode(quote_plus=True) == 'a+%2Fb'
         assert query.encode(quote_plus=False) == 'a%20%2Fb'
 
+        # dont_quote= accepts both True and a string of safe characters not to
+        # percent-encode. Unsafe query characters, like '^' and '#', are always
+        # percent-encoded.
+        query = furl.Query('a %2B/b?#')
+        assert query.encode(dont_quote='^') == 'a+%2B%2Fb%3F%23'
+        assert query.encode(quote_plus=True, dont_quote=True) == 'a++/b?%23'
+        assert query.encode(quote_plus=False, dont_quote=True) == 'a%20+/b?%23'
+
     def test_asdict(self):
         pairs = [('a', '1'), ('ロリポップ', 'testä')]
         key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
@@ -2039,6 +2047,10 @@ class TestFurl(unittest.TestCase):
                 'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap%24')
         assert (f.tostr(query_delimiter=';', query_quote_plus=False) ==
                 'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap%24')
+        assert (f.tostr(query_quote_plus=False, query_dont_quote=True) ==
+                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$')
+        assert (f.tostr(query_quote_plus=False, query_dont_quote='$') ==
+                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$')
 
     def test_equality(self):
         assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
