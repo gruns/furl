@@ -326,11 +326,11 @@ parameter value.
 'http://sprop.su/?param'
 ```
 
-__encode(delimiter='&', quote_plus=True)__ can be used to encode query strings
-with delimiters like `;` and encode key-value pairs with standard
-percent-encoding (i.e. `%20` not `+`). The default delimiter is `&` and the
-default key-value encoding is application/x-www-form-urlencoded (i.e. `+` not
-`%20`).
+__encode(delimiter='&', quote_plus=True, dont_quote='')__ can be used to encode
+query strings with delimiters like `;`, encode spaces as `+` instead of `%20`
+(i.e. application/x-www-form-urlencoded encoded), or avoid percent-encoding
+valid query charactes entirely (valid query characters are
+`/?:@-._~!$&'()*+,;=`).
 
 ```python
 >>> f.query = 'space=jams&woofs=squeeze+dog'
@@ -340,6 +340,20 @@ default key-value encoding is application/x-www-form-urlencoded (i.e. `+` not
 'space=jams;woofs=squeeze+dog'
 >>> f.query.encode(quote_plus=False)
 'space=jams&woofs=squeeze%20dog'
+```
+
+`dont_quote` accepts `True`, `False`, or a string of valid query characters to
+not percent-enode. If `True`, all valid query characters `/?:@-._~!$&'()*+,;=`
+aren't percent-encoded.
+
+```python
+>>> f.query = 'one,two/three'
+>>> f.query.encode()
+'one%2Ctwo%2Fthree'
+>>> f.query.encode(dont_quote=True)
+'one,two/three'
+>>> f.query.encode(dont_quote=',')
+'one,two%2Fthree'
 ```
 
 For a dictionary representation of a query, use __asdict()__.
@@ -592,9 +606,10 @@ path segments can be appended to a furl object's Path with the slash operator.
 'http://www.google.com/path/add/seg%20ments/?example=arg#frag'
 ```
 
-__tostr(query_delimiter='&', query_quote_plus=True)__ creates and returns a URL
-string. `query_delimiter` and `query_quote_plus` are passed unmodified to
-`Query.encode()`.
+__tostr(query_delimiter='&', query_quote_plus=True, query_dont_quote='')__
+creates and returns a URL string. `query_delimiter`, `query_quote_plus`, and
+`query_dont_quote` are passed unmodified to `Query.encode()` as `delimiter`,
+`quote_plus`, and `dont_quote` respectively.
 
 ```python
 >>> f = furl('http://spep.ru/?a+b=c+d&two%20tap=cat%20nap%24')
@@ -602,6 +617,8 @@ string. `query_delimiter` and `query_quote_plus` are passed unmodified to
 'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
 >> f.tostr(query_delimiter=';', query_quote_plus=False)
 'http://spep.ru/?a%20b=c%20d;two%20tap=cat%20nap$'
+>>> f.tostr(query_dont_quote='$')
+'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
 ```
 
 `furl.url` is a shortcut for `furl.tostr()`.
