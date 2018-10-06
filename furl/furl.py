@@ -430,13 +430,12 @@ class Path(object):
         take such strings, like load(), add(), set(), remove(), etc.
     """
 
-    # RFC 3986:
-    #
-    # segment       = *pchar
-    # pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
-    # unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
-    # sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
-    #                     / "*" / "+" / "," / ";" / "="
+    # From RFC 3986:
+    #   segment       = *pchar
+    #   pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+    #   unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+    #   sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+    #                       / "*" / "+" / "," / ";" / "="
     SAFE_SEGMENT_CHARS = ":@-._~!$&'()*+,;="
 
     def __init__(self, path='', force_absolute=lambda _: False, strict=False):
