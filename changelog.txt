@@ -1,6 +1,9 @@
 ================================================================================
  v2.1.0 (unreleased)
 ================================================================================
+Added: dont_quote parameter to Query.encode() and query_dont_quote parameter to
+  furl.tostr() that exempts valid query characters from percent-encoding, either
+  in their entirety (dont_quote=True) or selectively (e.g. dont_quote='/?').
 Fixed: Encode '/' consistently in query strings across both quote_plus=True and
   quote_plus=False.
 
