@@ -1326,15 +1326,15 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                  query=_absent, query_params=_absent, username=_absent,
                  password=_absent, strict=False):
         """
-        Raises: ValueError on invalid url.
+        Raises: ValueError on invalid URL or invalid URL component(s) provided.
         """
         URLPathCompositionInterface.__init__(self, strict=strict)
         QueryCompositionInterface.__init__(self, strict=strict)
         FragmentCompositionInterface.__init__(self, strict=strict)
         self.strict = strict
 
-        self.load(url)  # Raises ValueError on invalid url.
-        self.set(
+        self.load(url)  # Raises ValueError on invalid URL.
+        self.set(  # Raises ValueError on invalid URL component(s).
             args=args, path=path, fragment=fragment, scheme=scheme,
             netloc=netloc, origin=origin, fragment_path=fragment_path,
             fragment_args=fragment_args, fragment_separator=fragment_separator,
@@ -1577,7 +1577,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             fragment_args=_absent, fragment_separator=_absent, host=_absent,
             port=_absent, query=_absent, query_params=_absent,
             username=_absent, password=_absent):
-        """Set components of a url and return this furl instance, <self>.
+        """
+        Set components of a url and return this furl instance, <self>.
 
         If any overlapping, and hence possibly conflicting, parameters
         are provided, appropriate UserWarning's will be raised. The
