@@ -615,7 +615,7 @@ creates and returns a URL string. `query_delimiter`, `query_quote_plus`, and
 >>> f = furl('http://spep.ru/?a+b=c+d&two%20tap=cat%20nap%24')
 >>> f.tostr()
 'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
->> f.tostr(query_delimiter=';', query_quote_plus=False)
+>>> f.tostr(query_delimiter=';', query_quote_plus=False)
 'http://spep.ru/?a%20b=c%20d;two%20tap=cat%20nap$'
 >>> f.tostr(query_dont_quote='$')
 'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
