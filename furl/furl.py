@@ -114,6 +114,26 @@ def static_vars(**kwargs):
     return decorator
 
 
+def create_quote_fn(safe_charset, quote_plus):
+    def quote_fn(s, dont_quote):
+        safe = dont_quote
+        if dont_quote is True:
+            safe = safe_charset
+        elif dont_quote is False:
+            safe = ''
+
+        # Prune duplicates and characters not in <safe_charset>.
+        safe = ''.join(set(safe) & set(safe_charset))  # E.g. '?^#?' -> '?'.
+
+        quoted = quote(s, safe)
+        if quote_plus:
+            quoted = quoted.replace('%20', '+')
+
+        return quoted
+
+    return quote_fn
+
+
 #
 # TODO(grun): Update some of the regex functions below to reflect the fact that
 # the valid encoding of Path segments differs slightly from the valid encoding
@@ -939,46 +959,38 @@ class Query(object):
         spelled 'delimeter'. For backwards compatibility, accept both
         the correct 'delimiter' and the old, mispelled 'delimeter'.
 
+        Keys and values are encoded application/x-www-form-urlencoded if
+        <quote_plus> is True, percent-encoded otherwise.
+
+        <dont_quote> exempts valid query characters from
+        percent-encoding, either in their entirety with dont_quote=True,
+        or selectively, like with dont_quote='/?'.
+
         Returns: A URL encoded query string using <delimiter> as the
         delimiter separating key:value pairs. The most common and
         default delimiter is '&', but ';' can also be specified. ';' is
         W3C recommended.
-
-        Keys and values are encoded application/x-www-form-urlencoded if
-        <quote_plus> is True, percent-encoded otherwise.
         """
         if delimeter is not _absent:
             delimiter = delimeter
 
-        sixurl = urllib.parse  # six.moves.urllib.parse
-        quote_fn = sixurl.quote_plus if quote_plus else sixurl.quote
+        quote_key = create_quote_fn(self.SAFE_KEY_CHARS, quote_plus)
+        quote_value = create_quote_fn(self.SAFE_VALUE_CHARS, quote_plus)
 
         pairs = []
         for key, value in self.params.iterallitems():
             utf8key = utf8(key, utf8(attemptstr(key)))
-            utf8value = utf8(value, utf8(attemptstr(value)))
+            quoted_key = quote_key(utf8key, dont_quote)
 
-            def cull_unsafe_chars(s, safe):  # E.g. '//?^#' -> '/?'.
-                return ''.join(set(safe) & set(s))
-
-            if dont_quote is True:
-                safe_key_chars = self.SAFE_KEY_CHARS
-            else:
-                safe_key_chars = cull_unsafe_chars(
-                    self.SAFE_KEY_CHARS, dont_quote)
-            quoted_key = quote_fn(utf8key, safe_key_chars)
-
-            if dont_quote is True:
-                safe_value_chars = self.SAFE_VALUE_CHARS
-            else:
-                safe_value_chars = cull_unsafe_chars(
-                    self.SAFE_VALUE_CHARS,
-                    (dont_quote or '') + ('=' if not quoted_key else ''))
-            quoted_value = quote_fn(utf8value, safe_value_chars)
-
-            if value is None:  # Example: http://sprop.su/?param.
+            if value is None:  # Example: http://sprop.su/?key.
                 pair = quoted_key
-            else:
+            else:  # Example: http://sprop.su/?key=value.
+                utf8value = utf8(value, utf8(attemptstr(value)))
+                quoted_value = quote_value(utf8value, dont_quote)
+
+                if not quoted_key:  # Unquote '=' to allow queries like '?==='.
+                    quoted_value = quoted_value.replace('%3D', '=')
+
                 pair = '='.join([quoted_key, quoted_value])
 
             pairs.append(pair)
