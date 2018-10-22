@@ -950,7 +950,6 @@ class Query(object):
                delimeter=_absent):
         """
         Examples:
-
           Query('a=a&b=#').encode() == 'a=a&b=%23'
           Query('a=a&b=#').encode(';') == 'a=a;b=%23'
           Query('a+b=c+d').encode(quote_plus=False) == 'a%20b=c%20d'
