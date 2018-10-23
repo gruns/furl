@@ -952,7 +952,8 @@ class Query(object):
         Examples:
           Query('a=a&b=#').encode() == 'a=a&b=%23'
           Query('a=a&b=#').encode(';') == 'a=a;b=%23'
-          Query('a+b=c+d').encode(quote_plus=False) == 'a%20b=c%20d'
+          Query('a+b=c@d').encode(dont_quote='@') == 'a%2Bb=c@d'
+          Query('a+b=c@d').encode(quote_plus=False) == 'a%20b=c%40d'
 
         Until furl v0.4.6, the 'delimiter' argument was incorrectly
         spelled 'delimeter'. For backwards compatibility, accept both
