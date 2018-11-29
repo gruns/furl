@@ -871,7 +871,7 @@ class Query(object):
     #   unreserved  = ALPHA / DIGIT / "-" / "." / "_" / "~"
     #   sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
     #                     / "*" / "+" / "," / ";" / "="
-    SAFE_KEY_CHARS = "/?:@-._~!$&'()*+,;"
+    SAFE_KEY_CHARS = "/?:@-._~!$'()*+,;"
     SAFE_VALUE_CHARS = SAFE_KEY_CHARS + '='
 
     def __init__(self, query='', strict=False):
