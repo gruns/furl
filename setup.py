@@ -12,16 +12,15 @@
 #
 
 import os
-import re
 import sys
 from os.path import dirname, join as pjoin
 from setuptools import setup, find_packages, Command
 from setuptools.command.test import test as TestCommand
 
 
-with open(pjoin(dirname(__file__), 'furl', '__init__.py')) as fo:
-    regex = r".*__version__ = '(.*?)'"
-    VERSION = re.compile(regex, re.S).match(fo.read()).group(1)
+meta = {}
+with open(pjoin('furl', '__version__.py')) as f:
+    exec(f.read(), meta)
 
 
 class Publish(Command):
@@ -37,8 +36,8 @@ class Publish(Command):
     def run(self):
         os.system('python setup.py sdist bdist_wheel')
 
-        sdist = 'dist/furl-%s.tar.gz' % VERSION
-        wheel = 'dist/furl-%s-py2.py3-none-any.whl' % VERSION
+        sdist = 'dist/furl-%s.tar.gz' % meta['__version__']
+        wheel = 'dist/furl-%s-py2.py3-none-any.whl' % meta['__version__']
         rc = os.system('twine upload "%s" "%s"' % (sdist, wheel))
 
         sys.exit(rc)
@@ -67,13 +66,13 @@ class RunTests(TestCommand):
 
 
 setup(
-    name='furl',
-    version=VERSION,
-    author='Ansgar Grunseid',
-    author_email='grunseid@gmail.com',
-    url='https://github.com/gruns/furl',
-    license='Unlicense',
-    description='URL manipulation made simple.',
+    name=meta['__title__'],
+    license=meta['__license__'],
+    version=meta['__version__'],
+    author=meta['__author__'],
+    author_email=meta['__contact__'],
+    url=meta['__url__'],
+    description=meta['__description__'],
     long_description=(
         'Information and documentation can be found at '
         'https://github.com/gruns/furl.'),

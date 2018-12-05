@@ -11,10 +11,3 @@
 #
 
 from .furl import *  # noqa
-
-__title__ = 'furl'
-__version__ = '2.0.0'
-__license__ = 'Unlicense'
-__author__ = 'Ansgar Grunseid'
-__contact__ = 'grunseid@gmail.com'
-__url__ = 'https://github.com/gruns/furl'
