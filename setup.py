@@ -96,6 +96,10 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
+    tests_require=[
+        'flake8',
+        'six>=1.8.0'
+    ],
     install_requires=[
         'six>=1.8.0',
         'orderedmultidict>=1.0',
@@ -104,5 +108,4 @@ setup(
         'test': RunTests,
         'publish': Publish,
     },
-    tests_require=['flake8', 'six>=1.8.0'],
 )
