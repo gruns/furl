@@ -991,7 +991,7 @@ class Query(object):
                 if not quoted_key:  # Unquote '=' to allow queries like '?==='.
                     quoted_value = quoted_value.replace('%3D', '=')
 
-                pair = '='.join([quoted_key, quoted_value])
+                pair = '%s=%s' % (quoted_key, quoted_value)
 
             pairs.append(pair)
 
