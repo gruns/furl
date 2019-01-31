@@ -1399,6 +1399,13 @@ class TestFurl(unittest.TestCase):
         f.password = ''
         assert f.username is None and f.password == '' and f.url == '//:@'
 
+        # Unicode.
+        username = u'kødp'
+        password = u'ålæg'
+        f = furl.furl(u'https://%s:%s@example.com/' % (username, password))
+        assert f.username == username and f.password == password
+        assert f.url == 'https://k%C3%B8dp:%C3%A5l%C3%A6g@example.com/'
+
     def test_basics(self):
         url = 'hTtP://www.pumps.com/'
         f = furl.furl(url)
