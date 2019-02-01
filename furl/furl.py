@@ -116,11 +116,12 @@ def static_vars(**kwargs):
 
 def create_quote_fn(safe_charset, quote_plus):
     def quote_fn(s, dont_quote):
-        safe = dont_quote
         if dont_quote is True:
             safe = safe_charset
         elif dont_quote is False:
             safe = ''
+        else:  # <dont_quote> is expected to be a string.
+            safe = dont_quote
 
         # Prune duplicates and characters not in <safe_charset>.
         safe = ''.join(set(safe) & set(safe_charset))  # E.g. '?^#?' -> '?'.
