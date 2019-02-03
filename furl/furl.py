@@ -963,9 +963,15 @@ class Query(object):
         Keys and values are encoded application/x-www-form-urlencoded if
         <quote_plus> is True, percent-encoded otherwise.
 
-        <dont_quote> exempts valid query characters from
-        percent-encoding, either in their entirety with dont_quote=True,
-        or selectively, like with dont_quote='/?'.
+        <dont_quote> exempt valid query characters from being
+        percent-encoded, either in their entirety with dont_quote=True,
+        or selectively with dont_quote=<string>, like
+        dont_quote='/?@_'. Invalid query characters -- those not in
+        SAFE_KEY_CHARS, like '#' and '^' -- are always encoded, even if
+        passed to <dont_quote>, like
+
+          Query('#=^').encode(dont_quote='#^') == '%23=%5E'.
+
 
         Returns: A URL encoded query string using <delimiter> as the
         delimiter separating key:value pairs. The most common and
