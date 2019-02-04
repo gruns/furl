@@ -1,9 +1,10 @@
 ================================================================================
  v2.1.0 (unreleased)
 ================================================================================
-Added: dont_quote parameter to Query.encode() and query_dont_quote parameter to
-  furl.tostr() that exempts valid query characters from percent-encoding, either
-  in their entirety, with dont_quote=True, or selectively, with dont_quote='/?'.
+Added: a dont_quote= parameter to Query.encode() and a query_dont_quote=
+  parameter to furl.tostr() that exempt valid query characters from being
+  percent-encoded, either in their entirety with dont_quote=True, or selectively
+  with dont_quote=<string>, like dont_quote='/?@_'.
 Changed: Move package info from __init__.py into the more standard
   __version__.py.
 Fixed: Support unicode usernames and passwords in Python 2.

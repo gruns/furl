@@ -2046,18 +2046,27 @@ class TestFurl(unittest.TestCase):
         assert f.url == 'foo:blah'
 
     def test_tostr(self):
-        f = furl.furl('http://blast.off/?a+b=c+d&two%20tap=cat%20nap%24')
+        f = furl.furl('http://blast.off/?a+b=c+d&two%20tap=cat%20nap%24%21')
         assert f.tostr() == f.url
         assert (f.tostr(query_delimiter=';') ==
-                'http://blast.off/?a+b=c+d;two+tap=cat+nap%24')
+                'http://blast.off/?a+b=c+d;two+tap=cat+nap%24%21')
         assert (f.tostr(query_quote_plus=False) ==
-                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap%24')
+                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap%24%21')
         assert (f.tostr(query_delimiter=';', query_quote_plus=False) ==
-                'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap%24')
+                'http://blast.off/?a%20b=c%20d;two%20tap=cat%20nap%24%21')
         assert (f.tostr(query_quote_plus=False, query_dont_quote=True) ==
-                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$')
+                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$!')
+        # query_dont_quote ignores invalid query characters, like '$'.
         assert (f.tostr(query_quote_plus=False, query_dont_quote='$') ==
-                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$')
+                'http://blast.off/?a%20b=c%20d&two%20tap=cat%20nap$%21')
+
+        url = 'https://klugg.com/?hi=*'
+        url_encoded = 'https://klugg.com/?hi=%2A&url='
+        f = furl.furl(url).set(args=[('hi', '*'), ('url', url)])
+        assert f.tostr() == url_encoded + quote_plus(url)
+        assert f.tostr(query_dont_quote=True) == url + '&url=' + url
+        assert f.tostr(query_dont_quote='*') == (
+            url + '&url=' + quote_plus(url, '*'))
 
     def test_equality(self):
         assert furl.furl() is not furl.furl() and furl.furl() == furl.furl()
