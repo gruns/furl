@@ -7,7 +7,7 @@ Added: a dont_quote= parameter to Query.encode() and a query_dont_quote=
   with dont_quote=<string>, like dont_quote='/?@_'.
 Changed: Move package info from __init__.py into the more standard
   __version__.py.
-Fixed: Support unicode usernames and passwords in Python 2.
+Fixed: Support Unicode usernames and passwords in Python 2.
 Fixed: Encode '/' consistently in query strings across both quote_plus=True and
   quote_plus=False.
 
