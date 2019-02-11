@@ -119,4 +119,5 @@ Fixed: Verify valid schemes before adoption.
 ================================================================================
 Added: Origin support (e.g. http://google.com of http://u:p@google.com/).
 
+
 This changelog wasn't maintained prior to v0.5.
