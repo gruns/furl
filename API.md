@@ -198,6 +198,7 @@ Path segments can also be appended with the slash operator, like with
 
 ```python
 >>> from __future__ import division  # For Python 2.x.
+>>>
 >>> f = furl('path')
 >>> f.path /= 'with'
 >>> f.path = f.path / 'more' / 'path segments/'
