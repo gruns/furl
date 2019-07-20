@@ -48,9 +48,9 @@ class RunTests(TestCommand):
     Run the unit tests.
 
     By default, `python setup.py test` fails if tests/ isn't a Python
-    module (that is, if the tests/ directory doesn't contain an
-    __init__.py file). But the tests/ directory shouldn't contain an
-    __init__.py file and tests/ shouldn't be a Python module. See
+    module; i.e. if the tests/ directory doesn't contain an __init__.py
+    file). But the tests/ directory shouldn't contain an __init__.py
+    file and tests/ shouldn't be a Python module. See
 
       http://doc.pytest.org/en/latest/goodpractices.html
 
@@ -59,7 +59,7 @@ class RunTests(TestCommand):
     """
     def run_tests(self):
         from unittest import TestLoader, TextTestRunner
-        tests_dir = pjoin(dirname(__file__), 'tests')
+        tests_dir = pjoin(dirname(__file__), 'tests/')
         suite = TestLoader().discover(tests_dir)
         result = TextTestRunner().run(suite)
         sys.exit(0 if result.wasSuccessful() else -1)
