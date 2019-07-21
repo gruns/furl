@@ -23,15 +23,16 @@ Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
 and supports\
 Python 2, Python 3, PyPy2, and PyPy3.
 
-Code time: Query arguments are easy. Really easy.
+Code time: Paths and query arguments are easy. Really easy.
 
 ```python
 >>> from furl import furl
 >>> f = furl('http://www.google.com/?one=1&two=2')
+>>> f /= 'path'
 >>> f.args['three'] = '3'
 >>> del f.args['one']
 >>> f.url
-'http://www.google.com/?two=2&three=3'
+'http://www.google.com/path?two=2&three=3'
 ```
 
 Or use furl's inline modification methods.
