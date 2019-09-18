@@ -102,7 +102,7 @@ setup(
     ],
     install_requires=[
         'six>=1.8.0',
-        'orderedmultidict>=1.0',
+        'orderedmultidict>=1.0.1',
     ],
     cmdclass={
         'test': RunTests,
