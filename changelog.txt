@@ -1,5 +1,5 @@
 ================================================================================
- v2.1.0 (unreleased)
+ v2.1.0
 ================================================================================
 Added: a dont_quote= parameter to Query.encode() and a query_dont_quote=
   parameter to furl.tostr() that exempt valid query characters from being
