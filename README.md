@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="logo.svg" width="300px" height="103px" alt="furl">
+  <img src="logo.svg" width="360px" height="103px" alt="furl">
 </h1>
 
 <p align="center">
