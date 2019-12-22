@@ -22,7 +22,7 @@ from six.moves.urllib.parse import (
 
 import furl
 from furl.omdict1D import omdict1D
-from furl.compat import OrderedDict as odict
+from furl.compat import string_types, OrderedDict as odict
 
 import unittest
 
@@ -2355,3 +2355,15 @@ class TestFurl(unittest.TestCase):
             'fragment': f.asdict(),
             }
         assert u.asdict() == d
+
+
+class TestMeta(unittest.TestCase):
+    def test_metadata_varibles(self):
+        assert furl.__title__ and isinstance(furl.__title__, string_types)
+        assert furl.__version__ and isinstance(furl.__version__, string_types)
+        assert furl.__license__ and isinstance(furl.__license__, string_types)
+        assert furl.__author__ and isinstance(furl.__author__, string_types)
+        assert furl.__contact__ and isinstance(furl.__contact__, string_types)
+        assert furl.__url__ and isinstance(furl.__url__, string_types)
+        assert (furl.__description__ and
+                isinstance(furl.__description__, string_types))
