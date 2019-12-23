@@ -2359,11 +2359,13 @@ class TestFurl(unittest.TestCase):
 
 class TestMeta(unittest.TestCase):
     def test_metadata_varibles(self):
-        assert furl.__title__ and isinstance(furl.__title__, string_types)
-        assert furl.__version__ and isinstance(furl.__version__, string_types)
-        assert furl.__license__ and isinstance(furl.__license__, string_types)
-        assert furl.__author__ and isinstance(furl.__author__, string_types)
-        assert furl.__contact__ and isinstance(furl.__contact__, string_types)
-        assert furl.__url__ and isinstance(furl.__url__, string_types)
-        assert (furl.__description__ and
-                isinstance(furl.__description__, string_types))
+        def is_non_empty_string(s):
+            return isinstance(s, string_types) and s
+
+        assert is_non_empty_string(furl.__title__)
+        assert is_non_empty_string(furl.__version__)
+        assert is_non_empty_string(furl.__license__)
+        assert is_non_empty_string(furl.__author__)
+        assert is_non_empty_string(furl.__contact__)
+        assert is_non_empty_string(furl.__url__)
+        assert is_non_empty_string(furl.__description__)
