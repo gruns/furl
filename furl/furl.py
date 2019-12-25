@@ -33,7 +33,8 @@ from .common import (
 # urllib/parse.py, to their default ports. Protocol scheme strings are
 # lowercase.
 #
-# TODO(Ans): Is there a public list of these somewhere? If not, create one?
+# TODO(Ans): Is there a public map of schemes to their default ports? If not,
+# create one?
 DEFAULT_PORTS = {
     'ws': 80,
     'ftp': 21,
