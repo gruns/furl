@@ -29,8 +29,8 @@ Code time: Paths and query arguments are easy. Really easy.
 >>> from furl import furl
 >>> f = furl('http://www.google.com/?one=1&two=2')
 >>> f /= 'path'
->>> f.args['three'] = '3'
 >>> del f.args['one']
+>>> f.args['three'] = '3'
 >>> f.url
 'http://www.google.com/path?two=2&three=3'
 ```
