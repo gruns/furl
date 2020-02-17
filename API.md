@@ -3,6 +3,22 @@
 </h1>
 
 
+Table of Contents
+=================
+
+  * [Basics](#basics)
+  * [Scheme, Username, Password, Host, Port, Network Location, and Origin](#scheme-username-password-host-port-network-location-and-origin)
+  * [Path](#path)
+    * [Manipulation](#manipulation)
+  * [Query](#query)
+    * [Manipulation](#manipulation-1)
+    * [Parameters](#parameters)
+  * [Fragment](#fragment)
+  * [Encoding](#encoding)
+  * [Inline manipulation](#inline-manipulation)
+  * [Miscellaneous](#miscellaneous)
+
+
 ### Basics
 
 furl objects let you access and modify the various components of a URL.
