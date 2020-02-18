@@ -2,10 +2,6 @@
   <img src="api.svg" width="496px" height="101px" alt="furl API">
 </h1>
 
-
-Table of Contents
-=================
-
   * [Basics](#basics)
   * [Scheme, Username, Password, Host, Port, Network Location, and Origin](#scheme-username-password-host-port-network-location-and-origin)
   * [Path](#path)
