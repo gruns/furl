@@ -548,6 +548,12 @@ class TestPath(unittest.TestCase):
         p4 = furl.Path('f')
         assert p3 / p4 == furl.Path('e/f')
 
+        # Joining paths with __truediv__ should not modify the original, even if isabsolute is True
+        p5 = furl.Path(['a', 'b'], force_absolute=lambda _: True)
+        p6 = p5 / 'c'
+        assert str(p5) == '/a/b'
+        assert str(p6) == '/a/b/c'
+
     def test_asdict(self):
         segments = ['wiki', 'ロリポップ']
         path_encoded = 'wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'

@@ -13,6 +13,7 @@
 import re
 import abc
 import warnings
+from copy import deepcopy
 from posixpath import normpath
 
 import six
@@ -629,10 +630,7 @@ class Path(object):
         return not self.isdir
 
     def __truediv__(self, path):
-        copy = self.__class__(
-            path=self.segments,
-            force_absolute=self._force_absolute,
-            strict=self.strict)
+        copy = deepcopy(self)
         return copy.add(path)
 
     def __eq__(self, other):
