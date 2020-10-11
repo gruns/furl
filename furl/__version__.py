@@ -9,7 +9,7 @@
 #
 # License: Build Amazing Things (Unlicense)
 #
-
+__all__ = ["__title__", "__version__", "__license__", "__author__", "__contact__", "__url__", "__copyright__", "__description__"]
 __title__ = 'furl'
 __version__ = '2.1.0'
 __license__ = 'Unlicense'
