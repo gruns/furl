@@ -985,7 +985,7 @@ class Query(object):
 
         Until furl v0.4.6, the 'delimiter' argument was incorrectly
         spelled 'delimeter'. For backwards compatibility, accept both
-        the correct 'delimiter' and the old, mispelled 'delimeter'.
+        the correct 'delimiter' and the old, misspelled 'delimeter'.
 
         Keys and values are encoded application/x-www-form-urlencoded if
         <quote_plus> is True, percent-encoded otherwise.
