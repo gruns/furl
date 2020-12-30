@@ -271,8 +271,7 @@ def set_scheme(url, scheme):
     after_scheme = strip_scheme(url)
     if scheme is None:
         return after_scheme
-    else:
-        return '%s:%s' % (scheme, after_scheme)
+    return '%s:%s' % (scheme, after_scheme)
 
 
 # 'netloc' in Python parlance, 'authority' in RFC 3986 parlance.
@@ -514,7 +513,7 @@ class Path(object):
             segments = self._segments_from_path(path)
 
         if self._force_absolute(self):
-            self._isabsolute = True if segments else False
+            self._isabsolute = bool(segments)
         else:
             self._isabsolute = (segments and segments[0] == '')
 
@@ -746,7 +745,7 @@ class PathCompositionInterface(object):
         if attr == '_path':
             self.__dict__[attr] = value
             return True
-        elif attr == 'path':
+        if attr == 'path':
             self._path.load(value)
             return True
         return False
