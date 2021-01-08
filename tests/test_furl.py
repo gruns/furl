@@ -115,6 +115,17 @@ class itemstr(str, itemcontainer):
         return str(self)
 
 
+class TestMetadata(unittest.TestCase):
+    def test_metadata(self):
+        assert furl.__title__
+        assert furl.__version__
+        assert furl.__license__
+        assert furl.__author__
+        assert furl.__contact__
+        assert furl.__url__
+        assert furl.__description__
+
+
 class TestPath(unittest.TestCase):
 
     def test_none(self):
