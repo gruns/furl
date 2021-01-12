@@ -89,9 +89,9 @@ DEFAULT_PORTS = {
 }
 
 
-def lget(l, index, default=None):
+def lget(k, index, default=None):
     try:
-        return l[index]
+        return k[index]
     except IndexError:
         return default
 
