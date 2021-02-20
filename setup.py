@@ -74,8 +74,7 @@ setup(
     url=meta['__url__'],
     description=meta['__description__'],
     long_description=(
-        'Information and documentation can be found at '
-        'https://github.com/gruns/furl.'),
+        'Information and documentation can be found at ' + meta['__url__']),
     packages=find_packages(),
     include_package_data=True,
     platforms=['any'],
