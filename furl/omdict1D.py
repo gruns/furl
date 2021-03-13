@@ -88,7 +88,7 @@ class omdict1D(omdict):
                 # omdict._update_updateall().
                 if value == []:
                     replacements[key] = []
-                    leftovers[:] = [l for l in leftovers if key != l[0]]
+                    leftovers[:] = [lst for lst in leftovers if key != lst[0]]
                 # If there are existing items with key <key> that have
                 # yet to be marked for replacement, mark that item's
                 # value to be replaced by <value> by appending it to
