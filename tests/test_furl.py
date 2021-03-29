@@ -14,6 +14,7 @@ from __future__ import division
 
 import warnings
 from abc import ABCMeta, abstractmethod
+import sys
 
 import six
 from six.moves import zip
@@ -2063,9 +2064,13 @@ class TestFurl(unittest.TestCase):
         assert f.url == 'http://pepp.ru/a/b/c#uwantpump?'
 
         # In edge cases (e.g. URLs without an authority/netloc), behave
-        # identically to urllib.parse.urljoin().
+        # identically to urllib.parse.urljoin(), which changed behavior
+        # in Python 3.9
         f = furl.furl('wss://slrp.com/').join('foo:1')
-        assert f.url == 'wss://slrp.com/foo:1'
+        if sys.version_info[:2] < (3, 9):
+            assert f.url == 'wss://slrp.com/foo:1'
+        else:
+            assert f.url == 'foo:1'
         f = furl.furl('wss://slrp.com/').join('foo:1:rip')
         assert f.url == 'foo:1:rip'
         f = furl.furl('scheme:path').join('foo:blah')
