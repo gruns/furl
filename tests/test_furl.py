@@ -621,17 +621,17 @@ class TestQuery(unittest.TestCase):
             'space=a+a&amp=a%26a', 'a a=a a&no encoding=sup', 'a+a=a+a',
             'a%20=a+a', 'a%20a=a%20a', 'a+a=a%20a', 'space=a a&amp=a^a',
             'a=a&s=s#s', '+=+', "/?:@-._~!$&'()*+,=/?:@-._~!$'()*+,=",
-            'a=a&c=c%5Ec', '<=>&^="', '%3C=%3E&%5E=%22', '%=%;`=`',
+            'a=a&c=c%5Ec', '<=>&^="', '%3C=%3E&%5E=%22', '%=%&`=`',
             '%25=%25&%60=%60',
             # Only keys, no values.
             'asdfasdf', '/asdf/asdf/sdf', '*******', '!@#(*&@!#(*@!#', 'a&b',
-            'a;b',
+            'a&b',
             # Repeated parameters.
             'a=a&a=a', 'space=a+a&space=b+b',
             # Empty keys and/or values.
             '=', 'a=', 'a=a&a=', '=a&=b',
-            # Semicolon delimiter, like 'a=a;b=b'.
-            'a=a;a=a', 'space=a+a;space=b+b',
+            # Semicolon delimiter is not allowed per default after bpo#42967
+            'a=a&a=a', 'space=a+a&space=b+b',
         ]))
         self.items = (self.itemlists + self.itemdicts + self.itemomdicts +
                       self.itemstrs)
