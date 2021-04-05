@@ -1751,9 +1751,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return self
 
     def remove(self, args=_absent, path=_absent, fragment=_absent,
-               query=_absent, query_params=_absent, port=False,
-               fragment_path=_absent, fragment_args=_absent, username=False,
-               password=False):
+               query=_absent, query_params=_absent, scheme=False,
+               username=False, password=False, host=False, port=False,
+               netloc=False, fragment_path=_absent, fragment_args=_absent):
         """
         Remove components of this furl's URL and return this furl
         instance, <self>.
@@ -1782,12 +1782,19 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
           password: If True, remove the password, if it exists.
         Returns: <self>.
         """
+        if scheme is True:
+            self.scheme = None
         if username is True:
             self.username = None
         if password is True:
             self.password = None
+        if host is True:
+            self.host = None
         if port is True:
             self.port = None
+        if netloc is True:
+            self.netloc = None
+
         if path is not _absent:
             self.path.remove(path)
 

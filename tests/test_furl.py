@@ -1974,6 +1974,13 @@ class TestFurl(unittest.TestCase):
                              username=True, password=True, port=True)
         assert f.url == 'http://host/a/big/?s=s+s'
 
+        # scheme, host, port, netloc.
+        f = furl.furl('https://host:999')
+        assert f.copy().remove(scheme=True).url == '//host:999'
+        assert f.copy().remove(host=True).url == 'https://:999'
+        assert f.copy().remove(port=True).url == 'https://host'
+        assert f.copy().remove(netloc=True).url == 'https://'
+
         # No errors are thrown when removing URL components that don't exist.
         f = furl.furl(url)
         assert f is f.remove(fragment_path=['asdf'], fragment_args=['asdf'],
