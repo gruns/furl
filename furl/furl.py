@@ -1569,6 +1569,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     def url(self, url):
         return self.load(url)
 
+    @property
+    def relative_url(self):
+        return furl(url=self.tostr(), scheme=None, host=None, port=None).url
+
     def add(self, args=_absent, path=_absent, fragment_path=_absent,
             fragment_args=_absent, query_params=_absent):
         """
