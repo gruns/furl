@@ -1558,7 +1558,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 host_port = origin
             else:
                 self.scheme, host_port = toks
-    
+
             if ':' in host_port:
                 self.host, self.port = host_port.split(':', 1)
             else:
