@@ -1618,11 +1618,11 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         return self
 
-    def set(self, args=_absent, path=_absent, fragment=_absent, scheme=_absent,
-            netloc=_absent, origin=_absent, fragment_path=_absent,
-            fragment_args=_absent, fragment_separator=_absent, host=_absent,
-            port=_absent, query=_absent, query_params=_absent,
-            username=_absent, password=_absent):
+    def set(self, args=_absent, path=_absent, fragment=_absent, query=_absent,
+            scheme=_absent, username=_absent, password=_absent, host=_absent,
+            port=_absent, netloc=_absent, origin=_absent, query_params=_absent,
+            fragment_path=_absent, fragment_args=_absent,
+            fragment_separator=_absent):
         """
         Set components of a url and return this furl instance, <self>.
 
@@ -1751,9 +1751,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return self
 
     def remove(self, args=_absent, path=_absent, fragment=_absent,
-               query=_absent, query_params=_absent, scheme=False,
-               username=False, password=False, host=False, port=False,
-               netloc=False, fragment_path=_absent, fragment_args=_absent):
+               query=_absent, scheme=False, username=False, password=False,
+               host=False, port=False, netloc=False, query_params=_absent,
+               fragment_path=_absent, fragment_args=_absent):
         """
         Remove components of this furl's URL and return this furl
         instance, <self>.

@@ -3,6 +3,8 @@
 ================================================================================
 Fixed: Export metadata variables (furl.__title__, furl.__version__, etc).
 Added: scheme, host, and netloc as parameters to furl.remove().
+Changed: Homogenized parameter order across furl.add(), furl.set(), and
+  furl.remove().
 
 ================================================================================
  v2.1.0
