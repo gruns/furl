@@ -3,7 +3,7 @@
 ================================================================================
 Fixed: Export metadata variables (furl.__title__, furl.__version__, etc).
 Added: scheme, host, netloc, and origin as parameters to furl.remove().
-Changed: Homogenized parameter order across furl.add(), furl.set(), and
+Changed: Homogenize parameter order across furl.add(), furl.set(), and
   furl.remove().
 Changed: furl.origin can be assigned None. This has the same behavior as
   furl.remove(origin=True).
@@ -11,7 +11,7 @@ Changed: furl.origin can be assigned None. This has the same behavior as
 ================================================================================
  v2.1.0
 ================================================================================
-Added: a dont_quote= parameter to Query.encode() and a query_dont_quote=
+Added: A dont_quote= parameter to Query.encode() and a query_dont_quote=
   parameter to furl.tostr() that exempt valid query characters from being
   percent-encoded, either in their entirety with dont_quote=True, or selectively
   with dont_quote=<string>, like dont_quote='/?@_'.
