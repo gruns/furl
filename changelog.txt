@@ -1,4 +1,13 @@
 ================================================================================
+ v2.1.2 (unreleased)
+================================================================================
+Fixed: Support Python 3.9's changed urllib.parse.urljoin() behavior.
+  < py3.9:  furl('wss://slrp.com/').join('foo:1') -> 'wss://slrp.com/foo:1'
+  >= py3.9: furl('wss://slrp.com/').join('foo:1') -> 'foo:1'
+Changed: Drop semicolon query delimiters. See
+  https://bugs.python.org/issue42967.
+
+================================================================================
  v2.1.1
 ================================================================================
 Fixed: Export metadata variables (furl.__title__, furl.__version__, etc).
