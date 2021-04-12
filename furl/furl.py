@@ -999,7 +999,6 @@ class Query(object):
 
           Query('#=^').encode(dont_quote='#^') == '%23=%5E'.
 
-
         Returns: A URL encoded query string using <delimiter> as the
         delimiter separating key:value pairs. The most common and
         default delimiter is '&', but ';' can also be specified. ';' is

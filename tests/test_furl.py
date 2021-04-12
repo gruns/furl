@@ -2064,8 +2064,8 @@ class TestFurl(unittest.TestCase):
         assert f.url == 'http://pepp.ru/a/b/c#uwantpump?'
 
         # In edge cases (e.g. URLs without an authority/netloc), behave
-        # identically to urllib.parse.urljoin(), which changed behavior
-        # in Python 3.9
+        # identically to urllib.parse.urljoin(), which changed behavior in
+        # Python 3.9.
         f = furl.furl('wss://slrp.com/').join('foo:1')
         if sys.version_info[:2] < (3, 9):
             assert f.url == 'wss://slrp.com/foo:1'
