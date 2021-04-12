@@ -6,6 +6,7 @@ Fixed: Support Python 3.9's changed urllib.parse.urljoin() behavior.
   >= py3.9: furl('wss://slrp.com/').join('foo:1') -> 'foo:1'
 Changed: Drop semicolon query delimiters. See
   https://bugs.python.org/issue42967.
+Changed: Drop support for EOL Python 3.4 and Python 3.5.
 
 ================================================================================
  v2.1.1
