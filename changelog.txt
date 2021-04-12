@@ -1,5 +1,5 @@
 ================================================================================
- v2.1.2 (unreleased)
+ v2.1.2
 ================================================================================
 Fixed: Support Python 3.9's changed urllib.parse.urljoin() behavior.
   < py3.9:  furl('wss://slrp.com/').join('foo:1') -> 'wss://slrp.com/foo:1'

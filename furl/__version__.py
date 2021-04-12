@@ -11,7 +11,7 @@
 #
 
 __title__ = 'furl'
-__version__ = '2.1.1'
+__version__ = '2.1.2'
 __license__ = 'Unlicense'
 __author__ = 'Ansgar Grunseid'
 __contact__ = 'grunseid@gmail.com'
