@@ -8,6 +8,7 @@ Changed: Drop semicolon query delimiters. See
   https://bugs.python.org/issue42967.
 Changed: Drop support for EOL Python 3.4 and Python 3.5.
 
+
 ================================================================================
  v2.1.1
 ================================================================================
@@ -17,6 +18,7 @@ Changed: Homogenize parameter order across furl.add(), furl.set(), and
   furl.remove().
 Changed: furl.origin can be assigned None. This has the same behavior as
   furl.remove(origin=True).
+
 
 ================================================================================
  v2.1.0
@@ -32,6 +34,7 @@ Fixed: Update orderedmultdict to v1.0.1 to resolve a DeprecationWarning.
 Fixed: Encode '/' consistently in query strings across both quote_plus=True and
   quote_plus=False.
 
+
 ================================================================================
  v2.0.0
 ================================================================================
@@ -44,11 +47,13 @@ Changed: furl.__truediv__() and Path.__truediv__() now mirror
 Fixed: Path.load() now accepts Path instances, e.g. f.path.load(Path('hi')).
 Removed: Support for Python 2.6, which reached EOL on 2013-10-29.
 
+
 ================================================================================
  v1.2.1
 ================================================================================
 Fixed: Join URLs without an authority (e.g. 'foo:blah') consistently with
   urllib.parse.urljoin().
+
 
 ================================================================================
  v1.2
@@ -62,6 +67,7 @@ Changed: Percent-encode all non-unreserved characters in Query key=value pairs,
   signs remain decoded in query values where the key is empty to allow for, and
   preserve, queries like '?==3=='.
 
+
 ================================================================================
  v1.1
 ================================================================================
@@ -74,6 +80,7 @@ Changed: Don't encode equal signs ('=') in query values if the key is empty.
   equal signs in query values with an associted key, as expected. E.g.
   '?a=1%3D1'.
 
+
 ================================================================================
  v1.0.2
 ================================================================================
@@ -85,11 +92,13 @@ Added: Support all schemes without a netloc/authority, like
 Fixed: Restore furl.url's setter method. E.g. furl.url = 'http://www.foo.com/'.
 Removed: Support for Python 3.3, which reached EOL on 2017-09-29.
 
+
 ================================================================================
  v1.0.1
 ================================================================================
 Added: Add dictionary representations of Path, Query, Fragment, and furl objects
   via an asdict() method.
+
 
 ================================================================================
  v1.0.0
@@ -99,16 +108,19 @@ Changed: Bumped the version number to v1.0 to signify that furl is a mature and
   stable library. Furl has been marked Production/Stable in setup.py for a long
   time anyhow -- it's high time for the version number to catch up.
 
+
 ================================================================================
  v0.5.7
 ================================================================================
 Fixed: Only percent-decode percent-encoded path strings once, not twice.
+
 
 ================================================================================
  v0.5.6
 ================================================================================
 Changed: Bumped the orderedmultidict dependency from v0.7.7 to v0.7.8. The
   latter, v0.7.8, fixes a splat (i.e. **omdict) bug.
+
 
 ================================================================================
  v0.5.5
@@ -117,11 +129,13 @@ Changed: Bumped the orderedmultidict dependency from v0.7.6 to v0.7.7. The
   latter, v0.7.7, better interoperates with other popular libraries, like
   Requests.
 
+
 ================================================================================
  v0.5.4
 ================================================================================
 Fixed: When provided to constructors and load() methods, treat None as the empty
   string, not the string 'None'. E.g. furl(None) == furl(''), not furl('None').
+
 
 ================================================================================
  v0.5.3
@@ -129,11 +143,13 @@ Fixed: When provided to constructors and load() methods, treat None as the empty
 Fixed: In Python 2, furl.netloc and furl.origin return strings, not Unicode
   strings.
 
+
 ================================================================================
  v0.5.2
 ================================================================================
 Added: Test PEP8 compliance with tox.
 Fixed: Verify valid schemes before adoption.
+
 
 ================================================================================
  v0.5.1
