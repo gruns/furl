@@ -767,12 +767,10 @@ class TestQuery(unittest.TestCase):
         q = furl.Query('a=&=b')
         assert q.params == {'a': '', '': 'b'} and str(q) == 'a=&=b'
 
-        # ';' is a valid query delimiter.
+        # ';' is no longer a valid query delimiter, though it was prior to furl
+        # v2.1.3. See https://bugs.python.org/issue42967.
         q = furl.Query('=;=')
-        assert q.params.allitems() == [('', ''), ('', '')] and str(q) == '=&='
-        q = furl.Query('a=a;b=b;c=')
-        assert q.params == {
-            'a': 'a', 'b': 'b', 'c': ''} and str(q) == 'a=a&b=b&c='
+        assert q.params.allitems() == [('', ';=')] and str(q) == '=%3B='
 
         # Non-string parameters are coerced to strings in the final
         # query string.
@@ -1581,20 +1579,14 @@ class TestFurl(unittest.TestCase):
         assert str(f.fragment) == ''
         assert f.url == ''
 
-        # Keep in mind that ';' is a query delimiter for both the URL
-        # query and the fragment query, resulting in the str(path),
-        # str(query), and str(fragment) values below.
         url = (
             "sup://example.com/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+"
             ",==?/?:@-._~!$'()*+,;=/?:@-._~!$'()*+,;==#/?:@-._~!$&'()*+,;=")
         pathstr = "/:@-._~!$&'()*+,=;:@-._~!$&'()*+,=:@-._~!$&'()*+,=="
         querystr = (
-            quote_plus("/?:@-._~!$'()* ,") + '&' +
-            '=' + quote_plus("/?:@-._~!$'()* ,") + '&' +
-            '==')
-        fragmentstr = (
-            '/?' + quote_plus(':@-._~!$') + '&' +
-            quote_plus("'()* ,") + '&' + '=')
+            quote_plus("/?:@-._~!$'()* ,;") + '=' +
+            quote_plus("/?:@-._~!$'()* ,;=="))
+        fragmentstr = quote_plus("/?:@-._~!$&'()* ,;=", '/?&=')
         f = furl.furl(url)
         assert f.scheme == 'sup'
         assert f.host == 'example.com'

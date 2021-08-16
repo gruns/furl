@@ -1105,7 +1105,7 @@ class Query(object):
     def _extract_items_from_querystr(self, querystr):
         items = []
 
-        pairstrs = [s2 for s1 in querystr.split('&') for s2 in s1.split(';')]
+        pairstrs = querystr.split('&')
         pairs = [item.split('=', 1) for item in pairstrs]
         pairs = [(p[0], lget(p, 1, '')) for p in pairs]  # Pad with value ''.
 
