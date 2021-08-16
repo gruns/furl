@@ -47,8 +47,8 @@ class RunTests(TestCommand):
     """
     Run the unit tests.
 
-    To test against all supported Python versions (as specified in
-    tox.ini) in parallel, run
+    To test all supported Python versions (as specified in tox.ini) in
+    parallel, run
 
       $ tox -p
 
