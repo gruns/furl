@@ -11,6 +11,7 @@
 #
 
 from .furl import *  # noqa
-from .__version__ import (  # noqa
-    __title__, __version__, __license__, __author__, __contact__, __url__,
-    __description__)
+
+# Import all variables in __version__.py without explicit imports.
+from . import __version__
+globals().update(dict((k, v) for k, v in __version__.__dict__.items()))
