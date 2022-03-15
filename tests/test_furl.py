@@ -116,17 +116,6 @@ class itemstr(str, itemcontainer):
         return str(self)
 
 
-class TestMetadata(unittest.TestCase):
-    def test_metadata(self):
-        assert furl.__title__
-        assert furl.__version__
-        assert furl.__license__
-        assert furl.__author__
-        assert furl.__contact__
-        assert furl.__url__
-        assert furl.__description__
-
-
 class TestPath(unittest.TestCase):
 
     def test_none(self):
@@ -2380,11 +2369,10 @@ class TestFurl(unittest.TestCase):
         assert u.asdict() == d
 
 
-class TestMeta(unittest.TestCase):
+class TestMetadata(unittest.TestCase):
     def test_metadata_varibles(self):
         def is_non_empty_string(s):
             return isinstance(s, string_types) and s
-
         assert is_non_empty_string(furl.__title__)
         assert is_non_empty_string(furl.__version__)
         assert is_non_empty_string(furl.__license__)
