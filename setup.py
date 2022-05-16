@@ -23,6 +23,11 @@ with open(pjoin('furl', '__version__.py')) as f:
     exec(f.read(), meta)
 
 
+readmePath = pjoin(dirname(__file__), 'README.md')
+with open(readmePath) as f:
+    readmeContent = f.read()
+
+
 class Publish(Command):
     """Publish to PyPI with twine."""
     user_options = []
@@ -78,8 +83,8 @@ setup(
     author_email=meta['__contact__'],
     url=meta['__url__'],
     description=meta['__description__'],
-    long_description=(
-        'Information and documentation can be found at ' + meta['__url__']),
+    long_description=readmeContent,
+    long_description_content_type='text/markdown',
     packages=find_packages(),
     include_package_data=True,
     platforms=['any'],
