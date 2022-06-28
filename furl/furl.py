@@ -115,7 +115,7 @@ def non_string_iterable(o):
 
 
 # TODO(grun): Support IDNA2008 via the third party idna module. See
-# https://github.com/gruns/furl/issues/73.
+# https://github.com/gruns/furl/issues/73#issuecomment-226549755.
 def idna_encode(o):
     if callable_attr(o, 'encode'):
         return str(o.encode('idna').decode('utf8'))
