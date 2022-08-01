@@ -380,7 +380,7 @@ multivalue dictionary.
 ```
 
 __params__ is one dimensional. If a list of values is provided as a query value,
-that list is interpretted as multiple values.
+that list is interpreted as multiple values.
 
 ```python
 >>> f = furl()
@@ -422,7 +422,7 @@ parameter value.
 __encode(delimiter='&', quote_plus=True, dont_quote='')__ can be used to encode
 query strings with delimiters like `;`, encode spaces as `+` instead of `%20`
 (i.e. application/x-www-form-urlencoded encoded), or avoid percent-encoding
-valid query charactes entirely (valid query characters are
+valid query characters entirely (valid query characters are
 `/?:@-._~!$&'()*+,;=`).
 
 ```python
