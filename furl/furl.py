@@ -1478,6 +1478,15 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 "have adjacent periods.")
             raise ValueError(errmsg % (host, INVALID_HOST_CHARS))
 
+        if (
+            is_valid_ipv6(host)
+            and callable_attr(host, 'startswith')
+            and callable_attr(host, 'endswith')
+            and not host.startswith("[")
+            and not host.endswith("]")
+        ):
+            host = "[" + host + "]"
+
         if callable_attr(host, 'lower'):
             host = host.lower()
         if callable_attr(host, 'startswith') and host.startswith('xn--'):

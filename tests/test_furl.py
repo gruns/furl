@@ -1655,6 +1655,15 @@ class TestFurl(unittest.TestCase):
         # addresses.
         f = furl.furl('http://1.2.3.4.5.6/')
 
+        # IPv6 without brackets should be corrected
+        f.set(host="::1")
+        assert f.host == "[::1]"
+        assert f.url == "http://[::1]/"
+
+        f.set(host="[::]")
+        assert f.host == "[::]"
+        assert f.url == "http://[::]/"
+
         # Invalid, but well-formed, IPv6 addresses should raise an
         # exception.
         with self.assertRaises(ValueError):
