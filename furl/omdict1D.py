@@ -51,7 +51,7 @@ class omdict1D(omdict):
             value = [value]
 
         if value:
-            self._map.setdefault(key, list())
+            self._map.setdefault(key, [])
 
         for val in value:
             node = self._items.append(key, val)

@@ -15,7 +15,7 @@ from __future__ import division
 import warnings
 from abc import ABCMeta, abstractmethod
 import sys
-
+import unittest
 import six
 from six.moves import zip
 from six.moves.urllib.parse import (
@@ -25,7 +25,7 @@ import furl
 from furl.omdict1D import omdict1D
 from furl.compat import string_types, OrderedDict as odict
 
-import unittest
+
 
 
 #
@@ -36,7 +36,7 @@ import unittest
 
 
 @six.add_metaclass(ABCMeta)
-class itemcontainer(object):
+class itemcontainer():
 
     """
     Utility list subclasses to expose allitems() and iterallitems()
@@ -511,7 +511,7 @@ class TestPath(unittest.TestCase):
         assert p
 
     def test_unicode(self):
-        paths = ['/wiki/ロリポップ', u'/wiki/ロリポップ']
+        paths = ['/wiki/ロリポップ', '/wiki/ロリポップ']
         path_encoded = '/wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
         for path in paths:
             p = furl.Path(path)
@@ -804,7 +804,7 @@ class TestQuery(unittest.TestCase):
         assert str(q) == 'prp=&slrp=' and q.params['slrp'] == ''
 
     def test_unicode(self):
-        pairs = [('ロリポップ', 'testä'), (u'ロリポップ', u'testä')]
+        pairs = [('ロリポップ', 'testä'), ('ロリポップ', 'testä')]
         key_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
         value_encoded = 'test%C3%A4'
 
@@ -1052,7 +1052,7 @@ class TestFragment(unittest.TestCase):
         assert str(f.fragment) == 'a?b?c?d?'
 
     def test_unicode(self):
-        for fragment in ['ロリポップ', u'ロリポップ']:
+        for fragment in ['ロリポップ', 'ロリポップ']:
             f = furl.furl('http://sprop.ru/#ja').set(fragment=fragment)
             assert str(f.fragment) == (
                 '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97')
@@ -1189,7 +1189,7 @@ class TestFurl(unittest.TestCase):
         assert str(f) == ''
 
     def test_idna(self):
-        decoded_host = u'ドメイン.テスト'
+        decoded_host = 'ドメイン.テスト'
         encoded_url = 'http://user:pass@xn--eckwd4c7c.xn--zckzah/'
 
         f = furl.furl(encoded_url)
@@ -1203,19 +1203,19 @@ class TestFurl(unittest.TestCase):
         f.set(host=decoded_host)
         assert f.url == encoded_url
 
-        f = furl.furl().set(host=u'ロリポップ')
+        f = furl.furl().set(host='ロリポップ')
         assert f.url == '//xn--9ckxbq5co'
 
     def test_unicode(self):
-        paths = ['ロリポップ', u'ロリポップ']
-        pairs = [('testö', 'testä'), (u'testö', u'testä')]
-        key_encoded, value_encoded = u'test%C3%B6', u'test%C3%A4'
-        path_encoded = u'%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
+        paths = ['ロリポップ', 'ロリポップ']
+        pairs = [('testö', 'testä'), ('testö', 'testä')]
+        key_encoded, value_encoded = 'test%C3%B6', 'test%C3%A4'
+        path_encoded = '%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
 
         base_url = 'http://pumps.ru'
         full_url_utf8_str = '%s/%s?%s=%s' % (
             base_url, paths[0], pairs[0][0], pairs[0][1])
-        full_url_unicode = u'%s/%s?%s=%s' % (
+        full_url_unicode = '%s/%s?%s=%s' % (
             base_url, paths[1], pairs[1][0], pairs[1][1])
         full_url_encoded = '%s/%s?%s=%s' % (
             base_url, path_encoded, key_encoded, value_encoded)
@@ -1406,9 +1406,9 @@ class TestFurl(unittest.TestCase):
         assert f.username is None and f.password == '' and f.url == '//:@'
 
         # Unicode.
-        username = u'kødp'
-        password = u'ålæg'
-        f = furl.furl(u'https://%s:%s@example.com/' % (username, password))
+        username = 'kødp'
+        password = 'ålæg'
+        f = furl.furl('https://%s:%s@example.com/' % (username, password))
         assert f.username == username and f.password == password
         assert f.url == 'https://k%C3%B8dp:%C3%A5l%C3%A6g@example.com/'
 
@@ -2021,7 +2021,7 @@ class TestFurl(unittest.TestCase):
 
             # Unicode.
             ('/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
-            (u'/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
+            ('/?kødpålæg=4', 'unknown://pepp.ru/?k%C3%B8dp%C3%A5l%C3%A6g=4'),
         ]
 
         for test in empty_tests:
@@ -2341,7 +2341,7 @@ class TestFurl(unittest.TestCase):
         value_encoded = 'test%C3%A4'
         query_encoded = 'a=1&' + key_encoded + '=' + value_encoded
 
-        host = u'ドメイン.テスト'
+        host = 'ドメイン.テスト'
         host_encoded = 'xn--eckwd4c7c.xn--zckzah'
 
         fragment_encoded = path_encoded + '?' + query_encoded

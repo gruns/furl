@@ -19,12 +19,12 @@ from setuptools.command.test import test as TestCommand
 
 
 meta = {}
-with open(pjoin('furl', '__version__.py')) as f:
+with open(pjoin('furl', '__version__.py'), encoding='utf-8') as f:
     exec(f.read(), meta)
 
 
 readmePath = pjoin(dirname(__file__), 'README.md')
-with open(readmePath) as f:
+with open(readmePath, encoding='utf-8') as f:
     readmeContent = f.read()
 
 
