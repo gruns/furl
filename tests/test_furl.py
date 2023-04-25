@@ -1630,6 +1630,16 @@ class TestFurl(unittest.TestCase):
         assert f.netloc == '' and str(f.path) == '//path'
         assert f.url == '////path'
 
+        # Check that schemes with invalid characters are rejected
+        f = furl.furl('sch^eme://user@host.com/path')
+        assert f.scheme is None
+
+        f = furl.furl('sch2323eme://user@host.com/path')
+        assert f.scheme == 'sch2323eme'
+        assert f.username == 'user'
+        assert f.host == 'host.com'
+
+
         # TODO(grun): Test more odd URLs.
 
     def test_hosts(self):
