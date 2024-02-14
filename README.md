@@ -11,17 +11,15 @@
 
 ## furl is a small Python library that makes parsing and<br>manipulating URLs easy.
 
-Python's standard [urllib](https://docs.python.org/3/library/urllib.html) and
-[urlparse](https://docs.python.org/3/library/urllib.parse.html) modules provide a
-number of URL\
-related functions, but using these functions to perform common
-URL\
-operations proves tedious. Furl makes parsing and manipulating URLs\
-easy.
+Python's standard
+[urllib](https://docs.python.org/3/library/urllib.html) and
+[urlparse](https://docs.python.org/3/library/urllib.parse.html) modules
+provide a number of URL related functions, but using these functions to
+perform common URL operations proves tedious. Furl makes parsing and
+manipulating URLs easy.
 
-Furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain,
-and supports\
-Python 2, Python 3, PyPy2, and PyPy3.
+Furl is well tested, [Unlicensed](http://unlicense.org/) in the public
+domain, and supports Python 2, Python 3, PyPy2, and PyPy3.
 
 Code time: Paths and query arguments are easy. Really easy.
 
