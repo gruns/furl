@@ -10,22 +10,16 @@
 # License: Build Amazing Things (Unlicense)
 #
 
-from __future__ import division
-
+import sys
+import unittest
 import warnings
 from abc import ABCMeta, abstractmethod
-import sys
-
-import six
-from six.moves import zip
-from six.moves.urllib.parse import (
+from collections import OrderedDict as odict
+from urllib.parse import (
     quote, quote_plus, parse_qsl, urlsplit, SplitResult)
 
 import furl
 from furl.omdict1D import omdict1D
-from furl.compat import string_types, OrderedDict as odict
-
-import unittest
 
 
 #
@@ -35,8 +29,7 @@ import unittest
 #
 
 
-@six.add_metaclass(ABCMeta)
-class itemcontainer(object):
+class itemcontainer(metaclass=ABCMeta):
 
     """
     Utility list subclasses to expose allitems() and iterallitems()
@@ -2372,7 +2365,7 @@ class TestFurl(unittest.TestCase):
 class TestMetadata(unittest.TestCase):
     def test_metadata_varibles(self):
         def is_non_empty_string(s):
-            return isinstance(s, string_types) and s
+            return isinstance(s, (str, bytes)) and s
         assert is_non_empty_string(furl.__title__)
         assert is_non_empty_string(furl.__version__)
         assert is_non_empty_string(furl.__license__)
