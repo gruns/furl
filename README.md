@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://pypi.python.org/pypi/furl"><img src="https://badge.fury.io/py/furl.svg"></a>
-  <a href="https://travis-ci.org/gruns/furl"><img src="https://img.shields.io/travis/gruns/furl.svg"></a>
+  <a href="https://github.com/gruns/furl/actions/workflows/ci.yml"><img src="https://github.com/gruns/furl/actions/workflows/ci.yml/badge.svg"></a>
   <a href="http://unlicense.org/"><img src="https://img.shields.io/pypi/l/furl.svg"></a>
   <a href="https://pypi.python.org/pypi/furl"><img src="https://img.shields.io/pypi/pyversions/furl.svg"></a>
 </p>
