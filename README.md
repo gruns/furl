@@ -21,6 +21,10 @@ manipulating URLs easy.
 Furl is well tested, [Unlicensed](http://unlicense.org/) in the public
 domain, and supports Python 3 and PyPy3.
 
+👥 Furl is looking for a lead contributor and maintainer. Would you love
+to lead furl, the best URL library in Python? 🙌 Please email me at
+[grunseid+furl@gmail.com](grunseid+furl@gmail.com)!
+
 Code time: Paths and query arguments are easy. Really easy.
 
 ```python
