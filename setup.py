@@ -114,6 +114,7 @@ setup(
     install_requires=[
         'six>=1.8.0',
         'orderedmultidict>=1.0.1',
+        'ipaddress>=1.0.23; python_version < "3.3"',
     ],
     cmdclass={
         'test': RunTests,
