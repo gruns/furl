@@ -291,8 +291,6 @@ Path segments can also be appended with the slash operator, like with
 [pathlib.Path](https://docs.python.org/3/library/pathlib.html#operators).
 
 ```python
->>> from __future__ import division  # For Python 2.x.
->>>
 >>> f = furl('path')
 >>> f.path /= 'with'
 >>> f.path = f.path / 'more' / 'path segments/'
@@ -693,7 +691,6 @@ Like [pathlib.Path](https://docs.python.org/3/library/pathlib.html#operators),
 path segments can be appended to a furl object's Path with the slash operator.
 
 ```python
->>> from __future__ import division  # For Python 2.x.
 >>> f = furl('http://www.google.com/path?example=arg#frag')
 >>> f /= 'add'
 >>> f = f / 'seg ments/'

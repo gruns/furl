@@ -109,10 +109,8 @@ setup(
     ],
     tests_require=[
         'flake8',
-        'six>=1.8.0',
     ],
     install_requires=[
-        'six>=1.8.0',
         'orderedmultidict>=1.0.1',
     ],
     cmdclass={
