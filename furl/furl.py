@@ -223,9 +223,11 @@ def is_valid_encoded_query_value(value):
     return is_valid_encoded_query_value.regex.match(value) is not None
 
 
-@static_vars(regex=re.compile(r'[a-zA-Z][a-zA-Z\-\.\+]*'))
+@static_vars(regex=re.compile(r'[a-zA-Z][a-zA-Z0-9\-\.\+]*'))
 def is_valid_scheme(scheme):
-    return is_valid_scheme.regex.match(scheme) is not None
+    if is_valid_scheme.regex.match(scheme) is None:
+        return False
+    return is_valid_scheme.regex.match(scheme).group() == scheme
 
 
 @static_vars(regex=re.compile('[%s]' % re.escape(INVALID_HOST_CHARS)))
@@ -1423,6 +1425,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
     def scheme(self, scheme):
         if callable_attr(scheme, 'lower'):
             scheme = scheme.lower()
+        if scheme:
+            if not is_valid_scheme(scheme):
+                raise ValueError("Invalid Scheme")
         self._scheme = scheme
 
     @property
