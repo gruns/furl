@@ -537,7 +537,7 @@ class Path(object):
         elif is_iterable_but_not_string(path):  # List interface.
             newsegments = path
         else:  # String interface.
-            newsegments = self._segments_from_path(path)
+            newsegments = self._segments_from_path(str(path))
 
         # Preserve the opening '/' if one exists already (self.segments
         # == ['']).
