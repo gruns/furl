@@ -10,9 +10,6 @@
 # License: Build Amazing Things (Unlicense)
 #
 
-from .compat import string_types
-
-
 absent = object()
 
 
@@ -21,4 +18,4 @@ def callable_attr(obj, attr):
 
 
 def is_iterable_but_not_string(v):
-    return callable_attr(v, '__iter__') and not isinstance(v, string_types)
+    return callable_attr(v, '__iter__') and not isinstance(v, (str, bytes))

@@ -13,19 +13,17 @@
 import re
 import abc
 import warnings
+import urllib.parse
 from copy import deepcopy
 from posixpath import normpath
+from urllib.parse import quote, unquote
 
-import six
-from six.moves import urllib
-from six.moves.urllib.parse import quote, unquote
 try:
     from icecream import ic
 except ImportError:  # Graceful fallback if IceCream isn't installed.
     ic = lambda *a: None if not a else (a[0] if len(a) == 1 else a)  # noqa
 
 from .omdict1D import omdict1D
-from .compat import string_types, UnicodeMixin
 from .common import (
     callable_attr, is_iterable_but_not_string, absent as _absent)
 
@@ -111,7 +109,7 @@ def utf8(o, default=_absent):
 
 
 def non_string_iterable(o):
-    return callable_attr(o, '__iter__') and not isinstance(o, string_types)
+    return callable_attr(o, '__iter__') and not isinstance(o, (str, bytes))
 
 
 # TODO(grun): Support IDNA2008 via the third party idna module. See
@@ -137,7 +135,7 @@ def is_valid_port(port):
 
 def static_vars(**kwargs):
     def decorator(func):
-        for key, value in six.iteritems(kwargs):
+        for key, value in kwargs.items():
             setattr(func, key, value)
         return func
     return decorator
@@ -701,8 +699,7 @@ class Path(object):
         return '/'.join(segments)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class PathCompositionInterface(object):
+class PathCompositionInterface(metaclass=abc.ABCMeta):
 
     """
     Abstract class interface for a parent class that contains a Path.
@@ -752,8 +749,7 @@ class PathCompositionInterface(object):
         return False
 
 
-@six.add_metaclass(abc.ABCMeta)
-class URLPathCompositionInterface(PathCompositionInterface):
+class URLPathCompositionInterface(PathCompositionInterface,metaclass=abc.ABCMeta):
 
     """
     Abstract class interface for a parent class that contains a URL
@@ -780,8 +776,7 @@ class URLPathCompositionInterface(PathCompositionInterface):
         return bool(path) and self.netloc
 
 
-@six.add_metaclass(abc.ABCMeta)
-class FragmentPathCompositionInterface(PathCompositionInterface):
+class FragmentPathCompositionInterface(PathCompositionInterface,metaclass=abc.ABCMeta):
 
     """
     Abstract class interface for a parent class that contains a Fragment
@@ -1093,7 +1088,7 @@ class Query(object):
         elif callable_attr(items, 'iteritems'):
             items = list(items.iteritems())
         # Encoded query string. e.g. 'a=1&b=2&c=3'
-        elif isinstance(items, six.string_types):
+        elif isinstance(items, str):
             items = self._extract_items_from_querystr(items)
         # Default to list of key:value items interface. e.g. [('a','1'),
         # ('b','2')]
@@ -1109,7 +1104,7 @@ class Query(object):
         pairs = [item.split('=', 1) for item in pairstrs]
         pairs = [(p[0], lget(p, 1, '')) for p in pairs]  # Pad with value ''.
 
-        for pairstr, (key, value) in six.moves.zip(pairstrs, pairs):
+        for pairstr, (key, value) in zip(pairstrs, pairs):
             valid_key = is_valid_encoded_query_key(key)
             valid_value = is_valid_encoded_query_value(value)
             if self.strict and (not valid_key or not valid_value):
@@ -1131,8 +1126,7 @@ class Query(object):
         return items
 
 
-@six.add_metaclass(abc.ABCMeta)
-class QueryCompositionInterface(object):
+class QueryCompositionInterface(metaclass=abc.ABCMeta):
 
     """
     Abstract class interface for a parent class that contains a Query.
@@ -1299,8 +1293,7 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         return "%s('%s')" % (self.__class__.__name__, str(self))
 
 
-@six.add_metaclass(abc.ABCMeta)
-class FragmentCompositionInterface(object):
+class FragmentCompositionInterface(metaclass=abc.ABCMeta):
 
     """
     Abstract class interface for a parent class that contains a
@@ -1335,7 +1328,7 @@ class FragmentCompositionInterface(object):
 
 
 class furl(URLPathCompositionInterface, QueryCompositionInterface,
-           FragmentCompositionInterface, UnicodeMixin):
+           FragmentCompositionInterface):
 
     """
     Object for simple parsing and manipulation of a URL and its
@@ -1398,7 +1391,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         if url is None:
             url = ''
-        if not isinstance(url, six.string_types):
+        if not isinstance(url, str):
             url = str(url)
 
         # urlsplit() raises a ValueError on malformed IPv6 addresses in
@@ -1845,7 +1838,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     def join(self, *urls):
         for url in urls:
-            if not isinstance(url, six.string_types):
+            if not isinstance(url, str):
                 url = str(url)
             newurl = urljoin(self.url, url)
             self.load(newurl)
@@ -1888,8 +1881,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
            not FragmentCompositionInterface.__setattr__(self, attr, value)):
             object.__setattr__(self, attr, value)
 
-    def __unicode__(self):
-        return self.tostr()
+    def __str__(self):
+        return self.tostr().encode('utf8')
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
