@@ -130,7 +130,7 @@ def idna_decode(o):
 
 def is_valid_port(port):
     port = str(port)
-    if not port.isdigit() or not 0 < int(port) <= 65535:
+    if not port.isdigit() or not port.isascii() or not 0 < int(port) <= 65535:
         return False
     return True
 
