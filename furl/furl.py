@@ -1620,6 +1620,66 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         return self
 
+    def check_set_overlaps(self, args, query, query_params, scheme, origin, 
+                            netloc, host, port, fragment, fragment_path, 
+                            fragment_args, fragment_separator):
+        def present(v):
+            return v is not _absent
+
+        if present(scheme) and present(origin):
+            s = ('Possible parameter overlap: <scheme> and <origin>. See '
+                 'furl.set() documentation for more details.')
+            warnings.warn(s, UserWarning)
+        provided = [
+            present(netloc), present(origin), present(host) or present(port)]
+        if sum(provided) >= 2:
+            s = ('Possible parameter overlap: <origin>, <netloc> and/or '
+                 '(<host> and/or <port>) provided. See furl.set() '
+                 'documentation for more details.')
+            warnings.warn(s, UserWarning)
+        if sum(present(p) for p in [args, query, query_params]) >= 2:
+            s = ('Possible parameter overlap: <query>, <args>, and/or '
+                 '<query_params> provided. See furl.set() documentation for '
+                 'more details.')
+            warnings.warn(s, UserWarning)
+        provided = [fragment_path, fragment_args, fragment_separator]
+        if present(fragment) and any(present(p) for p in provided):
+            s = ('Possible parameter overlap: <fragment> and '
+                 '(<fragment_path>and/or <fragment_args>) or <fragment> '
+                 'and <fragment_separator> provided. See furl.set() '
+                 'documentation for more details.')
+            warnings.warn(s, UserWarning)
+
+    def apply_set_updates(self, username, password, netloc, origin, scheme, 
+                           host, port, path, query, args, query_params, 
+                           fragment, fragment_path, fragment_args, fragment_separator):
+        simple_attrs = [
+            ('username', username), ('password', password), 
+            ('netloc', netloc), ('origin', origin), 
+            ('scheme', scheme), ('host', host), ('port', port)
+        ]
+        
+        for attr_name, val in simple_attrs:
+            if val is not _absent:
+                setattr(self, attr_name, val)
+        
+        loaders = [
+            (self.path, path),
+            (self.query, query), 
+            (self.query, args), 
+            (self.query, query_params),
+            (self.fragment, fragment),
+            (self.fragment.path, fragment_path), 
+            (self.fragment.query, fragment_args)
+        ]
+        
+        for obj, val in loaders:
+            if val is not _absent:
+                obj.load(val)
+        
+        if fragment_separator is not _absent:
+            self.fragment.separator = fragment_separator
+
     def set(self, args=_absent, path=_absent, fragment=_absent, query=_absent,
             scheme=_absent, username=_absent, password=_absent, host=_absent,
             port=_absent, netloc=_absent, origin=_absent, query_params=_absent,
@@ -1682,70 +1742,17 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             <fragment_args>, and/or <fragment_separator>) are provided.
         Returns: <self>.
         """
-        def present(v):
-            return v is not _absent
-
-        if present(scheme) and present(origin):
-            s = ('Possible parameter overlap: <scheme> and <origin>. See '
-                 'furl.set() documentation for more details.')
-            warnings.warn(s, UserWarning)
-        provided = [
-            present(netloc), present(origin), present(host) or present(port)]
-        if sum(provided) >= 2:
-            s = ('Possible parameter overlap: <origin>, <netloc> and/or '
-                 '(<host> and/or <port>) provided. See furl.set() '
-                 'documentation for more details.')
-            warnings.warn(s, UserWarning)
-        if sum(present(p) for p in [args, query, query_params]) >= 2:
-            s = ('Possible parameter overlap: <query>, <args>, and/or '
-                 '<query_params> provided. See furl.set() documentation for '
-                 'more details.')
-            warnings.warn(s, UserWarning)
-        provided = [fragment_path, fragment_args, fragment_separator]
-        if present(fragment) and any(present(p) for p in provided):
-            s = ('Possible parameter overlap: <fragment> and '
-                 '(<fragment_path>and/or <fragment_args>) or <fragment> '
-                 'and <fragment_separator> provided. See furl.set() '
-                 'documentation for more details.')
-            warnings.warn(s, UserWarning)
-
-        # Guard against side effects on exception.
+        self.check_set_overlaps(
+            args, query, query_params, scheme, origin, netloc, host, port,
+            fragment, fragment_path, fragment_args, fragment_separator
+        )
         original_url = self.url
         try:
-            if username is not _absent:
-                self.username = username
-            if password is not _absent:
-                self.password = password
-            if netloc is not _absent:
-                # Raises ValueError on invalid port or malformed IP.
-                self.netloc = netloc
-            if origin is not _absent:
-                # Raises ValueError on invalid port or malformed IP.
-                self.origin = origin
-            if scheme is not _absent:
-                self.scheme = scheme
-            if host is not _absent:
-                # Raises ValueError on invalid host or malformed IP.
-                self.host = host
-            if port is not _absent:
-                self.port = port  # Raises ValueError on invalid port.
-
-            if path is not _absent:
-                self.path.load(path)
-            if query is not _absent:
-                self.query.load(query)
-            if args is not _absent:
-                self.query.load(args)
-            if query_params is not _absent:
-                self.query.load(query_params)
-            if fragment is not _absent:
-                self.fragment.load(fragment)
-            if fragment_path is not _absent:
-                self.fragment.path.load(fragment_path)
-            if fragment_args is not _absent:
-                self.fragment.query.load(fragment_args)
-            if fragment_separator is not _absent:
-                self.fragment.separator = fragment_separator
+            self.apply_set_updates(
+                username, password, netloc, origin, scheme, host, port, 
+                path, query, args, query_params, fragment, fragment_path, 
+                fragment_args, fragment_separator
+            )
         except Exception:
             self.load(original_url)
             raise
