@@ -12,6 +12,7 @@
 
 import re
 import abc
+import ipaddress
 import warnings
 from copy import deepcopy
 from posixpath import normpath
@@ -239,6 +240,37 @@ def is_valid_host(hostname):
             return False
 
     return '' not in toks  # Adjacent periods aren't allowed.
+
+
+def is_valid_ipv4(ip):
+    if isinstance(ip, six.binary_type):
+        ip = ip.decode()
+
+    try:
+        ipaddress.IPv4Address(ip)
+        return True
+    except ValueError:
+        return False
+
+
+def is_valid_ipv6(ip):
+    if isinstance(ip, six.binary_type):
+        ip = ip.decode()
+
+    # ipaddress handle IPs without brackets
+    if (
+        callable_attr(ip, 'startswith')
+        and callable_attr(ip, 'endswith')
+        and ip.startswith("[")
+        and ip.endswith("]")
+    ):
+        ip = ip[1:-1]
+
+    try:
+        ipaddress.IPv6Address(ip)
+        return True
+    except ValueError:
+        return False
 
 
 def get_scheme(url):
@@ -1434,15 +1466,12 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         """
         Raises: ValueError on invalid host or malformed IPv6 address.
         """
-        # Invalid IPv6 literal.
-        urllib.parse.urlsplit('http://%s/' % host)  # Raises ValueError.
-
-        # Invalid host string.
-        resembles_ipv6_literal = (
-            host is not None and lget(host, 0) == '[' and ':' in host and
-            lget(host, -1) == ']')
-        if (host is not None and not resembles_ipv6_literal and
-           not is_valid_host(host)):
+        if (
+            host
+            and not is_valid_host(host)
+            and not is_valid_ipv4(host)
+            and not is_valid_ipv6(host)
+        ):
             errmsg = (
                 "Invalid host '%s'. Host strings must have at least one "
                 "non-period character, can't contain any of '%s', and can't "
