@@ -271,8 +271,7 @@ def set_scheme(url, scheme):
     after_scheme = strip_scheme(url)
     if scheme is None:
         return after_scheme
-    else:
-        return '%s:%s' % (scheme, after_scheme)
+    return '%s:%s' % (scheme, after_scheme)
 
 
 # 'netloc' in Python parlance, 'authority' in RFC 3986 parlance.
@@ -383,7 +382,7 @@ def join_path_segments(*args):
     for segments in args:
         if not segments or segments == ['']:
             continue
-        elif not finals:
+        if not finals:
             finals.extend(segments)
         else:
             # Example #1: ['a',''] + ['b'] == ['a','b']
@@ -447,7 +446,7 @@ def quacks_like_a_path_with_segments(obj):
         is_iterable_but_not_string(obj.segments))
 
 
-class Path(object):
+class Path():
 
     """
     Represents a path comprised of zero or more path segments.
@@ -702,7 +701,7 @@ class Path(object):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class PathCompositionInterface(object):
+class PathCompositionInterface():
 
     """
     Abstract class interface for a parent class that contains a Path.
@@ -746,7 +745,7 @@ class PathCompositionInterface(object):
         if attr == '_path':
             self.__dict__[attr] = value
             return True
-        elif attr == 'path':
+        if attr == 'path':
             self._path.load(value)
             return True
         return False
@@ -798,7 +797,7 @@ class FragmentPathCompositionInterface(PathCompositionInterface):
         return False
 
 
-class Query(object):
+class Query():
 
     """
     Represents a URL query comprised of zero or more unique parameters
@@ -1132,7 +1131,7 @@ class Query(object):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class QueryCompositionInterface(object):
+class QueryCompositionInterface():
 
     """
     Abstract class interface for a parent class that contains a Query.
@@ -1300,7 +1299,7 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class FragmentCompositionInterface(object):
+class FragmentCompositionInterface():
 
     """
     Abstract class interface for a parent class that contains a
@@ -1518,10 +1517,9 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 colonpos, bracketpos = netloc.rfind(':'), netloc.rfind(']')
                 if colonpos > bracketpos and colonpos != bracketpos + 1:
                     raise ValueError("Invalid netloc '%s'." % netloc)
-                elif colonpos > bracketpos and colonpos == bracketpos + 1:
+                if colonpos > bracketpos and colonpos == bracketpos + 1:
                     host, port = netloc.rsplit(':', 1)
-                else:
-                    host = netloc
+                host = netloc
             else:
                 host, port = netloc.rsplit(':', 1)
                 host = host

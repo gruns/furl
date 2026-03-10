@@ -14,8 +14,10 @@ import unittest
 from itertools import chain, product, permutations
 
 import six
-from furl.omdict1D import omdict1D
+
 from orderedmultidict import omdict
+from furl.omdict1D import omdict1D
+
 
 _unique = object()
 
