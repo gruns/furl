@@ -1882,7 +1882,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             object.__setattr__(self, attr, value)
 
     def __str__(self):
-        return self.tostr().encode('utf8')
+        return self.tostr()
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
