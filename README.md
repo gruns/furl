@@ -232,15 +232,15 @@ True
 'url/path'
 >>> f.host = 'blaps.ru'
 >>> f.url
-'blaps.ru/url/path'
+'//blaps.ru/url/path'
 >>> f.path.isabsolute
 True
 >>> f.path.isabsolute = False
 Traceback (most recent call last):
   ...
-AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a username, password, host, and/or port). URL paths must be absolute if a netloc exists.
+AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a username, password, host, and/or port). A URL path must start with a '/' to separate itself from a netloc.
 >>> f.url
-'blaps.ru/url/path'
+'//blaps.ru/url/path'
 ```
 
 Conversely, the __isabsolute__ attribute of Fragment Paths isn't bound by the
