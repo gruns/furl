@@ -24,7 +24,7 @@ with open(pjoin('furl', '__version__.py')) as f:
 
 
 readmePath = pjoin(dirname(__file__), 'README.md')
-with open(readmePath) as f:
+with open(readmePath, encoding='utf-8') as f:
     readmeContent = f.read()
 
 
