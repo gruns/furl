@@ -1206,6 +1206,17 @@ class TestFurl(unittest.TestCase):
         f = furl.furl().set(host=u'ロリポップ')
         assert f.url == '//xn--9ckxbq5co'
 
+    def test_idna_undecodable_host(self):
+        # A host that passes host validation and starts with the ACE prefix
+        # 'xn--' but is not decodable punycode used to leak a raw UnicodeError
+        # from the idna codec. It should be kept in its (valid) ACE form.
+        for url in ('http://xn--a.example.com/path',
+                    'http://xn--/', 'https://xn--tt/p'):
+            f = furl.furl(url)
+            assert f.url == url
+        ace = 'xn--a.example.com'
+        assert furl.furl('http://%s/' % ace).host == ace
+
     def test_unicode(self):
         paths = ['ロリポップ', u'ロリポップ']
         pairs = [('testö', 'testä'), (u'testö', u'testä')]

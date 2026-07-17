@@ -1452,7 +1452,11 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         if callable_attr(host, 'lower'):
             host = host.lower()
         if callable_attr(host, 'startswith') and host.startswith('xn--'):
-            host = idna_decode(host)
+            try:
+                host = idna_decode(host)
+            except UnicodeError:
+                # Undecodable punycode: keep the valid ACE ('xn--') host as-is.
+                pass
         self._host = host
 
     @property
