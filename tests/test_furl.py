@@ -1725,6 +1725,13 @@ class TestFurl(unittest.TestCase):
         f.origin = 'http://[::1]'
         assert f.host == '[::1]'
         assert f.origin.startswith('http://[::1]')
+        # Setting an IPv6 origin must preserve existing auth (netloc clears it).
+        f = furl.furl('http://user:pass@example.com/path')
+        f.origin = 'http://[::1]:8080'
+        assert f.username == 'user'
+        assert f.password == 'pass'
+        assert f.host == '[::1]'
+        assert f.port == 8080
 
         f = furl.furl('http://user:pass@pumps.com/path?query#fragemtn')
         assert f.origin == 'http://pumps.com'
