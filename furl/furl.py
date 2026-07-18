@@ -1558,8 +1558,10 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             else:
                 self.scheme, host_port = toks
 
-            # Reuse netloc parsing so IPv6 literals with ports work.
+            # IPv6-aware host/port split (same rules as netloc), keep auth.
+            username, password = self.username, self.password
             self.netloc = host_port
+            self.username, self.password = username, password
 
     @property
     def url(self):
