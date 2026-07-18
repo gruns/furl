@@ -144,6 +144,21 @@ class TestPath(unittest.TestCase):
             assert p.isfile
             assert not p.isdir
 
+    def test_empty_path_isabsolute_is_bool(self):
+        # Empty segments must yield False, not the empty list from
+        # (segments and segments[0] == '').
+        p = furl.Path('')
+        assert p.isabsolute is False
+        assert isinstance(p.isabsolute, bool)
+
+        p = furl.Path([])
+        assert p.isabsolute is False
+
+        f = furl.furl('http://example.com')
+        assert f.path.isabsolute is False
+        assert f.asdict()['path']['isabsolute'] is False
+        assert f.asdict()['fragment']['path']['isabsolute'] is False
+
     def test_leading_slash(self):
         p = furl.Path('')
         assert not p.isabsolute

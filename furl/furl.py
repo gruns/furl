@@ -516,7 +516,7 @@ class Path(object):
         if self._force_absolute(self):
             self._isabsolute = True if segments else False
         else:
-            self._isabsolute = (segments and segments[0] == '')
+            self._isabsolute = bool(segments) and segments[0] == ''
 
         if self.isabsolute and len(segments) > 1 and segments[0] == '':
             segments.pop(0)
