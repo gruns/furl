@@ -1558,10 +1558,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
             else:
                 self.scheme, host_port = toks
 
-            if ':' in host_port:
-                self.host, self.port = host_port.split(':', 1)
-            else:
-                self.host = host_port
+            # Reuse netloc parsing so IPv6 literals with ports work.
+            self.netloc = host_port
 
     @property
     def url(self):

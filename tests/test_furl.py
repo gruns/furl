@@ -1716,6 +1716,16 @@ class TestFurl(unittest.TestCase):
         assert furl.furl().set(host='slurp.ru').origin == '://slurp.ru'
         assert furl.furl('http://pep.ru:83/yep').origin == 'http://pep.ru:83'
         assert furl.furl().set(origin='pep://yep.ru').origin == 'pep://yep.ru'
+        # IPv6 origins must keep brackets and optional ports.
+        f = furl.furl('http://example.com')
+        f.origin = 'http://[::1]:8080'
+        assert f.host == '[::1]'
+        assert f.port == 8080
+        assert f.origin == 'http://[::1]:8080'
+        f.origin = 'http://[::1]'
+        assert f.host == '[::1]'
+        assert f.origin.startswith('http://[::1]')
+
         f = furl.furl('http://user:pass@pumps.com/path?query#fragemtn')
         assert f.origin == 'http://pumps.com'
 
