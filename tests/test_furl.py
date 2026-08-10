@@ -1296,6 +1296,7 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('a b:c')
         assert f.scheme is None and str(f.path) == 'a%20b:c'
         assert furl.furl('foo bar:baz').scheme is None
+        assert furl.furl('http\n://host').scheme is None
 
         # Digits are valid in schemes (RFC 3986) and must still parse.
         assert furl.furl('ws2://host').scheme == 'ws2'
@@ -2302,7 +2303,7 @@ class TestFurl(unittest.TestCase):
     def test_is_valid_scheme(self):
         valids = ['a', 'ab', 'a-b', 'a.b', 'a+b', 'a----b', 'a123', 'a-b123',
                   'a+b.1-+']
-        invalids = ['1', '12', '12+', '-', '.', '+', '1a', '+a', '.b.']
+        invalids = ['1', '12', '12+', '-', '.', '+', '1a', '+a', '.b.', 'http\n']
 
         for valid in valids:
             assert furl.is_valid_scheme(valid)
