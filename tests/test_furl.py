@@ -1712,7 +1712,13 @@ class TestFurl(unittest.TestCase):
         assert f.scheme is None and f.netloc == '' and f.url == '//'
 
     def test_origin(self):
-        assert furl.furl().origin == '://'
+        # No scheme and no host: origin has nothing meaningful to report,
+        # so it should be empty/falsy, not the nonsensical '://'.
+        assert furl.furl().origin == ''
+        assert not furl.furl().origin
+        assert furl.furl('www.google.com').origin == ''
+        assert not furl.furl('www.google.com').origin
+
         assert furl.furl().set(host='slurp.ru').origin == '://slurp.ru'
         assert furl.furl('http://pep.ru:83/yep').origin == 'http://pep.ru:83'
         assert furl.furl().set(origin='pep://yep.ru').origin == 'pep://yep.ru'
