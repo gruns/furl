@@ -1557,6 +1557,27 @@ class TestFurl(unittest.TestCase):
         f3 = f / furl.Path('f')
         assert f3.url == 'http://www.pumps.com/f'
 
+    def test_path_assignment_preserves_absoluteness(self):
+        # Assigning a Path object back onto furl.path should keep whatever
+        # isabsolute that Path already had, not silently flip it based on
+        # segments alone (a Path's .segments never carries the leading ''
+        # that a parsed path string uses to mark itself absolute).
+        f = furl.furl('file:///a/b')
+        assert f.path.isabsolute is True
+
+        f.path = f.path / 'c'
+        assert f.path.isabsolute is True
+        assert str(f.path) == '/a/b/c'
+        assert f.url == 'file:///a/b/c'
+
+        # A relative Path assigned back should stay relative.
+        g = furl.furl('file:a/b')
+        assert g.path.isabsolute is False
+
+        g.path = g.path / 'c'
+        assert g.path.isabsolute is False
+        assert str(g.path) == 'a/b/c'
+
     def test_odd_urls(self):
         # Empty.
         f = furl.furl('')

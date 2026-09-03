@@ -504,10 +504,12 @@ class Path(object):
 
         Returns: <self>.
         """
+        from_path_instance = False
         if not path:
             segments = []
         elif quacks_like_a_path_with_segments(path):  # Path interface.
             segments = path.segments
+            from_path_instance = True
         elif is_iterable_but_not_string(path):  # List interface.
             segments = path
         else:  # String interface.
@@ -515,6 +517,12 @@ class Path(object):
 
         if self._force_absolute(self):
             self._isabsolute = True if segments else False
+        elif from_path_instance:
+            # A Path's .segments never carries the leading '' that marks
+            # a string-parsed path as absolute (see _segments_from_path
+            # and the pop() below), so infer absoluteness from the
+            # source Path directly instead of misreading it as relative.
+            self._isabsolute = path.isabsolute
         else:
             self._isabsolute = (segments and segments[0] == '')
 
