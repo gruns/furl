@@ -507,9 +507,9 @@ class Path(object):
         if not path:
             segments = []
         elif quacks_like_a_path_with_segments(path):  # Path interface.
-            segments = path.segments
+            segments = list(path.segments)
         elif is_iterable_but_not_string(path):  # List interface.
-            segments = path
+            segments = list(path)
         else:  # String interface.
             segments = self._segments_from_path(path)
 
@@ -533,9 +533,9 @@ class Path(object):
         Returns: <self>.
         """
         if quacks_like_a_path_with_segments(path):  # Path interface.
-            newsegments = path.segments
+            newsegments = list(path.segments)
         elif is_iterable_but_not_string(path):  # List interface.
-            newsegments = path
+            newsegments = list(path)
         else:  # String interface.
             newsegments = self._segments_from_path(path)
 
