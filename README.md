@@ -58,7 +58,7 @@ Encoding is handled for you. Unicode, too.
 >>> f.path = 'some encoding here'
 >>> f.args['and some encoding'] = 'here, too'
 >>> f.url
-'http://www.google.com/some%20encoding%20here?and+some+encoding=here,+too'
+'http://www.google.com/some%20encoding%20here?and+some+encoding=here%2C+too'
 >>> f.set(host=u'ドメイン.テスト', path=u'джк', query=u'☃=☺')
 >>> f.url
 'http://xn--eckwd4c7c.xn--zckzah/%D0%B4%D0%B6%D0%BA?%E2%98%83=%E2%98%BA'
@@ -580,7 +580,7 @@ Raw, non-URL strings should never be percent-encoded.
 
 >>> f.set(args={'query parameters':'and values', 'are':'decoded, too'})
 >>> str(f.query)
-'query+parameters=and+values&are=decoded,+too'
+'query+parameters=and+values&are=decoded%2C+too'
 
 >>> f.fragment.path.segments = ['decoded', 'path segments']
 >>> f.fragment.args = {'and decoded':'query parameters and values'}
@@ -707,12 +707,16 @@ creates and returns a URL string. `query_delimiter`, `query_quote_plus`, and
 `query_dont_quote` are passed unmodified to `Query.encode()` as `delimiter`,
 `quote_plus`, and `dont_quote` respectively.
 
+By default, query punctuation such as `$` is percent-encoded. Passing
+`query_dont_quote='$'` preserves `$` in the returned string without changing
+the default encoding used by `f.url`.
+
 ```python
 >>> f = furl('http://spep.ru/?a+b=c+d&two%20tap=cat%20nap%24')
 >>> f.tostr()
-'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
+'http://spep.ru/?a+b=c+d&two+tap=cat+nap%24'
 >>> f.tostr(query_delimiter=';', query_quote_plus=False)
-'http://spep.ru/?a%20b=c%20d;two%20tap=cat%20nap$'
+'http://spep.ru/?a%20b=c%20d;two%20tap=cat%20nap%24'
 >>> f.tostr(query_dont_quote='$')
 'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
 ```
@@ -721,7 +725,7 @@ creates and returns a URL string. `query_delimiter`, `query_quote_plus`, and
 
 ```python
 >>> f.url
-'http://spep.ru/?a+b=c+d&two+tap=cat+nap$'
+'http://spep.ru/?a+b=c+d&two+tap=cat+nap%24'
 >>> f.url == f.tostr() == str(f)
 True
 ```
