@@ -128,6 +128,12 @@ scheme://username:password@host:port/path?query#fragment
 __scheme__, __username__, __password__, and __host__ are strings or
 None. __port__ is an integer or None.
 
+furl parses URLs; it does not enforce your application's URL policy. For
+applications that only accept HTTP(S) URLs, check __scheme__ and __host__
+separately: `https://example.com/` and `unknown://example.com/` share a host
+but have different schemes. A __host__ of None alone does not mean a URL
+is relative.
+
 ```python
 >>> f = furl('http://user:pass@www.google.com:99/')
 >>> f.scheme, f.username, f.password, f.host, f.port
