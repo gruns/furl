@@ -949,7 +949,7 @@ class Query(object):
             items = self._items(query)
         # List of keys or items to remove.
         elif non_string_iterable(query):
-            items = query
+            items = list(query)
 
         for item in items:
             if non_string_iterable(item) and len(item) == 2:
