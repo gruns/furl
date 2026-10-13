@@ -50,12 +50,10 @@ class omdict1D(omdict):
         if not is_iterable_but_not_string(value):
             value = [value]
 
-        if value:
-            self._map.setdefault(key, list())
-
         for val in value:
+            nodes = self._map.setdefault(key, list())
             node = self._items.append(key, val)
-            self._map[key].append(node)
+            nodes.append(node)
 
         return self
 
