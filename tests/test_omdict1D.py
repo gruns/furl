@@ -125,6 +125,28 @@ class TestOmdict1D(unittest.TestCase):
         assert omd.add(_unique, []) == omd
         assert _unique not in omd
 
+    def test_add_empty_iterators(self):
+        factories = [lambda: iter([]), lambda: (value for value in [])]
+        for factory in factories:
+            for initial in [[], [('existing', 'value')]]:
+                for key in ['existing', 'missing']:
+                    with self.subTest(factory=factory,
+                                      initial=initial, key=key):
+                        omd = omdict1D(initial)
+                        keys = list(omd.keys())
+                        self.assertIs(omd.add(key, factory()), omd)
+                        self.assertEqual(list(omd.keys()), keys)
+                        self.assertEqual(omd.allitems(), initial)
+
+    def test_add_nonempty_iterators(self):
+        for values in [iter(['one', 'two']),
+                       (value for value in ['one', 'two'])]:
+            omd = omdict1D([('existing', 'value')])
+            self.assertIs(omd.add('existing', values), omd)
+            self.assertEqual(omd.allitems(), [
+                ('existing', 'value'), ('existing', 'one'),
+                ('existing', 'two')])
+
     def test_set(self):
         omd1, omd2, omd3 = omdict1D(), omdict1D(), omdict1D()
 
