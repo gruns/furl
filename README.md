@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src=".project/assets/logo.svg" width="360px" height="123px" alt="furl logo">
+  <img src=".project/assets/img/logo.svg" width="360px" height="123px" alt="furl logo">
 </h1>
 
 <p align="center">
