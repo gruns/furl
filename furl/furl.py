@@ -446,7 +446,7 @@ def quacks_like_a_path_with_segments(obj):
         is_iterable_but_not_string(obj.segments))
 
 
-class Path():
+class Path:
 
     """
     Represents a path comprised of zero or more path segments.
@@ -701,7 +701,7 @@ class Path():
 
 
 @six.add_metaclass(abc.ABCMeta)
-class PathCompositionInterface():
+class PathCompositionInterface:
 
     """
     Abstract class interface for a parent class that contains a Path.
@@ -797,7 +797,7 @@ class FragmentPathCompositionInterface(PathCompositionInterface):
         return False
 
 
-class Query():
+class Query:
 
     """
     Represents a URL query comprised of zero or more unique parameters
@@ -1131,7 +1131,7 @@ class Query():
 
 
 @six.add_metaclass(abc.ABCMeta)
-class QueryCompositionInterface():
+class QueryCompositionInterface:
 
     """
     Abstract class interface for a parent class that contains a Query.
@@ -1299,7 +1299,7 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
 
 
 @six.add_metaclass(abc.ABCMeta)
-class FragmentCompositionInterface():
+class FragmentCompositionInterface:
 
     """
     Abstract class interface for a parent class that contains a
@@ -1891,3 +1891,4 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
     def __repr__(self):
         return "%s('%s')" % (self.__class__.__name__, str(self))
+

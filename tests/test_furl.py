@@ -36,7 +36,7 @@ from furl.compat import string_types, OrderedDict as odict
 
 
 @six.add_metaclass(ABCMeta)
-class itemcontainer():
+class itemcontainer:
 
     """
     Utility list subclasses to expose allitems() and iterallitems()
