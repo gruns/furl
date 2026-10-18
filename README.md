@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="logo.svg" width="360px" height="123px" alt="furl">
+  <img src=".project/assets/logo.svg" width="360px" height="123px" alt="furl logo">
 </h1>
 
 <p align="center">
@@ -9,24 +9,22 @@
   <a href="https://pypi.python.org/pypi/furl"><img src="https://img.shields.io/pypi/pyversions/furl.svg"></a>
 </p>
 
-## furl is a small Python library that makes parsing and<br>modifying URLs easy.
+> **furl is a small Python library that makes parsing and modifying URLs easy.**
 
-Python's standard
-[urllib](https://docs.python.org/3/library/urllib.html) and
-[urlparse](https://docs.python.org/3/library/urllib.parse.html) modules
-provide a number of URL related functions, but using these functions to
-perform common URL operations proves tedious. Furl makes parsing and
-modifying URLs easy.
+Python's standard [urllib](https://docs.python.org/3/library/urllib.html) and
+[urlparse](https://docs.python.org/3/library/urllib.parse.html) modules provide a number of URL
+related functions, but using these functions to perform common URL operations proves tedious. furl
+makes parsing and modifying URLs easy.
 
-Furl is well tested, [Unlicensed](http://unlicense.org/) in the public
-domain, and supports Python 3 and PyPy3.
+furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain, and supports Python 3
+and PyPy3.
 
-Furl is maintained by [Alex Cochran](https://github.com/alexcochran), with support from the confidential computing folks at [🌖 Lunal](https://lunal.dev/).
-
+furl is maintained by [Aleksandre Cochran](https://github.com/aleksandre-c), with support from the
+confidential computing folks at [🌖 Lunal](https://lunal.dev/).
 
 ## Usage
 
-Code time: Paths and query arguments are easy. Really easy.
+*Code time:* Paths and query arguments are easy. Really easy.
 
 ```python
 >>> from furl import furl
@@ -82,21 +80,19 @@ Installing furl with pip is easy.
 $ pip install furl
 ```
 
-
 ## API
 
-  * [Basics](#basics)
-  * [Scheme, Username, Password, Host, Port, Network Location, and Origin](#scheme-username-password-host-port-network-location-and-origin)
-  * [Path](#path)
-    * [Modification](#modification)
-  * [Query](#query)
-    * [Modification](#modification-1)
-    * [Parameters](#parameters)
-  * [Fragment](#fragment)
-  * [Encoding](#encoding)
-  * [Inline modification](#inline-modification)
-  * [Miscellaneous](#miscellaneous)
-
+- [Basics](#basics)
+- [Scheme, Username, Password, Host, Port, Network Location, and Origin](#scheme-username-password-host-port-network-location-and-origin)
+- [Path](#path)
+  - [Modification](#modification)
+- [Query](#query)
+  - [Modification](#modification-1)
+  - [Parameters](#parameters)
+- [Fragment](#fragment)
+- [Encoding](#encoding)
+- [Inline modification](#inline-modification)
+- [Miscellaneous](#miscellaneous)
 
 ### Basics
 
@@ -106,27 +102,22 @@ furl objects let you access and modify the various components of a URL.
 scheme://username:password@host:port/path?query#fragment
 ```
 
- * __scheme__ is the scheme string (all lowercase) or None. None means no
-   scheme. An empty string means a protocol relative URL, like
-   `//www.google.com`.
- * __username__ is the username string for authentication.
- * __password__ is the password string for authentication with __username__.
- * __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names
-  are all lowercase.
- * __port__ is an integer or None. A value of None means no port specified and
-  the default port for the given __scheme__ should be inferred, if possible
-  (e.g. port 80 for the scheme `http`).
- * __path__ is a Path object comprised of path segments.
- * __query__ is a Query object comprised of key:value query arguments.
- * __fragment__ is a Fragment object comprised of a Path object and Query object
-   separated by an optional `?` separator.
-
-
+- __scheme__ is the scheme string (all lowercase) or None. None means no scheme. An empty string
+  means a protocol relative URL, like `//www.google.com`.
+- __username__ is the username string for authentication.
+- __password__ is the password string for authentication with __username__.
+- __host__ is the domain name, IPv4, or IPv6 address as a string. Domain names are all lowercase.
+- __port__ is an integer or None. A value of None means no port specified and the default port for
+  the given __scheme__ should be inferred, if possible (e.g. port 80 for the scheme `http`).
+- __path__ is a Path object comprised of path segments.
+- __query__ is a Query object comprised of key:value query arguments.
+- __fragment__ is a Fragment object comprised of a Path object and Query object separated by an
+  optional `?` separator.
 
 ### Scheme, Username, Password, Host, Port, Network Location, and Origin
 
-__scheme__, __username__, __password__, and __host__ are strings or
-None. __port__ is an integer or None.
+__scheme__, __username__, __password__, and __host__ are strings or None. __port__ is an integer or
+None.
 
 ```python
 >>> f = furl('http://user:pass@www.google.com:99/')
@@ -146,9 +137,8 @@ furl infers the default port for common schemes.
 None
 ```
 
-__netloc__ is the string combination of __username__, __password__, __host__,
-and __port__, not including __port__ if it's None or the default port for the
-provided __scheme__.
+__netloc__ is the string combination of __username__, __password__, __host__, and __port__, not
+including __port__ if it's None or the default port for the provided __scheme__.
 
 ```python
 >>> furl('http://www.google.com/').netloc
@@ -161,8 +151,8 @@ provided __scheme__.
 'user:pass@www.google.com:99'
 ```
 
-__origin__ is the string combination of __scheme__, __host__, and __port__, not
-including __port__ if it's None or the default port for the provided __scheme__.
+__origin__ is the string combination of __scheme__, __host__, and __port__, not including __port__
+if it's None or the default port for the provided __scheme__.
 
 ```python
 >>> furl('http://www.google.com/').origin
@@ -172,13 +162,10 @@ including __port__ if it's None or the default port for the provided __scheme__.
 'http://www.google.com:99'
 ```
 
-
-
 ### Path
 
-URL paths in furl are Path objects that have __segments__, a list of
-zero or more path segments that can be modified directly. Path segments
-in __segments__ are percent-decoded and all interaction with
+URL paths in furl are Path objects that have __segments__, a list of zero or more path segments that
+can be modified directly. Path segments in __segments__ are percent-decoded and all interaction with
 __segments__ should take place with percent-decoded strings.
 
 ```python
@@ -212,16 +199,14 @@ Path('/a/large ish/path')
 '/segments/are/maintained/decoded/%5E%60%3C%3E%5B%5D%22%23%2F%3F'
 ```
 
-A path that starts with `/` is considered absolute, and a Path can be absolute
-or not as specified (or set) by the boolean attribute __isabsolute__. URL Paths
-have a special restriction: they must be absolute if a __netloc__ (username,
-password, host, and/or port) is present. This restriction exists because a URL
-path must start with `/` to separate itself from the __netloc__, if
-present. Fragment Paths have no such limitation and __isabsolute__ and can be
-True or False without restriction.
+A path that starts with `/` is considered absolute, and a Path can be absolute or not as specified
+(or set) by the boolean attribute __isabsolute__. URL Paths have a special restriction: they must be
+absolute if a __netloc__ (username, password, host, and/or port) is present. This restriction exists
+because a URL path must start with `/` to separate itself from the __netloc__, if present. Fragment
+Paths have no such limitation and __isabsolute__ and can be True or False without restriction.
 
-Here's a URL Path example that illustrates how __isabsolute__ becomes True and
-read-only in the presence of a __netloc__.
+Here's a URL Path example that illustrates how __isabsolute__ becomes True and read-only in the
+presence of a __netloc__.
 
 ```python
 >>> f = furl('/url/path')
@@ -243,9 +228,9 @@ AttributeError: Path.isabsolute is True and read-only for URLs with a netloc (a 
 'blaps.ru/url/path'
 ```
 
-Conversely, the __isabsolute__ attribute of Fragment Paths isn't bound by the
-same read-only restriction. URL fragments are always prefixed by a `#` character
-and don't need to be separated from the __netloc__.
+Conversely, the __isabsolute__ attribute of Fragment Paths isn't bound by the same read-only
+restriction. URL fragments are always prefixed by a `#` character and don't need to be separated
+from the __netloc__.
 
 ```python
 >>> f = furl('http://www.google.com/#/absolute/fragment/path/')
@@ -259,10 +244,9 @@ True
 'http://www.google.com/#/absolute/fragment/path/'
 ```
 
-A path that ends with `/` is considered a directory, and otherwise considered a
-file. The Path attribute __isdir__ returns True if the path is a directory,
-False otherwise. Conversely, the attribute __isfile__ returns True if the path
-is a file, False otherwise.
+A path that ends with `/` is considered a directory, and otherwise considered a file. The Path
+attribute __isdir__ returns True if the path is a directory, False otherwise. Conversely, the
+attribute __isfile__ returns True if the path is a file, False otherwise.
 
 ```python
 >>> f = furl('http://www.google.com/a/directory/')
@@ -278,8 +262,8 @@ False
 True
 ```
 
-A path can be normalized with __normalize()__, and __normalize()__ returns the
-Path object for method chaining.
+A path can be normalized with __normalize()__, and __normalize()__ returns the Path object for
+method chaining.
 
 ```python
 >>> f = furl('http://www.google.com////a/./b/lolsup/../c/')
@@ -313,15 +297,12 @@ For a dictionary representation of a path, use __asdict()__.
   'segments': ['some', 'enc oding'] }
 ```
 
-
-
 ### Query
 
 URL queries in furl are Query objects that have __params__, a one dimensional
-[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of
-query keys and values. Query keys and values in __params__ are percent-decoded
-and all interaction with __params__ should take place with percent-decoded
-strings.
+[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) of query keys and values.
+Query keys and values in __params__ are percent-decoded and all interaction with __params__ should
+take place with percent-decoded strings.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
@@ -333,8 +314,8 @@ omdict1D([('one', '1'), ('two', '2')])
 'one=1&two=2'
 ```
 
-furl objects and Fragment objects (covered below) contain a Query object, and
-__args__ is provided as a shortcut on these objects to access __query.params__.
+furl objects and Fragment objects (covered below) contain a Query object, and __args__ is provided
+as a shortcut on these objects to access __query.params__.
 
 ```python
 >>> f = furl('http://www.google.com/?one=1&two=2')
@@ -349,8 +330,8 @@ True
 #### Modification
 
 __params__ is a one dimensional
-[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that
-maintains method parity with Python's standard dictionary.
+[ordered multivalue dictionary](https://github.com/gruns/orderedmultidict) that maintains method
+parity with Python's standard dictionary.
 
 ```python
 >>> f.query = 'silicon=14&iron=26&inexorable%20progress=vae%20victus'
@@ -362,8 +343,7 @@ omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus
 omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 ```
 
-__params__ can also store multiple values for the same key because it's a
-multivalue dictionary.
+__params__ can also store multiple values for the same key because it's a multivalue dictionary.
 
 ```python
 >>> f = furl('http://www.google.com/?space=jams&space=slams')
@@ -382,8 +362,8 @@ multivalue dictionary.
 'space=jams&repeated=1&repeated=3'
 ```
 
-__params__ is one dimensional. If a list of values is provided as a query value,
-that list is interpreted as multiple values.
+__params__ is one dimensional. If a list of values is provided as a query value, that list is
+interpreted as multiple values.
 
 ```python
 >>> f = furl()
@@ -393,17 +373,16 @@ that list is interpreted as multiple values.
 'repeated=1&repeated=2&repeated=3&space=jams&space=slams'
 ```
 
-This makes sense: URL queries are inherently one dimensional -- query values
-can't have native subvalues.
+This makes sense: URL queries are inherently one dimensional -- query values can't have native
+subvalues.
 
-See the [orderedmultimdict](https://github.com/gruns/orderedmultidict)
-documentation for more information on interacting with the ordered multivalue
-dictionary __params__.
+See the [orderedmultimdict](https://github.com/gruns/orderedmultidict) documentation for more
+information on interacting with the ordered multivalue dictionary __params__.
 
 #### Parameters
 
-To produce an empty query argument, like `http://sprop.su/?param=`, set the
-argument's value to the empty string.
+To produce an empty query argument, like `http://sprop.su/?param=`, set the argument's value to the
+empty string.
 
 ```python
 >>> f = furl('http://sprop.su')
@@ -412,8 +391,7 @@ argument's value to the empty string.
 'http://sprop.su/?param='
 ```
 
-To produce an empty query argument without a trailing `=`, use `None` as the
-parameter value.
+To produce an empty query argument without a trailing `=`, use `None` as the parameter value.
 
 ```python
 >>> f = furl('http://sprop.su')
@@ -422,10 +400,9 @@ parameter value.
 'http://sprop.su/?param'
 ```
 
-__encode(delimiter='&', quote_plus=True, dont_quote='')__ can be used to encode
-query strings with delimiters like `;`, encode spaces as `+` instead of `%20`
-(i.e. application/x-www-form-urlencoded encoded), or avoid percent-encoding
-valid query characters entirely (valid query characters are
+__encode(delimiter='&', quote_plus=True, dont_quote='')__ can be used to encode query strings with
+delimiters like `;`, encode spaces as `+` instead of `%20` (i.e. application/x-www-form-urlencoded
+encoded), or avoid percent-encoding valid query characters entirely (valid query characters are
 `/?:@-._~!$&'()*+,;=`).
 
 ```python
@@ -438,9 +415,8 @@ valid query characters entirely (valid query characters are
 'space=jams&woofs=squeeze%20dog'
 ```
 
-`dont_quote` accepts `True`, `False`, or a string of valid query characters to
-not percent-enode. If `True`, all valid query characters `/?:@-._~!$&'()*+,;=`
-aren't percent-encoded.
+`dont_quote` accepts `True`, `False`, or a string of valid query characters to not percent-enode. If
+`True`, all valid query characters `/?:@-._~!$&'()*+,;=` aren't percent-encoded.
 
 ```python
 >>> f.query = 'one,two/three'
@@ -462,12 +438,10 @@ For a dictionary representation of a query, use __asdict()__.
              ('space', 'slams')] }
 ```
 
-
-
 ### Fragment
 
-URL fragments in furl are Fragment objects that have a Path __path__ and Query
-__query__ separated by an optional `?` __separator__.
+URL fragments in furl are Fragment objects that have a Path __path__ and Query __query__ separated
+by an optional `?` __separator__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -481,8 +455,8 @@ Query('with=params')
 True
 ```
 
-Modification of Fragments is done via the Fragment's Path and Query instances,
-__path__ and __query__.
+Modification of Fragments is done via the Fragment's Path and Query instances, __path__ and
+__query__.
 
 ```python
 >>> f = furl('http://www.google.com/#/fragment/path?with=params')
@@ -500,9 +474,9 @@ __path__ and __query__.
 '/fragment/path?new=yep&with=params'
 ```
 
-Creating hash-bang fragments with furl illustrates the use of Fragment's boolean
-attribute __separator__. When __separator__ is False, the `?` that separates
-__path__ and __query__ isn't included.
+Creating hash-bang fragments with furl illustrates the use of Fragment's boolean attribute
+__separator__. When __separator__ is False, the `?` that separates __path__ and __query__ isn't
+included.
 
 ```python
 >>> f = furl('http://www.google.com/')
@@ -536,12 +510,10 @@ For a dictionary representation of a fragment, use __asdict()__.
              'params': [('args', 'args')]} }
 ```
 
-
-
 ### Encoding
 
-Furl handles encoding for you, and furl's philosophy on encoding is simple: raw
-URL strings should always be percent-encoded.
+furl handles encoding for you, and furl's philosophy on encoding is simple: raw URL strings should
+always be percent-encoded.
 
 ```python
 >>> f = furl()
@@ -588,22 +560,17 @@ Raw, non-URL strings should never be percent-encoded.
 'decoded/path%20segments?and+decoded=query+parameters+and+values'
 ```
 
-Python's
-[urllib.quote()](http://docs.python.org/library/urllib.html#urllib.quote) and
-[urllib.unquote()](http://docs.python.org/library/urllib.html#urllib.unquote)
-can be used to percent-encode and percent-decode path strings. Similarly,
-[urllib.quote_plus()](http://docs.python.org/library/urllib.html#urllib.quote_plus)
-and
-[urllib.unquote_plus()](http://docs.python.org/library/urllib.html#urllib.unquote_plus)
-can be used to percent-encode and percent-decode query strings.
-
-
+Python's [urllib.quote()](http://docs.python.org/library/urllib.html#urllib.quote) and
+[urllib.unquote()](http://docs.python.org/library/urllib.html#urllib.unquote) can be used to
+percent-encode and percent-decode path strings. Similarly,
+[urllib.quote_plus()](http://docs.python.org/library/urllib.html#urllib.quote_plus) and
+[urllib.unquote_plus()](http://docs.python.org/library/urllib.html#urllib.unquote_plus) can be used
+to percent-encode and percent-decode query strings.
 
 ### Inline modification
 
-For quick, single-line URL modifications, the __add()__, __set()__, and
-__remove()__ methods of furl objects modify various URL components and
-return the furl object for method chaining.
+For quick, single-line URL modifications, the __add()__, __set()__, and __remove()__ methods of furl
+objects modify various URL components and return the furl object for method chaining.
 
 ```python
 >>> url = 'http://www.google.com/#fragment' 
@@ -613,15 +580,13 @@ return the furl object for method chaining.
 
 __add()__ adds items to a furl object with the optional arguments
 
- * __args__: Shortcut for __query_params__.
- * __path__: A list of path segments to add to the existing path segments, or a
-   path string to join with the existing path string.
- * __query_params__: A dictionary of query keys and values to add to the query.
- * __fragment_path__: A list of path segments to add to the existing fragment
-   path segments, or a path string to join with the existing fragment path
-   string.
- * __fragment_args__: A dictionary of query keys and values to add to the
-   fragment's query.
+- __args__: Shortcut for __query_params__.
+- __path__: A list of path segments to add to the existing path segments, or a path string to join
+  with the existing path string.
+- __query_params__: A dictionary of query keys and values to add to the query.
+- __fragment_path__: A list of path segments to add to the existing fragment path segments, or a
+  path string to join with the existing fragment path string.
+- __fragment_args__: A dictionary of query keys and values to add to the fragment's query.
 
 ```python
 >>> f = furl('http://www.google.com/').add(
@@ -632,25 +597,23 @@ __add()__ adds items to a furl object with the optional arguments
 
 __set()__ sets items of a furl object with the optional arguments
 
- * __args__: Shortcut for __query_params__.
- * __path__: List of path segments or a path string to adopt.
- * __scheme__: Scheme string to adopt.
- * __netloc__: Network location string to adopt.
- * __origin__: Origin string to adopt.
- * __query__: Query string to adopt.
- * __query_params__: A dictionary of query keys and values to adopt.
- * __fragment__: Fragment string to adopt.
- * __fragment_path__: A list of path segments to adopt for the fragment's path
-   or a path string to adopt as the fragment's path.
- * __fragment_args__: A dictionary of query keys and values for the fragment's
-   query to adopt.
- * __fragment_separator__: Boolean whether or not there should be a `?`
-   separator between the fragment path and the fragment query.
- * __host__: Host string to adopt.
- * __port__: Port number to adopt.
- * __username__: Username string to adopt.
- * __password__: password string to adopt.
-
+- __args__: Shortcut for __query_params__.
+- __path__: List of path segments or a path string to adopt.
+- __scheme__: Scheme string to adopt.
+- __netloc__: Network location string to adopt.
+- __origin__: Origin string to adopt.
+- __query__: Query string to adopt.
+- __query_params__: A dictionary of query keys and values to adopt.
+- __fragment__: Fragment string to adopt.
+- __fragment_path__: A list of path segments to adopt for the fragment's path or a path string to
+  adopt as the fragment's path.
+- __fragment_args__: A dictionary of query keys and values for the fragment's query to adopt.
+- __fragment_separator__: Boolean whether or not there should be a `?` separator between the
+  fragment path and the fragment query.
+- __host__: Host string to adopt.
+- __port__: Port number to adopt.
+- __username__: Username string to adopt.
+- __password__: password string to adopt.
 
 ```python
 >>> f = furl().set(
@@ -662,23 +625,20 @@ __set()__ sets items of a furl object with the optional arguments
 
 __remove()__ removes items from a furl object with the optional arguments
 
- * __args__: Shortcut for __query_params__.
- * __path__: A list of path segments to remove from the end of the existing path
-       segments list, or a path string to remove from the end of the existing
-       path string, or True to remove the entire path portion of the URL.
- * __query__: A list of query keys to remove from the query, if they exist, or
-       True to remove the entire query portion of the URL.
- * __query_params__: A list of query keys to remove from the query, if they
-       exist.
- * __fragment__: If True, remove the entire fragment portion of the URL.
- * __fragment_path__: A list of path segments to remove from the end of the
-       fragment's path segments, or a path string to remove from the end of the
-       fragment's path string, or True to remove the entire fragment path.
- * __fragment_args__: A list of query keys to remove from the fragment's query,
-       if they exist.
- * __username__: If True, remove the username, if it exists.
- * __password__: If True, remove the password, if it exists.
-
+- __args__: Shortcut for __query_params__.
+- __path__: A list of path segments to remove from the end of the existing path segments list, or a
+  path string to remove from the end of the existing path string, or True to remove the entire path
+  portion of the URL.
+- __query__: A list of query keys to remove from the query, if they exist, or True to remove the
+  entire query portion of the URL.
+- __query_params__: A list of query keys to remove from the query, if they exist.
+- __fragment__: If True, remove the entire fragment portion of the URL.
+- __fragment_path__: A list of path segments to remove from the end of the fragment's path segments,
+  or a path string to remove from the end of the fragment's path string, or True to remove the
+  entire fragment path.
+- __fragment_args__: A list of query keys to remove from the fragment's query, if they exist.
+- __username__: If True, remove the username, if it exists.
+- __password__: If True, remove the password, if it exists.
 
 ```python
 >>> url = 'https://secure.google.com:99/a/path/?some=args#great job'
@@ -686,12 +646,10 @@ __remove()__ removes items from a furl object with the optional arguments
 'https://secure.google.com/a/'
 ```
 
-
-
 ### Miscellaneous
 
-Like [pathlib.Path](https://docs.python.org/3/library/pathlib.html#operators),
-path segments can be appended to a furl object's Path with the slash operator.
+Like [pathlib.Path](https://docs.python.org/3/library/pathlib.html#operators), path segments can be
+appended to a furl object's Path with the slash operator.
 
 ```python
 >>> from __future__ import division  # For Python 2.x.
@@ -702,10 +660,9 @@ path segments can be appended to a furl object's Path with the slash operator.
 'http://www.google.com/path/add/seg%20ments/?example=arg#frag'
 ```
 
-__tostr(query_delimiter='&', query_quote_plus=True, query_dont_quote='')__
-creates and returns a URL string. `query_delimiter`, `query_quote_plus`, and
-`query_dont_quote` are passed unmodified to `Query.encode()` as `delimiter`,
-`quote_plus`, and `dont_quote` respectively.
+__tostr(query_delimiter='&', query_quote_plus=True, query_dont_quote='')__ creates and returns a URL
+string. `query_delimiter`, `query_quote_plus`, and `query_dont_quote` are passed unmodified to
+`Query.encode()` as `delimiter`, `quote_plus`, and `dont_quote` respectively.
 
 ```python
 >>> f = furl('http://spep.ru/?a+b=c+d&two%20tap=cat%20nap%24')
@@ -736,9 +693,9 @@ __copy()__ creates and returns a new furl object with an identical URL.
 'http://www.google.com'
 ```
 
-__join()__ joins the furl object's URL with the provided relative or absolute
-URL and returns the furl object for method chaining. __join()__'s action is the
-same as navigating to the provided URL from the current URL in a web browser.
+__join()__ joins the furl object's URL with the provided relative or absolute URL and returns the
+furl object for method chaining. __join()__'s action is the same as navigating to the provided URL
+from the current URL in a web browser.
 
 ```python
 >>> f = furl('http://www.google.com')
