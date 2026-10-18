@@ -20,7 +20,7 @@ furl is well tested, [Unlicensed](http://unlicense.org/) in the public domain, a
 and PyPy3.
 
 furl is maintained by [Aleksandre Cochran](https://github.com/aleksandre-c), with support from the
-confidential computing folks at [🌖 Lunal](https://lunal.dev/).
+confidential computing folks at [🥷 Confidential AI](https://confidential.ai/).
 
 ## Usage
 
