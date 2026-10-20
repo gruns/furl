@@ -1740,6 +1740,22 @@ class TestFurl(unittest.TestCase):
         with self.assertRaises(ValueError):
             f.origin = 'http://pump2pump.org:777777777777'
 
+    def test_ipv6_origin(self):
+        for host in ('[::1]', '[2001:db8::1]'):
+            for prefix in ('http://', ''):
+                f = furl.furl('http://user:pass@example.com/path?x=y#z')
+                f.origin = prefix + host
+                assert f.origin == 'http://' + host
+                assert f.url == 'http://user:pass@' + host + '/path?x=y#z'
+
+    def test_ipv6_origin_with_port(self):
+        for host in ('[::1]', '[2001:db8::1]'):
+            for prefix in ('http://', ''):
+                f = furl.furl('http://user:pass@example.com/path?x=y#z')
+                f.origin = prefix + host + ':8080'
+                assert f.origin == 'http://' + host + ':8080'
+                assert f.url == 'http://user:pass@' + host + ':8080/path?x=y#z'
+
     def test_ports(self):
         # Default port values.
         assert furl.furl('http://www.pumps.com/').port == 80
