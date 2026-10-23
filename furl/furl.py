@@ -1562,6 +1562,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
                 self.host, self.port = host_port.split(':', 1)
             else:
                 self.host = host_port
+                self.port = None
 
     @property
     def url(self):
