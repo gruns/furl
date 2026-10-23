@@ -1541,6 +1541,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         port = ''
         scheme = self.scheme or ''
         host = idna_encode(self.host) or ''
+        if not scheme and not host:
+            return ''
         if self.port and self.port != DEFAULT_PORTS.get(self.scheme):
             port = ':%s' % self.port
         origin = '%s://%s%s' % (scheme, host, port)
