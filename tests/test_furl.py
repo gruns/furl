@@ -1511,7 +1511,7 @@ class TestFurl(unittest.TestCase):
         assert str(f) == 'http://www.yahoo.com/?foo=eep'
 
         f.scheme = 'sup'
-        assert str(f) == 'sup://www.yahoo.com:80/?foo=eep'
+        assert str(f) == 'sup://www.yahoo.com/?foo=eep'
 
         f.port = None
         assert str(f) == 'sup://www.yahoo.com/?foo=eep'

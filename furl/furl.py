@@ -1407,8 +1407,6 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         self.netloc = tokens.netloc  # Raises ValueError in Python 2.7+.
         self.scheme = tokens.scheme
-        if not self.port:
-            self._port = DEFAULT_PORTS.get(self.scheme)
         self.path.load(tokens.path)
         self.query.load(tokens.query)
         self.fragment.load(tokens.fragment)
@@ -1469,7 +1467,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         Raises: ValueError on invalid port.
         """
         if port is None:
-            self._port = DEFAULT_PORTS.get(self.scheme)
+            self._port = None
         elif is_valid_port(port):
             self._port = int(str(port))
         else:
