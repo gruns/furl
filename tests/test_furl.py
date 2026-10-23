@@ -1727,6 +1727,11 @@ class TestFurl(unittest.TestCase):
         f.origin = 'ssh://horse-machine.de'
         assert f.url == 'ssh://user:pass@horse-machine.de'
 
+        f = furl.furl('http://user:pass@old.example:8080/path')
+        f.origin = 'https://new.example'
+        assert f.url == 'https://user:pass@new.example/path'
+        assert f.port == 443
+
         # Malformed IPv6 should raise an exception because urlparse.urlsplit()
         # raises an exception.
         with self.assertRaises(ValueError):
