@@ -1154,6 +1154,24 @@ class TestFragmentCompositionInterface(unittest.TestCase):
 
 class TestFurl(unittest.TestCase):
 
+    def test_copy_preserves_strict(self):
+        for strict in (True, False):
+            original = furl.furl('https://example.com/path?a=b#fragment',
+                                 strict=strict)
+            copied = original.copy()
+            assert copied is not original
+            assert copied.url == original.url
+            for component in (copied, copied.path, copied.query,
+                              copied.fragment.path, copied.fragment.query):
+                assert component.strict is strict
+
+    def test_division_preserves_strict_warnings(self):
+        original = furl.furl('https://example.com/path', strict=True)
+        with self.assertWarns(UserWarning):
+            copied = original / 'bad path'
+        assert copied.url == 'https://example.com/path/bad%20path'
+        assert original.url == 'https://example.com/path'
+
     def setUp(self):
         # Don't hide duplicate Warnings. Test for all of them.
         warnings.simplefilter("always")

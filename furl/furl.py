@@ -1852,7 +1852,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         return self
 
     def copy(self):
-        return self.__class__(self)
+        return self.__class__(self, strict=self.strict)
 
     def asdict(self):
         return {
