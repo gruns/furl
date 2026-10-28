@@ -2334,6 +2334,27 @@ class TestFurl(unittest.TestCase):
         for invalid in invalids:
             assert not furl.is_valid_encoded_query_value(invalid)
 
+    def test_encoded_components_reject_trailing_newlines(self):
+        validators = [furl.is_valid_encoded_path_segment,
+                      furl.is_valid_encoded_query_key,
+                      furl.is_valid_encoded_query_value]
+        for validator in validators:
+            for value in ['\n', 'value\n']:
+                assert not validator(value)
+            assert validator('value%0A')
+
+    def test_strict_components_warn_for_trailing_newlines(self):
+        for constructor, value, encoded in [
+                (furl.Path, 'value\n', 'value%0A'),
+                (furl.Query, 'key\n=value', 'key%0A=value'),
+                (furl.Query, 'key=value\n', 'key=value%0A')]:
+            with self.assertWarns(UserWarning):
+                component = constructor(value, strict=True)
+            assert str(component) == encoded
+            with warnings.catch_warnings(record=True) as caught:
+                constructor(encoded, strict=True)
+            assert not caught
+
     def test_asdict(self):
         path_encoded = '/wiki/%E3%83%AD%E3%83%AA%E3%83%9D%E3%83%83%E3%83%97'
 

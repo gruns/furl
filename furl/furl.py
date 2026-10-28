@@ -206,19 +206,19 @@ INVALID_HOST_CHARS = '!@#$%^&\'\"*()+=:;/'
 
 
 @static_vars(regex=re.compile(
-    r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;='), PERCENT_REGEX)))
+    r'^([\w%s]|(%s))*\Z' % (re.escape('-.~:@!$&\'()*+,;='), PERCENT_REGEX)))
 def is_valid_encoded_path_segment(segment):
     return is_valid_encoded_path_segment.regex.match(segment) is not None
 
 
 @static_vars(regex=re.compile(
-    r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;/?'), PERCENT_REGEX)))
+    r'^([\w%s]|(%s))*\Z' % (re.escape('-.~:@!$&\'()*+,;/?'), PERCENT_REGEX)))
 def is_valid_encoded_query_key(key):
     return is_valid_encoded_query_key.regex.match(key) is not None
 
 
 @static_vars(regex=re.compile(
-    r'^([\w%s]|(%s))*$' % (re.escape('-.~:@!$&\'()*+,;/?='), PERCENT_REGEX)))
+    r'^([\w%s]|(%s))*\Z' % (re.escape('-.~:@!$&\'()*+,;/?='), PERCENT_REGEX)))
 def is_valid_encoded_query_value(value):
     return is_valid_encoded_query_value.regex.match(value) is not None
 
