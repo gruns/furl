@@ -223,7 +223,7 @@ def is_valid_encoded_query_value(value):
     return is_valid_encoded_query_value.regex.match(value) is not None
 
 
-@static_vars(regex=re.compile(r'[a-zA-Z][a-zA-Z\-\.\+]*'))
+@static_vars(regex=re.compile(r'^[a-zA-Z][a-zA-Z0-9\-\.\+]*\Z'))
 def is_valid_scheme(scheme):
     return is_valid_scheme.regex.match(scheme) is not None
 

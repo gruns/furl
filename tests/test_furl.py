@@ -1290,6 +1290,18 @@ class TestFurl(unittest.TestCase):
         assert furl.furl('+invalid$scheme://lolsup').scheme is None
         assert furl.furl('/api/test?url=http://a.com').scheme is None
 
+        # A prefix that looks like a scheme isn't one: the scheme regex must be
+        # anchored at both ends, so a ':' after invalid scheme characters
+        # doesn't get mis-parsed as a scheme separator.
+        f = furl.furl('a b:c')
+        assert f.scheme is None and str(f.path) == 'a%20b:c'
+        assert furl.furl('foo bar:baz').scheme is None
+        assert furl.furl('http\n://host').scheme is None
+
+        # Digits are valid in schemes (RFC 3986) and must still parse.
+        assert furl.furl('ws2://host').scheme == 'ws2'
+        assert furl.furl('a1b://host').scheme == 'a1b'
+
         # Empty scheme.
         f = furl.furl(':')
         assert f.scheme == '' and f.netloc is None and f.url == ':'
@@ -2291,7 +2303,7 @@ class TestFurl(unittest.TestCase):
     def test_is_valid_scheme(self):
         valids = ['a', 'ab', 'a-b', 'a.b', 'a+b', 'a----b', 'a123', 'a-b123',
                   'a+b.1-+']
-        invalids = ['1', '12', '12+', '-', '.', '+', '1a', '+a', '.b.']
+        invalids = ['1', '12', '12+', '-', '.', '+', '1a', '+a', '.b.', 'http\n']
 
         for valid in valids:
             assert furl.is_valid_scheme(valid)
