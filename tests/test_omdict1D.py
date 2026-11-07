@@ -13,7 +13,6 @@
 import unittest
 from itertools import chain, product, permutations
 
-import six
 from furl.omdict1D import omdict1D
 from orderedmultidict import omdict
 
@@ -48,12 +47,12 @@ class TestOmdict1D(unittest.TestCase):
                 data.update(update)
                 omd1.update(update)
                 omd2.updateall(update)
-                for key in six.iterkeys(omd1):
+                for key in omd1.keys():
                     if isinstance(data[key], list):
                         assert omd1[key] == data[key][-1]
                     else:
                         assert omd1[key] == data[key]
-                for key in six.iterkeys(omd2):
+                for key in omd2.keys():
                     data_values_unpacked = []
                     for value in data.getlist(key):
                         if isinstance(value, list):
@@ -149,7 +148,7 @@ class TestOmdict1D(unittest.TestCase):
 
     def test_setitem(self):
         omd = omdict1D()
-        for value, valuelist in six.moves.zip(self.values, self.valuelists):
+        for value, valuelist in zip(self.values, self.valuelists):
             if valuelist:
                 omd[self.key] = valuelist
                 assert omd[self.key] == omd.get(self.key) == valuelist[0]
