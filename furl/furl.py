@@ -1506,7 +1506,7 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
         username = password = host = port = None
 
         if netloc and '@' in netloc:
-            userpass, netloc = netloc.split('@', 1)
+            userpass, netloc = netloc.rsplit('@', 1)
             if ':' in userpass:
                 username, password = userpass.split(':', 1)
             else:
