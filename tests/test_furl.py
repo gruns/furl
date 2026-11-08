@@ -1676,6 +1676,52 @@ class TestFurl(unittest.TestCase):
             with self.assertRaises(ValueError):
                 f = furl.furl('http://google.com/').set(host=host)
 
+    def test_multiple_at_signs_in_userinfo(self):
+        cases = [
+            ('@david:passwd', '@david', 'passwd'),
+            ('aa@bb', 'aa@bb', None),
+            ('user:p@ss:word', 'user', 'p@ss:word'),
+            ('@@:', '@@', ''),
+            (':@@', '', '@@'),
+            ('%40user:p%40ss@word', '@user', 'p@ss@word'),
+        ]
+        for userinfo, username, password in cases:
+            for host in ['example.com', '127.0.0.1', '[::1]']:
+                with self.subTest(userinfo=userinfo, host=host):
+                    netloc = '%s@%s:8080' % (userinfo, host)
+                    url = 'https://%s/path?q=value#fragment' % netloc
+                    f = furl.furl(url)
+                    assert (f.username, f.password) == (username, password)
+                    assert (f.host, f.port) == (host, 8080)
+                    encoded = quote(username, safe='')
+                    if password is not None:
+                        encoded += ':' + quote(password, safe='')
+                    assert f.netloc == '%s@%s:8080' % (encoded, host)
+                    assert furl.furl(f.url).asdict() == f.asdict()
+
+    def test_assign_multiple_at_signs_in_netloc(self):
+        for use_set in [False, True]:
+            f = furl.furl('https://old:secret@old.example/path?q=one#frag')
+            if use_set:
+                f.set(netloc='first@second:p@ss@new.example:8443')
+            else:
+                f.netloc = 'first@second:p@ss@new.example:8443'
+            assert (f.username, f.password) == ('first@second', 'p@ss')
+            assert (f.host, f.port) == ('new.example', 8443)
+            assert f.url == (
+                'https://first%40second:p%40ss@new.example:8443'
+                '/path?q=one#frag')
+
+    def test_multiple_at_signs_still_validate_host_and_port(self):
+        f = furl.furl('https://user:pass@example.com:8443/path')
+        original = f.asdict()
+        for netloc in ['a@b@host:invalid', 'a@b@host:70000', 'a@b@[::1']:
+            with self.assertRaises(ValueError):
+                f.netloc = netloc
+            assert f.asdict() == original
+        with self.assertRaises(ValueError):
+            f.host = 'bad@host'
+
     def test_netloc(self):
         f = furl.furl('http://pumps.com/')
         netloc = '1.2.3.4.5.6:999'
