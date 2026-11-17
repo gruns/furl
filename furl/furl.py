@@ -1079,7 +1079,7 @@ class Query(object):
         Raises: UserWarning if <path> is an improperly encoded path
         string and self.strict is True.
         """
-        if not items:
+        if not non_string_iterable(items) and not items:
             items = []
         # Multivalue Dictionary-like interface. e.g. {'a':1, 'a':2,
         # 'b':2}
