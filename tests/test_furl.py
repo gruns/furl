@@ -118,6 +118,40 @@ class itemstr(str, itemcontainer):
 
 class TestPath(unittest.TestCase):
 
+    def test_path_instance_preserves_root(self):
+        for value in ['', '/', '/a/b', '//a/b', '/a%2Fb/%252F', 'a/b']:
+            for operation in ('construct', 'load', 'set', 'self_load'):
+                with self.subTest(value=value, operation=operation):
+                    source = furl.Path(value)
+                    if operation == 'construct':
+                        result = furl.Path(source)
+                    elif operation == 'self_load':
+                        result = source.load(source)
+                    else:
+                        result = furl.Path('old/path')
+                        getattr(result, operation)(source)
+                    assert str(result) == value
+                    assert bool(result.isabsolute) == value.startswith('/')
+                    assert str(source) == value
+
+    def test_path_instance_assignment_preserves_root(self):
+        url = furl.furl('file:///a/b?keep=1#fragment')
+        url.path = url.path / 'c'
+        assert str(url.path) == '/a/b/c'
+        assert url.path.isabsolute
+        assert url.url == 'file:///a/b/c?keep=1#fragment'
+
+        # A URL with an authority still requires an absolute path.
+        url = furl.furl('https://example.com/old')
+        url.path = furl.Path('relative/path')
+        assert url.url == 'https://example.com/relative/path'
+
+    def test_path_instance_without_absolute_attribute(self):
+        class SegmentsOnly(object):
+            segments = ['', 'a', 'b']
+
+        assert str(furl.Path(SegmentsOnly())) == '/a/b'
+
     def test_none(self):
         p = furl.Path(None)
         assert str(p) == ''
