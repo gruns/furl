@@ -507,7 +507,9 @@ class Path(object):
         if not path:
             segments = []
         elif quacks_like_a_path_with_segments(path):  # Path interface.
-            segments = path.segments
+            segments = list(path.segments)
+            if getattr(path, 'isabsolute', False):
+                segments.insert(0, '')
         elif is_iterable_but_not_string(path):  # List interface.
             segments = path
         else:  # String interface.
