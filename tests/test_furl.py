@@ -667,6 +667,14 @@ class TestQuery(unittest.TestCase):
                     runningsum.append(item)
                 assert q.params.allitems() == runningsum
 
+    def test_add_empty_value_iterator(self):
+        f = furl.furl('https://example.com/?keep=1')
+        self.assertIs(f.add(args={'tag': iter(())}), f)
+        self.assertEqual(f.url, 'https://example.com/?keep=1')
+        self.assertEqual(list(f.args.keys()), ['keep'])
+        with self.assertRaises(KeyError):
+            f.args['tag']
+
     def test_set(self):
         for items in self.items:
             q = furl.Query(items.original())
