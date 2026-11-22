@@ -576,7 +576,9 @@ class Path(object):
         Returns: <self>.
         """
         if str(self):
-            normalized = normpath(str(self)) + ('/' * self.isdir)
+            path = str(self)
+            is_directory = self.isdir or path.endswith(('/.', '/..'))
+            normalized = normpath(path) + ('/' * is_directory)
             if normalized.startswith('//'):  # http://bugs.python.org/636648
                 normalized = '/' + normalized.lstrip('/')
             self.load(normalized)
