@@ -1837,7 +1837,8 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         if self.netloc == '':
             if self.scheme is None:
-                url = '//' + url
+                if not url.startswith('//'):
+                    url = '//' + url
             elif strip_scheme(url) == '':
                 url = url + '//'
 
