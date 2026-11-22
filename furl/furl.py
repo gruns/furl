@@ -1837,7 +1837,14 @@ class furl(URLPathCompositionInterface, QueryCompositionInterface,
 
         if self.netloc == '':
             if self.scheme is None:
-                url = '//' + url
+                # Prepend the '//' that denotes an empty authority, unless
+                # urlunsplit() already added it. Since Python 3.9, when the
+                # path begins with '//', urlunsplit() prefixes the result
+                # with '//' itself (per RFC 3986 section 3.3) to keep the
+                # path from being misparsed as an authority. Prepending here
+                # too would double the slashes (e.g. '////path' -> '//////path').
+                if not url.startswith('//'):
+                    url = '//' + url
             elif strip_scheme(url) == '':
                 url = url + '//'
 

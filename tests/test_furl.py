@@ -1630,6 +1630,13 @@ class TestFurl(unittest.TestCase):
         assert f.netloc == '' and str(f.path) == '//path'
         assert f.url == '////path'
 
+        # A path that itself begins with '//' must round-trip without
+        # gaining extra slashes. Since Python 3.9, urlunsplit() prepends
+        # '//' to disambiguate such a path from an authority (RFC 3986
+        # section 3.3); furl must not prepend a second '//' on top of it.
+        for url in ('////path', '//', '///', '///x', '////'):
+            assert furl.furl(url).url == url
+
         # TODO(grun): Test more odd URLs.
 
     def test_hosts(self):

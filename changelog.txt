@@ -3,6 +3,10 @@
 ================================================================================
 Changed: Drop support for all Python versions prior to Python 3.8, which
   are now long past EOL. Notably: Python 2 is no longer supported.
+Fixed: Don't prepend an extra '//' to a URL whose path begins with '//'
+  and has an empty authority (e.g. furl('////path').url is now '////path',
+  not '//////path'). Since Python 3.9, urllib.parse.urlunsplit() prefixes
+  such paths with '//' itself per RFC 3986; furl no longer doubles it.
 
 ================================================================================
  v2.1.3
