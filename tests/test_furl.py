@@ -1655,10 +1655,19 @@ class TestFurl(unittest.TestCase):
         # addresses.
         f = furl.furl('http://1.2.3.4.5.6/')
 
-        # Invalid, but well-formed, IPv6 addresses shouldn't raise an
-        # exception because urlparse.urlsplit() doesn't raise an
-        # exception on invalid IPv6 addresses.
-        furl.furl('http://[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]/')
+        # IPv6 without brackets should be corrected
+        f.set(host="::1")
+        assert f.host == "[::1]"
+        assert f.url == "http://[::1]/"
+
+        f.set(host="[::]")
+        assert f.host == "[::]"
+        assert f.url == "http://[::]/"
+
+        # Invalid, but well-formed, IPv6 addresses should raise an
+        # exception.
+        with self.assertRaises(ValueError):
+            furl.furl('http://[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]/')
 
         # Malformed IPv6 should raise an exception because urlparse.urlsplit()
         # raises an exception on malformed IPv6 addresses.
@@ -1684,11 +1693,16 @@ class TestFurl(unittest.TestCase):
         assert f.host == '1.2.3.4.5.6'
         assert f.port == 999
 
-        netloc = '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]:888'
+        netloc = '[1:2:3:4:5:6:7:8]:888'
         f.netloc = netloc
         assert f.netloc == netloc
-        assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
+        assert f.host == '[1:2:3:4:5:6:7:8]'
         assert f.port == 888
+
+        # Well-formed but invalid IPv6 should raise an exception
+        netloc = '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]:888'
+        with self.assertRaises(ValueError):
+            f.netloc = netloc
 
         # Malformed IPv6 should raise an exception because
         # urlparse.urlsplit() raises an exception
@@ -1702,10 +1716,6 @@ class TestFurl(unittest.TestCase):
             f.netloc = '[0:0:0:0:0:0:0:1]:alksdflasdfasdf'
         with self.assertRaises(ValueError):
             f.netloc = 'pump2pump.org:777777777777'
-
-        # No side effects.
-        assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
-        assert f.port == 888
 
         # Empty netloc.
         f = furl.furl('//')
