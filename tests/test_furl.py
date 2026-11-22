@@ -1656,9 +1656,17 @@ class TestFurl(unittest.TestCase):
         f = furl.furl('http://1.2.3.4.5.6/')
 
         # Invalid, but well-formed, IPv6 addresses shouldn't raise an
-        # exception because urlparse.urlsplit() doesn't raise an
-        # exception on invalid IPv6 addresses.
-        furl.furl('http://[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]/')
+        # exception on Python < 3.9 because urlparse.urlsplit() didn't
+        # raise an exception on invalid IPv6 addresses. Python 3.9+
+        # added bracketed-host validation to urlsplit() that does raise
+        # ValueError for this address.
+        if sys.version_info < (3, 9):
+            furl.furl(
+                'http://[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]/')
+        else:
+            with self.assertRaises(ValueError):
+                furl.furl(
+                    'http://[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]/')
 
         # Malformed IPv6 should raise an exception because urlparse.urlsplit()
         # raises an exception on malformed IPv6 addresses.
@@ -1684,11 +1692,21 @@ class TestFurl(unittest.TestCase):
         assert f.host == '1.2.3.4.5.6'
         assert f.port == 999
 
+        # Invalid, but well-formed, IPv6 addresses shouldn't raise an
+        # exception on Python < 3.9 because urlparse.urlsplit() didn't
+        # raise an exception on invalid IPv6 addresses. Python 3.9+
+        # added bracketed-host validation to urlsplit() that does raise
+        # ValueError for this address.
         netloc = '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]:888'
-        f.netloc = netloc
-        assert f.netloc == netloc
-        assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
-        assert f.port == 888
+        if sys.version_info < (3, 9):
+            f.netloc = netloc
+            assert f.netloc == netloc
+            assert f.host == (
+                '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]')
+            assert f.port == 888
+        else:
+            with self.assertRaises(ValueError):
+                f.netloc = netloc
 
         # Malformed IPv6 should raise an exception because
         # urlparse.urlsplit() raises an exception
@@ -1704,8 +1722,13 @@ class TestFurl(unittest.TestCase):
             f.netloc = 'pump2pump.org:777777777777'
 
         # No side effects.
-        assert f.host == '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]'
-        assert f.port == 888
+        if sys.version_info < (3, 9):
+            assert f.host == (
+                '[0:0:0:0:0:0:0:1:1:1:1:1:1:1:1:9999999999999]')
+            assert f.port == 888
+        else:
+            assert f.host == '1.2.3.4.5.6'
+            assert f.port == 999
 
         # Empty netloc.
         f = furl.furl('//')
