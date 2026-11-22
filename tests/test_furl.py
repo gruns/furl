@@ -2096,7 +2096,7 @@ class TestFurl(unittest.TestCase):
         urls = ['sup', '127.0.0.1', 'www.google.com', '192.168.1.1:8000']
         for url in urls:
             assert isinstance(furl.urlsplit(url), SplitResult)
-            assert furl.urlsplit(url).path == urlsplit(url).path
+            assert furl.urlsplit(url).path == url
 
         # No changes to existing urlsplit() behavior for known schemes.
         url = 'http://www.pumps.com/'
@@ -2124,6 +2124,28 @@ class TestFurl(unittest.TestCase):
                    'a=a&b=b&m=m%26m', 'frag')
         assert isinstance(furl.urlsplit(url), SplitResult)
         assert furl.urlsplit(url) == correct
+
+    def test_urlsplit_invalid_scheme_prefixes(self):
+        urls = [
+            '127.0.0.1:8329',
+            '127.0.0.1:8080/a/b',
+            '1.1:8000/a/b',
+            '1Ab:relative/path',
+            '1://example.com/path',
+        ]
+        for url in urls:
+            assert furl.urlsplit(url) == (None, None, url, '', '')
+            parsed = furl.furl(url)
+            assert parsed.scheme is None
+            assert parsed.host is None
+            assert str(parsed.path) == url
+            assert parsed.url == url
+
+    def test_urlsplit_invalid_scheme_with_query_and_fragment(self):
+        url = '127.0.0.1:8080/a/b?key=value#section'
+        assert furl.urlsplit(url) == (
+            None, None, '127.0.0.1:8080/a/b', 'key=value', 'section')
+        assert furl.furl(url).url == url
 
     def test_join_path_segments(self):
         jps = furl.join_path_segments
