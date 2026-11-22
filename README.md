@@ -379,6 +379,40 @@ subvalues.
 See the [orderedmultimdict](https://github.com/gruns/orderedmultidict) documentation for more
 information on interacting with the ordered multivalue dictionary __params__.
 
+#### Setting repeated query parameters
+
+Both `f.args['key'] = ['one', 'two']` and
+`f.args.setlist('key', ['one', 'two'])` replace all values for that key.
+Use `addlist()` to append values instead. With the default query encoding,
+multiple values are serialized as repeated `key=value` pairs separated by
+`&`, in value order; they are not combined into a comma-separated value.
+Pairs for other keys can appear between the repeated pairs.
+
+```python
+>>> from furl import furl
+>>> f = furl('https://example.com/path?foobar=old&keep=yes')
+>>> f.args['foobar'] = ['one', 'two']
+>>> f.url
+'https://example.com/path?foobar=one&keep=yes&foobar=two'
+>>> _ = f.args.setlist('foobar', ['three', 'four'])
+>>> f.args.getlist('foobar')
+['three', 'four']
+>>> f.url
+'https://example.com/path?foobar=three&keep=yes&foobar=four'
+>>> _ = f.args.addlist('foobar', ['five'])
+>>> f.args.getlist('foobar')
+['three', 'four', 'five']
+>>> f.args['foobar'] = 'one,two'
+>>> f.args.getlist('foobar')
+['one,two']
+>>> f.url
+'https://example.com/path?foobar=one%2Ctwo&keep=yes'
+```
+
+A comma in a single string remains part of one value and is percent-encoded
+by default. Whether a server interprets that value as a list is specific to
+the server's API.
+
 #### Parameters
 
 To produce an empty query argument, like `http://sprop.su/?param=`, set the argument's value to the
