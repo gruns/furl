@@ -289,6 +289,9 @@ class TestPath(unittest.TestCase):
         assert p.add(['e', 'f', 'e e', '']) == p
         assert p.isabsolute
         assert str(p) == '/a/b/c/d/e/f/e%20e/'
+        assert p.add(12) == p
+        assert p.isabsolute
+        assert str(p) == '/a/b/c/d/e/f/e%20e/12'
 
         f = furl.furl('http://sprop.ru')
         assert not f.path.isabsolute
@@ -529,8 +532,11 @@ class TestPath(unittest.TestCase):
         p /= 'c d/'
         assert str(p) == 'a/b/c%20d/'
 
+        p /= 12
+        assert str(p) == 'a/b/c%20d/12'
+
         p /= furl.Path('e')
-        assert str(p) == 'a/b/c%20d/e'
+        assert str(p) == 'a/b/c%20d/12/e'
 
     def test_truediv(self):
         p = furl.Path()
@@ -539,10 +545,15 @@ class TestPath(unittest.TestCase):
         assert p1 is not p
         assert str(p1) == 'a'
 
-        p2 = p / 'a' / 'b'
+        p2 = p / 'a' / 12
         assert p2 is not p
+        assert str(p2) == 'a/12'
+
+        p3 = p / 'a' / 12 / 'b'
+        assert p3 is not p
+        assert str(p3) == 'a/12/b'
+
         assert str(p) == ''
-        assert str(p2) == 'a/b'
 
         # Path objects should be joinable with other Path objects.
         p3 = furl.Path('e')
