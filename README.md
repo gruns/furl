@@ -343,6 +343,23 @@ omdict1D([('silicon', '14'), ('iron', '26'), ('inexorable progress', 'vae victus
 omdict1D([('silicon', '14'), ('iron', '26'), ('magnesium', '12')])
 ```
 
+To replace one parameter while preserving the others, assign to `f.args[key]`
+(or call `f.args.set(key, value)`). This replaces all existing values for that
+key; it does not append another value:
+
+```python
+>>> from furl import furl
+>>> f = furl('http://foo.com/?a=1&b=2&a=old')
+>>> f.args['a'] = 3
+>>> f.url
+'http://foo.com/?a=3&b=2'
+>>> f.args.getlist('a')
+[3]
+```
+
+Use `f.set(args=...)` when replacing the entire query, or `f.add(args=...)`
+when adding values without replacing the existing ones.
+
 __params__ can also store multiple values for the same key because it's a multivalue dictionary.
 
 ```python
