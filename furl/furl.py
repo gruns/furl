@@ -309,7 +309,12 @@ def urlsplit(url):
     if original_scheme is not None:
         url = set_scheme(url, 'http')
 
-    scheme, netloc, path, query, fragment = urllib.parse.urlsplit(url)
+    parts = urllib.parse.urlsplit(url)
+    if original_scheme is None and parts.scheme:
+        # Some urllib versions accept digit-leading schemes. If furl rejects
+        # the scheme, keep that prefix in the path instead of discarding it.
+        parts = urllib.parse.urlsplit('http:' + url)
+    scheme, netloc, path, query, fragment = parts
 
     # Detect and preserve the '//' before the netloc, if present. E.g. preserve
     # URLs like 'http:', 'http://', and '///sup' correctly.
