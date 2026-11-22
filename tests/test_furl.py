@@ -737,6 +737,16 @@ class TestQuery(unittest.TestCase):
         q.remove(omd)
         assert q.params.allitems() == [('a', '1')]
 
+    def test_remove_key_iterator(self):
+        q = furl.Query('a=1&b=2&a=3')
+        assert q.remove(q.params.iterkeys()) is q
+        assert q.params.allitems() == []
+
+    def test_remove_filtered_key_iterator(self):
+        q = furl.Query('a=1&keep=2&a=3&b=4')
+        q.remove(key for key in q.params.iterkeys() if key != 'keep')
+        assert q.params.allitems() == [('keep', '2')]
+
     def test_params(self):
         # Basics.
         q = furl.Query('a=a&b=b')
