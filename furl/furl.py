@@ -1213,9 +1213,18 @@ class Fragment(FragmentPathCompositionInterface, QueryCompositionInterface):
         elif len(toks) == 1:
             # Does this fragment look like a path or a query? Default to
             # path.
-            if '=' in fragment:  # Query example: '#woofs=dogs'.
+            #
+            # A '=' alone isn't enough to call it a query: a fragment like
+            # '#/foo=123' is a path that happens to contain '=' (and its '/'
+            # would wrongly get percent-encoded if treated as a query key).
+            # Only treat it as a query when '=' comes before any '/', or no
+            # '/' is present at all. A '/' before the first '=' signals path
+            # structure. See issue #172.
+            if '=' in fragment and (
+                '/' not in fragment or fragment.find('=') < fragment.find('/')
+            ):  # Query example: '#woofs=dogs'.
                 self._query.load(fragment)
-            else:  # Path example: '#supinthisthread'.
+            else:  # Path example: '#supinthisthread', '#/foo=123'.
                 self._path.load(fragment)
         else:
             # Does toks[1] actually look like a query? Like 'a=a' or

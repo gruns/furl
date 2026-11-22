@@ -989,6 +989,16 @@ class TestFragment(unittest.TestCase):
                   {'a': 'a', 'hok sprm': None}),
                  ('/sch/toot?a=a&hok sprm', '/sch/toot',
                   {'a': 'a', 'hok sprm': None}),
+                 # A '=' without a '?' is only a query when '=' precedes any
+                 # '/'. A '/' before the first '=' means the fragment is a
+                 # path that merely contains '=' and its '/' must not be
+                 # percent-encoded as a query key would be (issue #172).
+                 ('/foo=123', '/foo=123', {}),
+                 ('a/b=c', 'a/b=c', {}),
+                 ('/a=1&b=2', '/a=1&b=2', {}),
+                 ('/foo=123/bar=456', '/foo=123/bar=456', {}),
+                 # '=' before any '/' still parses as a query (unchanged).
+                 ('woofs=dogs', '', {'woofs': 'dogs'}),
                  ]
 
         for fragment, path, query in comps:
